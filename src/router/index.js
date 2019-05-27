@@ -71,6 +71,53 @@ export const constantRoutes = [
     component: () => import('@/views/error-page/401'),
     hidden: true
   },
+  //
+  {
+    path: '/home',
+    component: Layout,
+    redirect: '',
+    children: [
+      {
+        path: 'home',
+        component: () => import('@/views/home/home'),
+        name: 'Dashboard',
+        meta: { title: '首页', icon: 'component', affix: true }
+      }
+    ]
+  },
+  {
+    path: '/system',
+    component: Layout,
+    redirect: '',
+    children: [
+      {
+        path: 'system',
+        component: () => import('@/views/system/system'),
+        name: 'Dashboard',
+        meta: { title: '系统管理', icon: 'component', affix: true }
+      }
+    ]
+  },
+  // 业务
+  {
+    path: '/business',
+    component: Layout,
+    redirect: '/business/orderManagement',
+    alwaysShow: true,
+    name: 'business',
+    meta: {
+      title: '业务', icon: 'lock', roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: 'orderManagement',
+        component: () => import('@/views/business/orderManagement.vue'),
+        name: 'orderManagement',
+        meta: { title: '订单管理', icon: 'component', affix: true }
+      }
+    ]
+  },
+  //
   {
     path: '/',
     component: Layout,
