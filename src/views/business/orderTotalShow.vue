@@ -1,28 +1,44 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" placeholder="Title" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.importance" placeholder="Imp" clearable style="width: 90px" class="filter-item">
+      <el-input
+        v-model="listQuery.title"
+        placeholder="请写查询条件"
+        style="width: 200px;"
+        class="filter-item"
+        @keyup.enter.native="handleFilter"
+      />
+      <el-select v-model="listQuery.importance" placeholder="下拉" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
       </el-select>
-      <el-select v-model="listQuery.type" placeholder="Type" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        搜索
+        查询
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-        添加
+      <el-button
+        class="filter-item"
+        style="margin-left: 10px;"
+        type="primary"
+        icon="el-icon-edit"
+        @click="handleCreate"
+      >
+        创建订单
       </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
+      <el-button
+        v-waves
+        :loading="downloadLoading"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-download"
+        @click="handleDownload"
+      >
         导出
       </el-button>
       <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
         评审
       </el-checkbox>
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleReset">
+        重置
+      </el-button>
     </div>
 
     <el-table
@@ -33,58 +49,21 @@
       fit
       highlight-current-row
       style="width: 100%;"
+      :row-class-name="tableRowClassName"
       @sort-change="sortChange"
+      @selection-change="handleSelectionChange"
     >
-      <el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
-        <template slot-scope="scope">
-          <span>{{ scope.row.id }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Date" width="150px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Title" min-width="150px">
-        <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.title }}</span>
-          <el-tag>{{ row.type | typeFilter }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="Author" width="110px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.author }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column v-if="showReviewer" label="Reviewer" width="110px" align="center">
-        <template slot-scope="scope">
-          <span style="color:red;">{{ scope.row.reviewer }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Imp" width="80px">
-        <template slot-scope="scope">
-          <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon" />
-        </template>
-      </el-table-column>
-      <el-table-column label="Readings" align="center" width="95">
-        <template slot-scope="{row}">
-          <span v-if="row.pageviews" class="link-type" @click="handleFetchPv(row.pageviews)">{{ row.pageviews }}</span>
-          <span v-else>0</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Status" class-name="status-col" width="100">
-        <template slot-scope="{row}">
-          <el-tag :type="row.status | statusFilter">
-            {{ row.status }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="Actions" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column fixed label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
-          <el-button v-if="row.status!='published'" size="mini" type="success" @click="handleModifyStatus(row,'published')">
+          <el-button
+            v-if="row.status!='published'"
+            size="mini"
+            type="success"
+            @click="handleModifyStatus(row,'published')"
+          >
             发行
           </el-button>
           <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
@@ -95,15 +74,86 @@
           </el-button>
         </template>
       </el-table-column>
+      <el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
+        <template slot-scope="scope">
+          <span>{{ scope.row.id }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="订单号" prop="id" sortable="custom" align="center" width="120">
+        <template slot-scope="scope">
+          <span>{{ scope.row.id }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column
+        type="selection"
+        width="55"
+      />
+      <el-table-column label="日期" width="150px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="标题" min-width="150px" align="center">
+        <template slot-scope="{row}">
+          <span class="link-type" @click="handleUpdate(row)">{{ row.title }}</span>
+          <el-tag>{{ row.type | typeFilter }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="作者" width="110px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.author }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="showReviewer" label="评审人" width="110px" align="center">
+        <template slot-scope="scope">
+          <span style="color:red;">{{ scope.row.reviewer }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="星级" width="80px">
+        <template slot-scope="scope">
+          <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon" />
+        </template>
+      </el-table-column>
+      <el-table-column label="点击率" align="center" width="95">
+        <template slot-scope="{row}">
+          <span v-if="row.pageviews" class="link-type" @click="handleFetchPv(row.pageviews)">{{ row.pageviews }}</span>
+          <span v-else>0</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" class-name="status-col" width="100">
+        <template slot-scope="{row}">
+          <el-tag :type="row.status | statusFilter">
+            {{ row.status }}
+          </el-tag>
+        </template>
+      </el-table-column>
     </el-table>
-
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <!-- 分页器 -->
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.limit"
+      @pagination="getList"
+    />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="temp"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left:50px;"
+      >
         <el-form-item label="Type" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+            <el-option
+              v-for="item in calendarTypeOptions"
+              :key="item.key"
+              :label="item.display_name"
+              :value="item.key"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="Date" prop="timestamp">
@@ -118,10 +168,20 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Imp">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
+          <el-rate
+            v-model="temp.importance"
+            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+            :max="3"
+            style="margin-top:8px;"
+          />
         </el-form-item>
         <el-form-item label="Remark">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+          <el-input
+            v-model="temp.remark"
+            :autosize="{ minRows: 2, maxRows: 4}"
+            type="textarea"
+            placeholder="Please input"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -213,8 +273,8 @@ export default {
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '编辑',
+        create: '创建'
       },
       dialogPvVisible: false,
       pvData: [],
@@ -223,16 +283,21 @@ export default {
         timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
         title: [{ required: true, message: 'title is required', trigger: 'blur' }]
       },
-      downloadLoading: false
+      multipleSelection: [], // 多选的
+      downloadLoading: false,
+      search: ''
     }
   },
   created() {
     this.getList()
   },
   methods: {
-    getList() {
+    getList(params) {
       this.listLoading = true
-      fetchList(this.listQuery).then(response => {
+      if (!params) {
+        params = this.listQuery
+      }
+      fetchList(params).then(response => {
         this.list = response.data.items
         this.total = response.data.total
 
@@ -241,6 +306,18 @@ export default {
           this.listLoading = false
         }, 1.5 * 1000)
       })
+    },
+    // 重置
+    handleReset() {
+      const params = {
+        page: 1,
+        limit: 20,
+        importance: undefined,
+        title: undefined,
+        type: undefined,
+        sort: '+id'
+      }
+      this.getList(params)
     },
     handleFilter() {
       this.listQuery.page = 1
@@ -375,7 +452,33 @@ export default {
           return v[j]
         }
       }))
+    },
+    tableRowClassName({ row, rowIndex }) {
+      if (rowIndex === 1) {
+        return 'warning-row'
+      } else if (rowIndex === 3) {
+        return 'success-row'
+      }
+      return ''
+    },
+    handleSelectionChange(val) {
+      console.log('多选', val)
+      this.multipleSelection = val
+    },
+    tableSearch() {
+      this.listQuery.page = 1
+      this.getList()
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
+</style>

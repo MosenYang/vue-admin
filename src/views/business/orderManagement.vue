@@ -17,16 +17,29 @@
       </div>
     </div>
     <div class="flex">
-      <Chart id="a1" class-name="a1" />
-      <Chart id="a2" class-name="a2" />
+      <Loop id="a1" class-name="a1" />
+      <Loop id="a2" class-name="a2" />
+      <Loop id="a3" class-name="a3" />
+      <Loop id="a4" class-name="a4" />
+      <Loop id="a5" class-name="a5" />
+    </div>
+    <div class="chart-wrap">
+      <div class="bar-name">成交额度/成交量</div>
+      <Pillar style="width: 100%;height: 500px" />
+    </div>
+    <div class="chart-wrap">
+      <div class="bar-name">线形图</div>
+      <GanttChart id="c1" class-name="c1" style="width: 100%;height: 500px" />
     </div>
   </div>
 </template>
 <script>
-import Chart from '../../components/Charts/Loop'
+import Loop from '../../components/Charts/Loop'
+import Pillar from '../../components/Charts/Pillar'
+import GanttChart from '../../components/Charts/GanttChart'
 
 export default {
-  components: { Chart },
+  components: { Loop, Pillar, GanttChart },
   props: {},
   data() {
     return {
@@ -63,17 +76,12 @@ export default {
   },
   computed: {},
   watch: {},
-  // 生命周期钩子：组件实例完成创建之后调用
   created() {
-    console.log('组件实例完成创建component created')
   },
-  // 生命周期钩子：组件实例渲染完成时调用
   mounted() {
-    console.log('组件实例渲染完成component mounted')
   },
   methods: {},
   beforeCreated() {
-    console.log('component before created')
   }
 }
 </script>
@@ -95,4 +103,15 @@ export default {
     }
   }
 
+  .chart-wrap {
+    padding: 40px 0;
+
+    .bar-name {
+      padding: 10px 0;
+      font-weight: 500;
+      font-size: 20px;
+      color: #97a8be;
+
+    }
+  }
 </style>

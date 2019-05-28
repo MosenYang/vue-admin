@@ -80,7 +80,7 @@ export const constantRoutes = [
       {
         path: 'home',
         component: () => import('@/views/home/home'),
-        name: 'Dashboard',
+        name: 'home',
         meta: { title: '首页', icon: 'component', affix: true }
       }
     ]
@@ -93,7 +93,7 @@ export const constantRoutes = [
       {
         path: 'system',
         component: () => import('@/views/system/system'),
-        name: 'Dashboard',
+        name: 'system',
         meta: { title: '系统管理', icon: 'component', affix: true }
       }
     ]
@@ -106,7 +106,7 @@ export const constantRoutes = [
     alwaysShow: true,
     name: 'business',
     meta: {
-      title: '业务', icon: 'lock', roles: ['admin', 'editor'] // you can set roles in root nav
+      title: '业 务', icon: 'lock', roles: ['admin', 'editor'] // you can set roles in root nav
     },
     children: [
       {
@@ -114,6 +114,12 @@ export const constantRoutes = [
         component: () => import('@/views/business/orderManagement.vue'),
         name: 'orderManagement',
         meta: { title: '订单管理', icon: 'component', affix: true }
+      },
+      {
+        path: 'orderTotalShow',
+        component: () => import('@/views/business/orderTotalShow'),
+        name: 'orderTotalShow',
+        meta: { title: '订单总表', icon: 'component', affix: true }
       }
     ]
   },
@@ -126,7 +132,7 @@ export const constantRoutes = [
       {
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
-        name: 'Dashboard',
+        name: '控制面板',
         meta: { title: '控制面板', icon: 'dashboard', affix: true }
       }
     ]
