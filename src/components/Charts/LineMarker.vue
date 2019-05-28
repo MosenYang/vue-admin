@@ -43,6 +43,7 @@ export default {
   },
   methods: {
     initChart() {
+      console.log(this)
       this.chart = echarts.init(document.getElementById(this.id))
 
       this.chart.setOption({

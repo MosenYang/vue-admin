@@ -16,13 +16,15 @@
         />
       </div>
     </div>
-    <div>
-      <Chart />
+    <div class="flex">
+      <Chart id="a1" class-name="a1" />
+      <Chart id="a2" class-name="a2" />
     </div>
   </div>
 </template>
 <script>
 import Chart from '../../components/Charts/Loop'
+
 export default {
   components: { Chart },
   props: {},
@@ -60,8 +62,7 @@ export default {
     }
   },
   computed: {},
-  watch: {
-  },
+  watch: {},
   // 生命周期钩子：组件实例完成创建之后调用
   created() {
     console.log('组件实例完成创建component created')
@@ -70,28 +71,27 @@ export default {
   mounted() {
     console.log('组件实例渲染完成component mounted')
   },
-  methods: {
-
-  },
+  methods: {},
   beforeCreated() {
     console.log('component before created')
   }
 }
 </script>
 <style lang="scss" scoped>
-  .page{
-    padding:0 20px  ;
+  .page {
+    padding: 0 20px;
   }
+
   .title {
     display: flex;
     justify-content: space-between;
     align-items: center;
 
-    .title-name{
+    .title-name {
       font-weight: 600;
       font-size: 30px;
       color: #97a8be;
-      padding: 20px 0 ;
+      padding: 20px 0;
     }
   }
 
