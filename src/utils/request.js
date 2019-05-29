@@ -4,6 +4,11 @@ import store from '@/store'
 import { getToken } from '@/utils/auth'
 
 // 创建axios实例
+// url:"http://api.thisyang.online/api/products"
+// headers: {
+//   Accept: "application/json",
+//   Authorization:"Bearer... "
+// }
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   withCredentials: true, // 跨域发送请求
@@ -18,7 +23,6 @@ service.interceptors.request.use(config => {
     return config
   },
   error => {
-    // do something with request error
     console.log(error) // for debug
     return Promise.reject(error)
   }
@@ -61,5 +65,5 @@ service.interceptors.response.use(response => {
     return Promise.reject(error)
   }
 )
-
+console.log(service, 'aaaaa')
 export default service
