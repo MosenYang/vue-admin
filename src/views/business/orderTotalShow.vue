@@ -304,6 +304,7 @@ export default {
         params = this.listQuery
       }
       fetchList(params).then(response => {
+        console.log(response, 'res')
         this.list = response.data.items
         this.total = response.data.total
 

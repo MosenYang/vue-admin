@@ -32,5 +32,9 @@ module.exports = {
    * The default is only used in the production env
    * If you want to also use it in dev, you can pass ['production', 'development']
    */
-  errorLog: 'production'
+  errorLog: 'production',
+  /**
+   * @description 根据情况是否使用mock模拟数据
+   */
+  useMockData: false
 }
