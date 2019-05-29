@@ -7,7 +7,14 @@ export function login(data) {
     data
   })
 }
-
+// 这里是新添加接口
+export function f(data) {
+  return request({
+    url: '/user/login',
+    method: 'post',
+    data
+  })
+}
 export function getInfo(token) {
   return request({
     url: '/user/info',

@@ -1,4 +1,3 @@
-
 const tokens = {
   admin: {
     token: 'admin-token'
@@ -22,11 +21,16 @@ const users = {
     name: 'Normal Editor'
   }
 }
-
+// 模拟的路由，和接口对应的
 export default [
   // user login
   {
-    url: '/user/login',
+    /*最常见的操作就是：你本地模拟了了一些数据，待后端完成接口后，逐步替换掉原先 mock 的接口。
+      我们以src/api/role.js中的getRoles接口为例。
+      它原本是在mock/role/index.js中 mock 的数据。
+      现在我们需要将它切换为真实后端数据，只要在mock/role/index.js找到对应的路由，
+      之后将它删除即可。这时候你可以在network中，查看到真实的数据。*/
+    url: '/user/login',// url 必须能匹配你的接口路由，和api里面的接口地址一致
     type: 'post',
     response: config => {
       const { username } = config.body

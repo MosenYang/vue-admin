@@ -9,7 +9,7 @@ function resolve(dir) {
 const name = defaultSettings.title || '索邦' // 页面头部
 let orUseMock = defaultSettings.useMockData
 const port = 9527
-
+console.log('是否使用mock', orUseMock)
 // 所有配置项解释都可以在其中找到 https://cli.vuejs.org/config/
 module.exports = {
   /**
@@ -33,6 +33,8 @@ module.exports = {
       proxy: {
       // change xxx-api/login => mock/login
       // 详情: https://cli.vuejs.org/config/#devserver-proxy
+      // 其实就是拼接
+      //[process.env.VUE_APP_BASE_API] 代理到`http://127.0.0.1:${port}/mock`+[process.env.VUE_APP_BASE_API]
       [process.env.VUE_APP_BASE_API]: {
         target: `http://127.0.0.1:${port}/mock`,
         changeOrigin: true,
