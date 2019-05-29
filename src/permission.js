@@ -1,3 +1,4 @@
+// 权限管理文件
 import router from './router'
 import store from './store'
 import { Message } from 'element-ui'
