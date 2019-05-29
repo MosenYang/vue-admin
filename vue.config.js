@@ -8,7 +8,6 @@ function resolve(dir) {
 
 const name = defaultSettings.title || '索邦' // 页面头部
 let orUseMock = defaultSettings.useMockData
-console.log('0', orUseMock)
 const port = 9527
 
 // 所有配置项解释都可以在其中找到 https://cli.vuejs.org/config/
@@ -31,7 +30,7 @@ module.exports = {
       warnings: false,
       errors: true
     },
-    proxy: {
+      proxy: {
       // change xxx-api/login => mock/login
       // 详情: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {

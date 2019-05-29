@@ -9,7 +9,7 @@ import { getToken } from '@/utils/auth'
 //   Accept: "application/json",
 //   Authorization:"Bearer... "
 // }
-console.log('env?', process.env.VUE_APP_BASE_API)
+console.log('环境变量?', process.env.VUE_APP_BASE_API, process.env.NODE_ENV)
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   withCredentials: true, // 跨域发送请求
