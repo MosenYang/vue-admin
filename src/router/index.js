@@ -75,7 +75,7 @@ export const constantRoutes = [
   {
     path: '/home',
     component: Layout,
-    redirect: '',
+    redirect: '/home',
     children: [
       {
         path: 'home',
@@ -88,7 +88,7 @@ export const constantRoutes = [
   {
     path: '/system',
     component: Layout,
-    redirect: '',
+    redirect: '/system',
     children: [
       {
         path: 'system',
@@ -132,7 +132,7 @@ export const constantRoutes = [
       {
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
-        name: '控制面板',
+        name: 'dashboard',
         meta: { title: '控制面板', icon: 'dashboard', affix: true }
       }
     ]
