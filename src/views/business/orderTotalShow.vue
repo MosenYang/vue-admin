@@ -1,5 +1,6 @@
 <template>
   <div class="app-container">
+    <!--查询项-->
     <div class="filter-container">
       <el-input
         v-model="listQuery.title"
@@ -37,13 +38,17 @@
         评审
       </el-checkbox>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleReset">
-        重置
+        更新数据
+      </el-button>
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="clearFilter">
+        重置筛选
       </el-button>
     </div>
-
+    <!--表格-->
     <el-table
       :key="tableKey"
       v-loading="listLoading"
+      ref="filterTable"
       :data="list"
       border
       fit
@@ -84,10 +89,7 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        type="selection"
-        width="55"
-      />
+      <el-table-column type="selection" width="55" />
       <el-table-column label="日期" width="150px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
@@ -114,7 +116,14 @@
           <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon" />
         </template>
       </el-table-column>
-      <el-table-column label="点击率" align="center" width="95">
+      <el-table-column
+        label="点击率"
+        align="center"
+        width="95"
+        :filters="[{ text: '家', value: '895' }, { text: '公司', value: '4894' }]"
+        :filter-method="filterTag"
+        filter-placement="bottom-end"
+      >
         <template slot-scope="{row}">
           <span v-if="row.pageviews" class="link-type" @click="handleFetchPv(row.pageviews)">{{ row.pageviews }}</span>
           <span v-else>0</span>
@@ -136,7 +145,7 @@
       :limit.sync="listQuery.limit"
       @pagination="getList"
     />
-
+    <!--弹窗-->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
@@ -185,12 +194,8 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">
-          取消
-        </el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          确定
-        </el-button>
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
       </div>
     </el-dialog>
 
@@ -250,7 +255,7 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 20,
+        limit: 11,
         importance: undefined,
         title: undefined,
         type: undefined,
@@ -381,6 +386,14 @@ export default {
         }
       })
     },
+    // 表格筛选
+    filterTag(value, row) {
+      return row.tag === value
+    },
+    // 重置表格删选
+    clearFilter() {
+      this.$refs.filterTable.clearFilter()
+    },
     handleUpdate(row) {
       this.temp = Object.assign({}, row) // copy obj
       this.temp.timestamp = new Date(this.temp.timestamp)
@@ -389,6 +402,7 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
+      console.log('0')
     },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
