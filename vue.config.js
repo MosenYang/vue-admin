@@ -6,20 +6,19 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-const name = defaultSettings.title || 'vue Element Admin' // page title
+const name = defaultSettings.title || '索邦' // 页面头部
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
 // For example, Mac: sudo npm run
-const port = 9527 // dev port
+const port = 9527
 
-// All configuration item explanations can be find in https://cli.vuejs.org/config/
+// 所有配置项解释都可以在其中找到 https://cli.vuejs.org/config/
 module.exports = {
   /**
-   * You will need to set publicPath if you plan to deploy your site under a sub path,
-   * for example GitHub Pages. If you plan to deploy your site to https://foo.github.io/bar/,
-   * then publicPath should be set to "/bar/".
-   * In most cases please use '/' !!!
-   * Detail: https://cli.vuejs.org/config/#publicpath
+   *Vue CLI会假设你的应用是被部署在一个域名的根路径上，例如https://www.my-app.com/。
+   *如果应用被部署在一个子路径上，你就需要用这个选项指定这个子路径。
+   * 例如，如果你的应用被部署在https://www.my-app.com/my-app/，设置则publicPath为/my-app/
+   * 详细: https://cli.vuejs.org/config/#publicpath
    */
   publicPath: '/',
   outputDir: 'dist',
@@ -35,7 +34,7 @@ module.exports = {
     },
     proxy: {
       // change xxx-api/login => mock/login
-      // detail: https://cli.vuejs.org/config/#devserver-proxy
+      // 详情: https://cli.vuejs.org/config/#devserver-proxy
       [process.env.VUE_APP_BASE_API]: {
         target: `http://127.0.0.1:${port}/mock`,
         changeOrigin: true,
@@ -47,8 +46,6 @@ module.exports = {
     after: require('./mock/mock-server.js')
   },
   configureWebpack: {
-    // provide the app's title in webpack's name field, so that
-    // it can be accessed in index.html to inject the correct title.
     name: name,
     resolve: {
       alias: {

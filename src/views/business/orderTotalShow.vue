@@ -47,8 +47,8 @@
     <!--表格-->
     <el-table
       :key="tableKey"
-      v-loading="listLoading"
       ref="filterTable"
+      v-loading="listLoading"
       :data="list"
       border
       fit
@@ -101,6 +101,7 @@
           <el-tag>{{ row.type | typeFilter }}</el-tag>
         </template>
       </el-table-column>
+
       <el-table-column label="作者" width="110px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.author }}</span>
