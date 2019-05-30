@@ -217,6 +217,7 @@
 
 <script>
 import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
+import { getRoles } from '@/api/role'
 import { testLogin } from '@/api/address'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
@@ -307,6 +308,7 @@ export default {
         email: '807037603@qq.com',
         password: '123456'
       }
+      getRoles().then()
       testLogin(params).then((res) => {
         console.log('res', res)
       })
