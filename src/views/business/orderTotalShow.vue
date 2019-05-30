@@ -40,6 +40,9 @@
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleReset">
         更新数据
       </el-button>
+      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleTeset">
+        测试
+      </el-button>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="clearFilter">
         重置筛选
       </el-button>
@@ -214,6 +217,7 @@
 
 <script>
 import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
+import { testLogin } from '@/api/address'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -298,6 +302,15 @@ export default {
     this.getList()
   },
   methods: {
+    handleTeset() {
+      const params = {
+        email: '807037603@qq.com',
+        password: '123456'
+      }
+      testLogin(params).then((res) => {
+        console.log('res', res)
+      })
+    },
     getList(params) {
       this.listLoading = true
       if (!params) {
