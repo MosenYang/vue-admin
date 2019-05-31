@@ -11,9 +11,12 @@ import { getToken } from '@/utils/auth'
 // }
 console.log('环境变量', process.env.VUE_APP_BASE_API, process.env.NODE_ENV)
 const service = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
+  baseURL: process.env.VUE_APP_BASE_API,
   withCredentials: true, // 跨域发送请求
-  timeout: 8000
+  timeout: 8000,
+  headers: {
+    Accept: 'application/json'
+  }
 })
 
 // 请求拦截器

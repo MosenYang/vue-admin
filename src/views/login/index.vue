@@ -102,6 +102,7 @@
 <script>
 import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
+import { testLogin } from '../../api/address'
 
 export default {
   name: 'Login',
@@ -196,7 +197,13 @@ export default {
       })
     },
     handleLogin() {
-      this.$refs.loginForm.validate(valid => {
+      const params = {
+        email: '807037603@qq.com',
+        password: '123456'
+      }
+      testLogin(params).then((res) => {})
+      return false
+/*      this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
           this.$store
@@ -215,7 +222,7 @@ export default {
           console.log('error submit!!')
           return false
         }
-      })
+      })*/
     },
     getOtherQuery(query) {
       return Object.keys(query).reduce((acc, cur) => {

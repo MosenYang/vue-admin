@@ -30,16 +30,23 @@ module.exports = {
       warnings: false,
       errors: true
     },
-      proxy: {
-      // change xxx-api/login => mock/login
+    proxy: {
+      // 改变 xxx-api/login => mock/login
       // 详情: https://cli.vuejs.org/config/#devserver-proxy
-      // 其实就是拼接
-      //[process.env.VUE_APP_BASE_API] 代理到`http://127.0.0.1:${port}/mock`+[process.env.VUE_APP_BASE_API]
-      [process.env.VUE_APP_BASE_API]: {
-        target: `http://127.0.0.1:${port}/mock`,
+      //[process.env.VUE_APP_BASE_API] 代理到 `http://127.0.0.1:${port}/mock`+[process.env.VUE_APP_BASE_API]
+      // [process.env.VUE_APP_BASE_API]: {
+      //   // target: `http://127.0.0.1:${port}/mock`,
+      //   target: [process.env.SUO_BANG_BASE_URL],
+      //   changeOrigin: true,
+      //   pathRewrite: {
+      //     ['^' + process.env.VUE_APP_BASE_API]: ''
+      //   }
+      // },
+      '/api': {
+        target: `http://api.thisyang.online`,
         changeOrigin: true,
         pathRewrite: {
-          ['^' + process.env.VUE_APP_BASE_API]: ''
+          '/api': ''
         }
       }
     },
