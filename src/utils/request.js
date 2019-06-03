@@ -2,20 +2,21 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
-
-// 创建axios实例
+// 索邦接口
 // url:"http://api.thisyang.online/api/products"
 // headers: {
 //   Accept: "application/json",
 //   Authorization:"Bearer... "
 // }
-console.log('环境变量', process.env.VUE_APP_BASE_API, process.env.NODE_ENV)
+console.log('vue环境',process.env.VUE_APP_BASE_API)
+console.log('索邦环境', process.env.SUO_BANG_BASE_API)
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
   withCredentials: true, // 跨域发送请求
   timeout: 8000,
   headers: {
-    Accept: 'application/json'
+    Accept: 'application/json',
+    SUOBANG:process.env.SUO_BANG_BASE_API
   }
 })
 

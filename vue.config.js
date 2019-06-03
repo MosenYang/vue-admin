@@ -34,19 +34,18 @@ module.exports = {
       // 改变 xxx-api/login => mock/login
       // 详情: https://cli.vuejs.org/config/#devserver-proxy
       //[process.env.VUE_APP_BASE_API] 代理到 `http://127.0.0.1:${port}/mock`+[process.env.VUE_APP_BASE_API]
-      // [process.env.VUE_APP_BASE_API]: {
-      //   // target: `http://127.0.0.1:${port}/mock`,
-      //   target: [process.env.SUO_BANG_BASE_URL],
-      //   changeOrigin: true,
-      //   pathRewrite: {
-      //     ['^' + process.env.VUE_APP_BASE_API]: ''
-      //   }
-      // },
-      '/api': {
-        target: `http://api.thisyang.online`,
+      [process.env.VUE_APP_BASE_API]: {
+        target: `http://127.0.0.1:${port}/mock`,
         changeOrigin: true,
         pathRewrite: {
-          '/api': ''
+          ['^' + process.env.VUE_APP_BASE_API]: ''
+        }
+      },
+      [process.env.SUO_BANG_BASE_API]: {
+        target: `http://api.thisyang.online/api`,
+        changeOrigin: true,
+        pathRewrite: {
+          ['^' + process.env.SUO_BANG_BASE_API]: ''
         }
       }
     },
@@ -122,7 +121,7 @@ module.exports = {
               elementUI: {
                 name: 'chunk-elementUI', // split elementUI into a single package
                 priority: 20, // the weight needs to be larger than libs and app or it will be packaged into libs or app
-                test: /[\\/]node_modules[\\/]_?element-ui(.*)/ // in order to adapt to cnpm
+                test: /[\\/]node_modules[\\/]_?element-ui(.*)/ // in businessOrderManage to adapt to cnpm
               },
               commons: {
                 name: 'chunk-commons',

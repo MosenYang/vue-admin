@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <!-- Note that row-key is necessary to get a correct row order. -->
+    <!-- Note that row-key is necessary to get a correct row businessOrderManage. -->
     <el-table ref="dragTable" v-loading="listLoading" :data="list" row-key="id" border fit highlight-current-row style="width: 100%">
       <el-table-column align="center" label="ID" width="65">
         <template slot-scope="scope">

@@ -102,16 +102,16 @@ export const constantRoutes = [
   {
     path: '/business',
     component: Layout,
-    redirect: '/business/orderManagement',
+    redirect: '/business/orderManagementChars',
     alwaysShow: true,
     name: 'business',
     meta: {
-      title: '业 务', icon: 'lock', roles: ['admin', 'editor'] // you can set roles in root nav
+      title: '我的业务', icon: 'lock', roles: ['admin', 'editor'] // you can set roles in root nav
     },
     children: [
       {
         path: 'orderManagement',
-        component: () => import('@/views/business/orderManagement.vue'),
+        component: () => import('@/views/business/orderManagementChars.vue'),
         name: 'orderManagement',
         meta: { title: '订单管理', icon: 'component', affix: true }
       },
@@ -239,7 +239,7 @@ export const asyncRoutes = [
     ]
   },
 
-  /** when your routing map is too long, you can split it into small modules **/
+  /** 页面太长,把它拆分**/
   componentsRouter,
   chartsRouter,
   nestedRouter,

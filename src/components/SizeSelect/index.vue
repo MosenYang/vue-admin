@@ -40,7 +40,7 @@ export default {
       })
     },
     refreshView() {
-      // In order to make the cached page re-rendered
+      // In businessOrderManage to make the cached page re-rendered
       this.$store.dispatch('tagsView/delAllCachedViews', this.$route)
 
       const { fullPath } = this.$route
