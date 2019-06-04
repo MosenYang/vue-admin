@@ -4,6 +4,7 @@
 @import './element-ui.scss';
 @import './sidebar.scss';
 @import './btn.scss';
+@import './extend.scss';
 
 body {
   height: 100%;
@@ -21,7 +22,9 @@ html {
   height: 100%;
   box-sizing: border-box;
 }
-
+div{
+  box-sizing: border-box;
+}
 #app {
   height: 100%;
 }
@@ -191,12 +194,37 @@ aside {
 }
 
 
-.flex{
+.flex {
   display: flex;
 }
+
 .flex-row {
   display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.flex-cow {
+  display: flex;
+  flex-direction: column;
   justify-content: space-between;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-around {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-around;
   align-items: center;
 }
 
@@ -205,3 +233,4 @@ aside {
   align-items: center;
   justify-content: center;
 }
+

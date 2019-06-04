@@ -1,61 +1,65 @@
 import Layout from '@/layout'
+
 const businessRouter = {
-  path: '/nested',
+  path: '/business',
   component: Layout,
-  redirect: '/nested/menu1/menu1-1',
-  name: 'Nested',
-  meta: {
-    title: '个人业务',
-    icon: 'nested'
+  redirect: '/business',
+  name: 'business',
+  alwaysShow: false,
+  meta: { title: '我的业务', icon: 'nested' },
+  children: [{
+    path: 'businessOrderManage',
+    component: () => import('@/views/business/businessOrderManage/index'),
+    name: 'businessOrderManage',
+    meta: { title: '订单管理' },
+    redirect: 'businessOrderManage',
+    children: [
+      {
+        path: 'businessOrderTable',
+        component: () => import('@/views/business/businessOrderManage/orderTable/index'),
+        name: 'businessOrderTable',
+        redirect: 'businessTotalTable',
+        meta: { title: '订单总表', roles: ['admin', 'editor'] },
+        children: [
+          {
+            path: 'businessTotalTable',
+            component: () => import('@/views/business/businessOrderManage/orderTable/totalTable'),
+            name: 'businessTotalTable',
+            meta: { title: '订单总表' }
+          },
+          {
+            path: 'businessCreateOrder',
+            component: () => import('@/views/business/businessOrderManage/orderTable/createOrder'),
+            name: 'businessCreateOrder',
+            meta: { title: '创建订单' }
+          },
+          {
+            path: 'businessAlterOrder',
+            component: () => import('@/views/business/businessOrderManage/orderTable/alterOrder'),
+            name: 'businessAlterOrder',
+            meta: { title: '修改订单' }
+          },
+          {
+            path: 'businessOrderInfo',
+            component: () => import('@/views/business/businessOrderManage/orderTable/orderInfo'),
+            name: 'businessOrderInfo',
+            meta: { title: '订单详情' }
+          }
+        ]
+      },
+      {
+        path: 'businessOrderShow',
+        component: () => import('@/views/business/businessOrderManage/orderTable/orderTotalShow'),
+        name: 'businessOrderShow',
+        meta: { title: '测试页' }
+      }
+    ]
   },
-  children: [
     {
-      path: 'menu1',
-      component: () => import('@/views/nested/menu1/index'), // Parent router-view
-      name: 'Menu1',
-      meta: { title: 'Menu 1' },
-      redirect: '/nested/menu1/menu1-1',
-      children: [
-        {
-          path: 'menu1-1',
-          component: () => import('@/views/nested/menu1/menu1-1'),
-          name: 'Menu1-1',
-          meta: { title: 'Menu 1-1' }
-        },
-        {
-          path: 'menu1-2',
-          component: () => import('@/views/nested/menu1/menu1-2'),
-          name: 'Menu1-2',
-          redirect: '/nested/menu1/menu1-2/menu1-2-1',
-          meta: { title: 'Menu 1-2' },
-          children: [
-            {
-              path: 'menu1-2-1',
-              component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-              name: 'Menu1-2-1',
-              meta: { title: 'Menu 1-2-1' }
-            },
-            {
-              path: 'menu1-2-2',
-              component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-              name: 'Menu1-2-2',
-              meta: { title: 'Menu 1-2-2' }
-            }
-          ]
-        },
-        {
-          path: 'menu1-3',
-          component: () => import('@/views/nested/menu1/menu1-3'),
-          name: 'Menu1-3',
-          meta: { title: 'Menu 1-3' }
-        }
-      ]
-    },
-    {
-      path: 'menu2',
-      name: 'Menu2',
-      component: () => import('@/views/nested/menu2/index'),
-      meta: { title: 'Menu 2' }
+      path: 'transportManage',
+      name: 'transportManage',
+      component: () => import('@/views/business/transportManage/GpsCharsManage'),
+      meta: { title: '运输管理' }
     }
   ]
 }

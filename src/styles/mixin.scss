@@ -64,3 +64,31 @@
     border-bottom: $transparent-border-style;
   }
 }
+
+//物理像素是css像素的倍数
+// 算法例:j(20) 20/base-font-size * rem (20或30或40)
+$base-font-size: 40px;
+@function j($px, $base-font-size: 40px) {
+  @if (unitless($px)) {
+    @warn "Assuming #{$px} to be in pixels, attempting to convert it into pixels for you";
+    @return j($px + 0px); // That may fail.
+  } @else if (unit($px) == rem) {
+    @return $px;
+  }
+  @return ($px / $base-font-size) * 1rem;
+}
+
+@function g($px) {
+  @return ($px / 2) * 1px;
+}
+
+//尺寸
+@mixin size($width,$height:$width) {
+  @if (unitless($width)) {
+    width: j($width);
+    height: j($height);
+  } @else {
+    width: j($width);
+    height: j($width);
+  }
+}

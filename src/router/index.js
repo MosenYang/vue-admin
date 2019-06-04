@@ -11,6 +11,7 @@ import componentsRouter from './modules/components'
 import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
 import nestedRouter from './modules/nested'
+import businessRouter from './modules/myBusinessRoute'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -61,17 +62,7 @@ export const constantRoutes = [
     component: () => import('@/views/login/auth-redirect'),
     hidden: true
   },
-  {
-    path: '/404',
-    component: () => import('@/views/error-page/404'),
-    hidden: true
-  },
-  {
-    path: '/401',
-    component: () => import('@/views/error-page/401'),
-    hidden: true
-  },
-  //
+  businessRouter,
   {
     path: '/home',
     component: Layout,
@@ -98,32 +89,6 @@ export const constantRoutes = [
       }
     ]
   },
-  // 业务
-  {
-    path: '/business',
-    component: Layout,
-    redirect: '/business/orderManagementChars',
-    alwaysShow: true,
-    name: 'business',
-    meta: {
-      title: '我的业务', icon: 'lock', roles: ['admin', 'editor'] // you can set roles in root nav
-    },
-    children: [
-      {
-        path: 'orderManagement',
-        component: () => import('@/views/business/orderManagementChars.vue'),
-        name: 'orderManagement',
-        meta: { title: '订单管理', icon: 'component', affix: true }
-      },
-      {
-        path: 'orderTotalShow',
-        component: () => import('@/views/business/orderTotalShow'),
-        name: 'orderTotalShow',
-        meta: { title: '订单总表', icon: 'component', affix: true }
-      }
-    ]
-  },
-  //
   {
     path: '/',
     component: Layout,

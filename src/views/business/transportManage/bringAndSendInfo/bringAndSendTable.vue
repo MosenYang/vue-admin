@@ -1,7 +1,5 @@
 <template>
-  <div>
-    修改订单
-  </div>
+  <div />
 </template>
 <script>
 // import ChildComponents from './ChildComponents.vue'

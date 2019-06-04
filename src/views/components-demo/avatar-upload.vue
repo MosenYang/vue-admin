@@ -8,7 +8,7 @@
     <pan-thumb :image="image" />
 
     <el-button type="primary" icon="upload" style="position: absolute;bottom: 15px;margin-left: 40px;" @click="imagecropperShow=true">
-      Change Avatar
+      改变作者
     </el-button>
 
     <image-cropper

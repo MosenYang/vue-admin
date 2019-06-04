@@ -2,7 +2,7 @@ import Vue from 'vue'
 
 import Cookies from 'js-cookie'
 
-import 'normalize.css/normalize.css' // a modern alternative to CSS resets
+import 'normalize.css/normalize.css' // CSS resets
 
 import Element from 'element-ui'
 import './styles/element-variables.scss'
@@ -14,7 +14,7 @@ import store from './store'
 import router from './router'
 
 import './icons' // icon
-import './permission' // permission control
+import './permission' // permission control 权限js
 import './utils/error-log' // error log
 
 import * as filters from './filters' // global filters
@@ -26,6 +26,7 @@ import * as filters from './filters' // global filters
  *
  * Currently MockJs will be used in the production environment,
  * please remove it before going online! ! !
+ * 线上环境请关闭mock
  */
 import { mockXHR } from '../mock'
 if (process.env.NODE_ENV === 'production') {

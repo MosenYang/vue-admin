@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <h2 />
+      首页
     </div>
   </div>
 </template>
