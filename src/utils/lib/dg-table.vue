@@ -255,7 +255,6 @@ var _filterAction = {} // 动作状态对象 radio_gender: true
 var _curFilter = '' // 当前元素
 var _filterbar = null // 点击元素的父元素
 var _regfilterarr = []
-console.log('', scope)
 export default {
   name: 'DgTable',
   directives: {
