@@ -134,8 +134,8 @@ module.exports = {
     'no-this-before-super': 2,
     'no-throw-literal': 2,
     'no-trailing-spaces': 2,
-    'no-undef': 2,
-    'no-undef-init': 2,
+    // 'no-undef': 2,
+    // 'no-undef-init': 2,
     'no-unexpected-multiline': 2,
     'no-unmodified-loop-condition': 2,
     'no-unneeded-ternary': [2, {
@@ -143,8 +143,8 @@ module.exports = {
     }],
     'no-unreachable': 2,
     'no-unsafe-finally': 2,
-    'no-unused-vars': [2, {
-      'vars': 'all',
+    'no-unused-vars': [0, { // 未使用变量 0 关闭
+      'vars': 'off',
       'args': 'none'
     }],
     'no-useless-call': 2,
@@ -173,7 +173,7 @@ module.exports = {
       'after': true
     }],
     'space-before-blocks': [2, 'always'],
-    'space-before-function-paren': [2, 'never'],
+    'space-before-function-paren': [0, 'never'],
     'space-in-parens': [2, 'never'],
     'space-infix-ops': 2,
     'space-unary-ops': [2, {

@@ -397,7 +397,7 @@ export default {
             value: 'radio',
             label: 'Radio 单选框'
           }, {
-            value: 'select',
+            value: 'inputSelect.vue',
             label: 'Select 选择器'
           }, {
             value: 'upload',

@@ -7,7 +7,7 @@ function resolve(dir) {
 }
 
 const name = defaultSettings.title || '索邦' // 页面头部
-let orUseMock = defaultSettings.useMockData
+const orUseMock = defaultSettings.useMockData
 const port = 9527
 console.log('是否使用mock', orUseMock)
 // 所有配置项解释都可以在其中找到 https://cli.vuejs.org/config/
@@ -21,7 +21,7 @@ module.exports = {
   publicPath: '/',
   outputDir: 'dist',
   assetsDir: 'static',
-  lintOnSave: process.env.NODE_ENV === 'development',//为 true 时,eslint-loader 会将 lint 错误输出为编译警告
+  // lintOnSave: process.env.NODE_ENV === 'development',//为 true 时,eslint-loader 会将 lint 错误输出为编译警告
   productionSourceMap: false,
   devServer: {
     port: port,
@@ -33,7 +33,7 @@ module.exports = {
     proxy: {
       // 改变 xxx-api/login => mock/login
       // 详情: https://cli.vuejs.org/config/#devserver-proxy
-      //[process.env.VUE_APP_BASE_API] 代理到 `http://127.0.0.1:${port}/mock`+[process.env.VUE_APP_BASE_API]
+      // [process.env.VUE_APP_BASE_API] 代理到 `http://127.0.0.1:${port}/mock`+[process.env.VUE_APP_BASE_API]
       [process.env.VUE_APP_BASE_API]: {
         target: `http://127.0.0.1:${port}/mock`,
         changeOrigin: true,
@@ -51,6 +51,7 @@ module.exports = {
     },
     after: require('./mock/mock-server.js')
   },
+  lintOnSave: false,
   configureWebpack: {
     name: name,
     resolve: {

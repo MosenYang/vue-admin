@@ -1,10 +1,11 @@
 <template>
-  <div>
-  </div>
+  <div />
 </template>
 <script>
 // import ChildComponents from './ChildComponents.vue'
 export default {
+  components: {},
+  props: {},
   data() {
     return {
       title: '组件标题',
@@ -12,23 +13,21 @@ export default {
       lastName: ''
     }
   },
-  props: {},
   computed: {
     fullName() {
       return this.firstName + this.lastName
     }
   },
   watch: {},
-  methods: {
-    getCurrentDate() {
-      return new Date().toLocaleDateString()
-    }
-  },
   created() {
   },
   mounted() {
   },
-  components: {}
+  methods: {
+    getCurrentDate() {
+      return new Date().toLocaleDateString()
+    }
+  }
 }
 </script>
 <style scoped>

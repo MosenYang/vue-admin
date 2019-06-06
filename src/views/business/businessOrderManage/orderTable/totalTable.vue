@@ -53,7 +53,7 @@
         highlight-current-row
         style="width: 100%;"
         :row-class-name="tableRowClassName"
-        :header-cell-style="{background:'#bbc0be'}"
+        :header-cell-style="{background:'rgba(197,201,197,0.01)'}"
         @sort-change="sortChange"
         @selection-change="handleSelectionChange"
       >
@@ -83,9 +83,9 @@
             <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
               打样
             </el-button>
-            <el-button size="small" type="success" @click="beginUnloadHandle">
-              上传凭证 <i class="el-icon-upload el-icon--right" />
-            </el-button>
+            <!--            <el-button size="small" type="success" @click="beginUnloadHandle">-->
+            <!--              上传凭证 <i class="el-icon-upload el-icon&#45;&#45;right" />-->
+            <!--            </el-button>-->
           </template>
         </el-table-column>
         <el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
@@ -109,8 +109,12 @@
             <span class="link-type" @click="handleUpdate(row)">{{ row.title }}</span>
             <el-tag>{{ row.type | typeFilter }}</el-tag>
           </template>
+          <!--//:render-header="customFieldColumn"-->
+          <!--          <el-table-column >-->
+          <!--            <template label="省份" slot="header" slot-scope="scope">-->
+          <!--            </template>-->
+          <!--          </el-table-column>-->
         </el-table-column>
-
         <el-table-column label="作者" width="110px" align="center">
           <template slot-scope="scope">
             <span>{{ scope.row.author }}</span>
@@ -326,6 +330,12 @@ export default {
     this.getList()
   },
   methods: {
+    customFieldColumn(h, { column, $index }) {
+      return h('span', [
+        h('el-input', { props: {}}
+        )
+      ])
+    },
     beginUnloadHandle() {
       this.dialogVisible = true
     },

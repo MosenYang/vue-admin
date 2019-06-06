@@ -10,7 +10,7 @@
         @keyup.enter.native="handleFilter"
       />
       <el-select v-model="listQuery.importance" placeholder="下拉" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item"/>
+        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
       </el-select>
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         查询
@@ -92,7 +92,7 @@
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column type="selection" width="55"/>
+      <el-table-column type="selection" width="55" />
       <el-table-column label="日期" width="150px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
@@ -125,7 +125,7 @@
       </el-table-column>
       <el-table-column label="星级" width="80px">
         <template slot-scope="scope">
-          <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon"/>
+          <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon" />
         </template>
       </el-table-column>
       <el-table-column
@@ -178,14 +178,14 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Date" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date"/>
+          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
         </el-form-item>
         <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title"/>
+          <el-input v-model="temp.title" />
         </el-form-item>
         <el-form-item label="Status">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item"/>
+            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
         <el-form-item label="Imp">
@@ -213,8 +213,8 @@
 
     <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
       <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel"/>
-        <el-table-column prop="pv" label="Pv"/>
+        <el-table-column prop="key" label="Channel" />
+        <el-table-column prop="pv" label="Pv" />
       </el-table>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
@@ -315,9 +315,9 @@ export default {
     renderTypeHeader1() {
       return (h('el-input', {
           on: {
-            input: (value) => {//随着下拉框的不同，文字框里的内容改变
+            input: (value) => { // 随着下拉框的不同，文字框里的内容改变
               this.typeValue = value
-              change: this.search1()
+              this.search1()
             }
           },
           props: {

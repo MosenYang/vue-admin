@@ -8,15 +8,15 @@ import { getToken } from '@/utils/auth'
 //   Accept: "application/json",
 //   Authorization:"Bearer... "
 // }
-console.log('vue环境',process.env.VUE_APP_BASE_API)
-console.log('索邦环境', process.env.SUO_BANG_BASE_API)
+// console.log('vue环境',process.env.VUE_APP_BASE_API)
+// console.log('索邦环境', process.env.SUO_BANG_BASE_API)
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
   withCredentials: true, // 跨域发送请求
   timeout: 8000,
   headers: {
     Accept: 'application/json',
-    SUOBANG:process.env.SUO_BANG_BASE_API
+    SUOBANG: process.env.SUO_BANG_BASE_API
   }
 })
 
