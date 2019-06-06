@@ -186,7 +186,6 @@
                 :user-set-data="item.userSetData"
                 @getFilterBridge="getFilterBridge"
               />
-              <!-- :userSetData="item.userSetData" 用户自定义字段 好像没有使用-->
             </div>
           </div>
         </template>
