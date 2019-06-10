@@ -20,7 +20,7 @@
 </template>
 <script>
 import TableComponents from '../../components/dg-table'
-import control from '../../../../utils/lib/customizemenu.vue'// 自定义按钮组
+import control from '../../components/defFilter/control.vue'// 自定义按钮组
 import searchText from '../../components/defFilter/searchText.vue'//传组件
 
 import { searchdata, dofilter, cities, createTableDataByRandom } from './mock.js' // 用于模拟表数据的js
