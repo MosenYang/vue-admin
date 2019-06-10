@@ -10,7 +10,6 @@
       :pagination="false"
       :row-click="onClickHandle"
       :page-config="pageData"
-      :filter-init="[]"
       :action-config="actionConfig"
       :column-config="columnData"
       @filter-change="getFilter"
@@ -21,10 +20,8 @@
 </template>
 <script>
 import TableComponents from '../../components/dg-table'
-import cc from '../../../../utils/lib/columcomponent.vue' // 判断男女
-import CF from '../../../../utils/lib/customizefilter.vue'// 自定义删选
-import CM from '../../../../utils/lib/customizemenu.vue'// 自定义按钮组
-import searchText from '../../components/defFilter/searchText.vue'
+import control from '../../../../utils/lib/customizemenu.vue'// 自定义按钮组
+import searchText from '../../components/defFilter/searchText.vue'//传组件
 
 import { searchdata, dofilter, cities, createTableDataByRandom } from './mock.js' // 用于模拟表数据的js
 export default {
@@ -50,12 +47,11 @@ export default {
       onClickHandle(row) {
         alert('点击行')
       },
-      // 按钮点击 操作栏数据
       actionConfig: {
         type: 'customize', // 分单个 :button  文字 textbtn  自定义customize
         label: '操作',
-        width: '180',
-        component: CM, // 自定义customize传改值也要传 自定义的需要传的组件
+        width: 350,
+        component: control,
         handlers: {
           firsth: (row) => { console.log('first', row) },
           second: (row) => { console.log('second', row) }
@@ -69,7 +65,6 @@ export default {
   mounted() {
     const res = createTableDataByRandom(587)
     this.tableData = res.data
-    console.log(this.tableData, '内容数据')
     this.pagenum = res.pagenum
     this.pageData.pageNum = res.pagenum
     this.mapTableTh()
@@ -81,7 +76,7 @@ export default {
         {
           name: '编号',//表头label
           isNeed: true,//是否需要搜索
-          type: 'search',// 搜索类型
+          type: 'text',// 搜索类型
           width: '100'
         },
         {
@@ -92,8 +87,8 @@ export default {
         },
         {
           name: '手机',
-          isNeed:true ,
-          type: 'search',
+          isNeed: true,
+          type: 'text',
           width: '100'
         },
         {
@@ -129,7 +124,7 @@ export default {
           thIndex: null,
           component: null,// 表格Td 内部组件可以传
           fixed: null, // 是否固定
-          width: '120', // 宽度
+          width: null, // 宽度
           'min-width': '80', // 最小宽度
           resizable: true, // 拖动改变列宽度(需要在 el-table 上设置 border 属性为真)
           'show-overflow-tooltip': false, // 内容过长隐藏
@@ -150,6 +145,7 @@ export default {
             comData: [],
             comProps: '',
             listInfo: {
+              fetchData() {},
               callback: () => {}// 回调
             }
           }

@@ -2,20 +2,20 @@
   <div style="padding:10px">
     <div>
       <el-autocomplete
-        v-model="searchdata"
+        v-model="chooseData"
         popper-class="my-autocomplete"
         :fetch-suggestions="querySearchAsync"
-        :placeholder="placeholderstr"
-        @select="handleSelect"
-      >
+        :placeholder="placeholder"
+        clearable="true"
+        @select="handleSelect">
         <template slot-scope="{ item }">
-          <div class="name">{{ item[showkey] }}</div>
+          <div class="name">678678678{{ item[showkey] }}</div>
         </template>
       </el-autocomplete>
     </div>
   </div>
 </template>
-
+<!--暂时不改,根据业务-->
 <script>
 export default {
   name:'search',
@@ -34,9 +34,9 @@ export default {
         }
       }
     },
-    placeholderStr: {
+    placeholder: {
       type: String,
-      default: '请输入内容'
+      default: '请选择内容'
     },
     ftn: {
       type: String,
@@ -45,21 +45,21 @@ export default {
   },
   data() {
     return {
-      searchdata: '',
+      chooseData: '',
       showkey: 'name'
     }
   },
   mounted() {
-    this.showkey = this.listinfo.showkey ? this.listinfo.showkey : 'name'
+    this.showkey = this.listInfo.showkey ? this.listInfo.showkey : 'name'
   },
   methods: {
     querySearchAsync(queryString, cb) {
       if (queryString) {
-        if (typeof this.listinfo.handler === 'function') {
+        if (typeof this.listInfo.handler === 'function') {
           var _searchkey = {}
-          if (!this.listinfo.searchkey) return
-          _searchkey[this.listinfo.searchkey] = queryString
-          this.listinfo.handler(_searchkey).then(res => {
+          if (!this.listInfo.searchkey) return
+          _searchkey[this.listInfo.searchkey] = queryString
+          this.listInfo.handler(_searchkey).then(res => {
             var showlist = res
             if (Array.isArray(showlist)) {
               if (showlist.length === 0) showlist = [{ [this.showkey]: '暂无数据' }]
