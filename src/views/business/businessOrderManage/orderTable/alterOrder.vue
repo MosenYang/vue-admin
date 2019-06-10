@@ -9,10 +9,10 @@
       :selection="true"
       :pagination="false"
       :row-click="onClickHandle"
-      :page-config="{ pagenum:pagenum, curpage: curpage }"
+      :page-config="pageData"
       :filter-init="[]"
       :action-config="actionConfig"
-      :column-config="config"
+      :column-config="columnData"
       @filter-change="getFilter"
       @select-change="getselect"
       @page-change="getpage"
@@ -20,12 +20,15 @@
   </div>
 </template>
 <script>
-import TableComponents from '../../../../utils/lib/dg-table'
+import TableComponents from '../../components/dg-table'
 import cc from '../../../../utils/lib/columcomponent.vue' // 判断男女
 import CF from '../../../../utils/lib/customizefilter.vue'// 自定义删选
 import CM from '../../../../utils/lib/customizemenu.vue'// 自定义按钮组
+import searchText from '../../components/defFilter/searchText.vue'
+
 import { searchdata, dofilter, cities, createTableDataByRandom } from './mock.js' // 用于模拟表数据的js
 export default {
+  name: 'tables',
   components: {
     TableComponents
   },
@@ -35,8 +38,13 @@ export default {
       columnData: [],
       tableData: [],
       filters: 3,
-      pagenum: 1,
-      curpage: 1,
+      pageData: {
+        pageNum: '',
+        curPage: 1
+      },
+      propsCom: {
+        text: searchText
+      },
       select: true,
       pagination: true,
       onClickHandle(row) {
@@ -52,116 +60,7 @@ export default {
           firsth: (row) => { console.log('first', row) },
           second: (row) => { console.log('second', row) }
         }
-      },
-      config: [{
-        prop: 'name',
-        label: '姓名',
-        width: '80',
-        filterConfig: {// 各自的筛选器的选项
-          ftn: '姓名',
-          type: 'text',
-          filterKey: 'uid',
-          placeholder: '输入姓名',
-          listInfo: {
-            handler: searchdata, // 这是筛选函数
-            searchkey: 'name', // 用于搜索api对应的key
-            showkey: 'name' // 在列表中要显示的字段
-          }
-        }
-      }, {
-        prop: 'gender',
-        label: '性别',
-        component: cc, // 传的组件
-        width: '80',
-        filterConfig: {// 过滤组件的配置
-          ftn: '性别',
-          type: 'radio',
-          filterKey: 'gender',
-          listInfo: {
-            labelkey: 'label',
-            valuekey: 'value'
-          },
-          dataItems: [
-            { label: '男', value: 1 },
-            { label: '女', value: 2 }
-          ]
-        }
-      }, {
-        // component 和  processdata 和 style 应该都在同级
-        prop: 'birthPlace',
-        label: '出生地',
-        // processdata 传值 time time2 或者Fn
-        processCallback: (row, prop) => {
-          // row返回整行数据 便于 处理一些依赖其他列的数据
-          var space = ''
-          if (!row.birthPlace) return '-'
-          var curobj = row.birthPlace
-          if (curobj) {
-            space += curobj.name
-            curobj = curobj.child
-          }
-          // while (1) {
-          //   if (curobj) {
-          //     space += curobj.name
-          //     curobj = curobj.child
-          //   } else {
-          //     break
-          //   }
-          // }
-          return space
-        }, // 数据的处理 默认提供一些 也可以自定义处理数据的函数
-        filterConfig: {
-          ftn: '出生地',
-          filterKey: 'birthPlace',
-          type: 'cascader',
-          hideBg: true,
-          cProps: {
-            value: 'code',
-            label: 'name',
-            children: 'children'
-          },
-          dataItems: cities()
-        }
-      }, {
-        prop: 'birthDay',
-        label: '出生日期',
-        processdata: 'time', // 应该是格式化了
-        filterConfig: {
-          ftn: '生日',
-          hideBg: true,
-          type: 'date',
-          filterKey: 'birthDay'
-        }
-
-      }, {
-        prop: 'phone',
-        label: '手机号',
-        filterConfig: {
-          ftn: '手机',
-          type: 'edit',
-          filterKey: 'phone'
-        }
-      }, {
-        prop: 'age',
-        label: '年龄',
-        filterConfig: {
-          ftn: '年龄',
-          type: 'range',
-          filterKey: 'age',
-          unit: '岁'
-        }
-      }, {
-        prop: 'age3',
-        label: '自定义筛选',
-        filterConfig: {
-          ftn: '自定义筛选',
-          type: 'customize',
-          component: CF,
-          filterKey: 'age',
-          userSetData: { label: '我是用户自定义的数据', value: 'balabalabala' }
-        }
       }
-      ]
     }
   },
   computed: {},
@@ -169,20 +68,67 @@ export default {
   created() {},
   mounted() {
     const res = createTableDataByRandom(587)
-    console.log('', res)
     this.tableData = res.data
+    console.log(this.tableData, '内容数据')
     this.pagenum = res.pagenum
+    this.pageData.pageNum = res.pagenum
+    this.mapTableTh()
   },
   methods: {
-    mapHeader() {
-      const names = ['日期', '名字', '省市', '区', '地址', '邮编'] // 栏目名称
+    mapTableTh() {
+      //初始化表格表头名称数据.根据业务来的,顺序必须一致
+      let initTHData = [
+        {
+          name: '编号',//表头label
+          isNeed: true,//是否需要搜索
+          type: 'search',// 搜索类型
+          width: '100'
+        },
+        {
+          name: '年龄',
+          isNeed: true,
+          type: 'text',
+          width: '100'
+        },
+        {
+          name: '手机',
+          isNeed:true ,
+          type: 'search',
+          width: '100'
+        },
+        {
+          name: '内容',
+          isNeed: false,
+          type: 'text',
+          width: '200'
+        },
+        {
+          name: '名字',
+          isNeed: true,
+          type: 'text',
+          width: '100'
+        },
+        {
+          name: '编号',
+          isNeed: true,
+          type: 'text'
+        },
+        {
+          name: '日期',
+          isNeed: true,
+          type: 'text'
+        }
+      ]
       Object.keys(this.tableData[0]).forEach((item, i) => {
         // 栏目配置
-        const defConfig = {
+        let defTableConfig = {
           prop: '', // 参数字段
           label: '', // 名字
-          type: '', // 类型
-          fixed: false, // 是否固定
+          type: '', // 类型当前表头交互类型
+          isNeed: true,// 是否需要搜索项
+          thIndex: null,
+          component: null,// 表格Td 内部组件可以传
+          fixed: null, // 是否固定
           width: '120', // 宽度
           'min-width': '80', // 最小宽度
           resizable: true, // 拖动改变列宽度(需要在 el-table 上设置 border 属性为真)
@@ -191,34 +137,38 @@ export default {
           'header-align': 'center', // left/center/right 头对齐方式
           'label-class-name': '', // 当前列自定义class
           sortable: false, // 是否排序
-          formatter: 'fun', // 排序用字段 v-bind绑定
-          filters: '[array]', // 绑定需要条件列表 数组
-          'filter-method': 'fun', // 过滤方法 v-bind绑定
-          'render-header': 'fun', // Label区域渲染  v-bind绑定
-          filterConfig: {// 接
-            ftn: '姓名',
-            type: 'search',
-            filterKey: 'uid',
+          formatter: () => {}, // 排序用字段 v-bind绑定
+          filters: [], // 绑定需要条件列表 数组
+          'filter-method': () => {}, // 过滤方法 v-bind绑定
+          'render-header': () => {}, // Label区域渲染  v-bind绑定
+          filterConfig: {// 过滤组件
+            label: null,// filter 组件的table,同表头一致
+            type: null,//filter 组件的类型,同表头一致
+            component: null,// 传入的组件,
+            filterKey: 'uid',//字段对应表头字段
             placeholder: '输入姓名',
-            component: 'search',
-            listinfo: {
-              handler: searchdata,
-              searchkey: 'name', // 用于搜索api对应的key
-              showkey: 'name' // 在列表中要显示的字段
+            comData: [],
+            comProps: '',
+            listInfo: {
+              callback: () => {}// 回调
             }
           }
         }
-        const comConfig = {}
-        console.log(comConfig)
-        // component 配置
-        defConfig.prop = item
-        defConfig.label = names[i]
-        this.columnData.push(defConfig)
+        defTableConfig.prop = item // 数据字段
+        defTableConfig.thIndex = i
+        defTableConfig.isNeed = initTHData[i].isNeed
+        defTableConfig.label = defTableConfig.filterConfig.label = initTHData[i].name
+        defTableConfig.type = defTableConfig.filterConfig.type = initTHData[i].type
+        if (defTableConfig.type === 'text') {// 自定义 可传参
+          defTableConfig.filterConfig.component = searchText
+        }
+        this.columnData.push(defTableConfig)
       })
+      console.log(this.columnData, '表头数据')
     },
     // 删选项事件
     getFilter(val) {
-      console.log(val, '筛选')
+      // console.log(val, '筛选')
       const allfilter = {
         filters: val,
         page: 1

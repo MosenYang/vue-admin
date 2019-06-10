@@ -3,29 +3,26 @@
     <div class="filterbox">
       <!--筛选项内容区-->
       <div v-if="bardata" class="filter-with-count">
-        <el-tag
-          v-for="(item, index) in bardata"
-          :key="index"
-          disable-transitions
-          closable
-          style="margin-right:10px;"
-          size="small"
-          type="info"
-          @close="handleClose(item)"
-        >
+        <el-tag v-for="(item, index) in bardata"
+                :key="index"
+                disable-transitions
+                closable
+                style="margin-right:10px;"
+                size="small"
+                type="info"
+                @close="handleClose($event,item)">
           <span v-if="item.ftn" style="color:#bbb">{{ item.ftn }}:</span>{{ item.label }}
         </el-tag>
       </div>
     </div>
     <div v-if="tableData" style="position:relative">
-      <el-table
-        ref="eltable"
-        v-loading="isLoading"
-        :data="tableData"
-        style="width: 100%"
-        :show-summary="summary"
-        @row-click="rowClick"
-        @selection-change="handleSelectChange"
+      <el-table ref="eltable"
+                v-loading="isLoading"
+                :data="tableData"
+                style="width: 100%"
+                :show-summary="summary"
+                @row-click="rowClick"
+                @selection-change="handleSelectChange"
       >
         <!-- @selection-change="handleSelectChange" 单选事件-->
         <!--  element 自带 show-summary字段 是否在表尾显示合计行-->
@@ -43,53 +40,17 @@
             :width="item.width"
           >
             <template slot="header" slot-scope="scope">
-              <template v-if="item.filterConfig && item.filterConfig.type">
-                <!-- 表格头部-->
-                <span :id="`${item.filterConfig.type}_${item.prop}`"
-                      class="customize_filter"
-                      style="cursor:pointer;display:inline-block"
-                      @click="headerClick"
-                >
+              <!-- 表格头部-->
+              <span :id="`${item.filterConfig.type}_${item.prop}`"
+                    class="customize_filter"
+                    style="cursor:pointer;display:inline-block"
+                    @click="headerClick($event,item)">
                   <span style="padding-right:3px;">{{ item.label }}</span>
-                  <!--上下箭头-->
-                  <i class="el-icon-caret-bottom"/>
+                <!--上下箭头-->
+                  <i class="el-icon-caret-bottom" v-if="item.filterConfig && item.isNeed"></i>
                 </span>
-              </template>
-              <template v-else>
-                <!--不显示箭头-->
-                <span class="customize_filter" style="display:inline-block">
-                  <span style="padding-right:3px;">{{ item.label }}</span>
-                </span>
-              </template>
             </template>
-            <!--            -->
-            <template slot-scope="{ row }">
-              <!--传数据的时候  component 和  processCallback 和 style 是平级的 -->
-              <template v-if="!item.component">
-                <!-- 默认提供了时间转化列，获取数组数量列，数据映射列，提供以点的形式来获取对象数据，为空时返回 ‘-’ -->
-                <span v-if="item.processCallback === 'time'" :style="item.style ? item.style : ''">
-                  {{ getTime(row[item.prop]) }}
-                </span>
-                <span v-else-if="item.processCallback === 'time2'" :style="item.style ? item.style : ''">
-                  {{ getTime(row[item.prop], 'y-m-d h:s:m') }}
-                </span>
-                <span v-else-if="typeof item.processCallback === 'function'" :style="item.style ? item.style : ''">
-                  {{ item.processCallback(row, item.prop) }}
-                </span>
-                <span v-else :style="item.style">
-                  {{ getText({cc: item, s: row}) }}
-                </span>
-              </template>
-              <!-- 自定义组件来处理列的数据 -->
-              <template v-if="item.component">
-                <component
-                  :is="item.component"
-                  :key="index"
-                  :row="row"
-                  :extra="item.extra"
-                />
-              </template>
-            </template>
+            <!-- -->
           </el-table-column>
         </template>
         <!--操控按钮栏目-->
@@ -105,8 +66,7 @@
           <!-- 传个文字 -->
           <el-table-column v-if="actionConfig.type === 'textbtn'"
                            :width="actionConfig.width"
-                           label="操作"
-          >
+                           label="操作">
             <template slot-scope="scope">
               <span style="cursor:pointer;color: #ff0000;" @click.stop="actionConfig.handler(scope)">
                 {{ actionConfig.label }}
@@ -118,8 +78,7 @@
             v-if="actionConfig.type === 'customize' && actionConfig.component"
             :width="actionConfig.width"
             :label="actionConfig.label ? actionConfig.label : '操作'"
-            fixed
-          >
+            fixed>
             <template slot-scope="scope">
               <component
                 :is="actionConfig.component"
@@ -135,14 +94,9 @@
         </template>
       </el-table>
       <!-- 注册的筛选器 -->
-      <div v-clickoutside="allfilterHide">
-        <template v-for="(item, key) in regfilters">
-          <!-- 输入框选择器 -->
-          <div
-            v-show="filterAction[key]"
-            :key="key"
-            :class="{'filterWrap': true, 'hideBg': item.hideBg}"
-            :style="item.position">
+      <div v-clickOutSide="allFilterHide">
+        <template v-for="(item, key) in regFilters">
+          <div v-show="filterAction[key]" :key="key" :class="{'filterWrap': true}" :style="item.position">
             <div class="filterContainer">
               <component
                 :is="item.component"
@@ -164,40 +118,28 @@
         </template>
       </div>
     </div>
-
     <!--  分页器区域-->
     <div v-if="pagination" class="paginationWrap">
       <el-pagination
         background
         :pager-count="7"
         layout="prev, pager, next"
-        :page-count="pageConfig.pagenum"
-        :current-page.sync="pageConfig.curpage"
+        :page-count="pageConfig.pageNum"
+        :current-page.sync="pageConfig.curPage"
         @current-change="clickpage"
       />
     </div>
   </div>
 </template>
 <script>
-import editFilter from './filters/edit.vue'
-import dateFilter from './filters/date.vue'
-import cascaderFilter from './filters/cascader.vue'
-import searchFilter from './filters/search.vue'
-import radiosFilter from './filters/radio.vue'
-import rangeFilter from './filters/range.vue'
-import textFilter from './filters/inputText.vue'
-
-import Bus from './js/Bus.js'
-import { getFilter, doDeleteFilter, initFilterData } from './js/index.js'
-// 筛选器组件
-var myFilterComponts = {
+import editFilter from './defFilter/edit.vue'
+import searchFilter from './defFilter/search.vue'
+// import Bus from './js/Bus.js'
+import { getFilter, doDeleteFilter, initFilterData } from './index.js'
+// 默认筛选器组件
+var defComponents = {
   edit: editFilter, // 输入框选择器
-  date: dateFilter, // 日期选择器
-  cascader: cascaderFilter, // 级联搜索
-  search: searchFilter, // 自动搜索
-  radio: radiosFilter,
-  range: rangeFilter, // 输入框区间
-  text: textFilter
+  search: searchFilter // 自动搜索
 }
 // 默认筛选器字段
 const ComFilterDefConfig = {
@@ -212,45 +154,11 @@ const ComFilterDefConfig = {
   ftn: '',
   hideBg: false
 }
-// 渲染后各类型筛选器的数量 对应的filter的key 有多个一样类型的筛选器
-var curFilterCount = {
-  edit: 0,
-  date: 0,
-  cascader: 0,
-  search: 0,
-  radio: 0,
-  range: 0
-}
-var _regFilter = {} // 所有的对象
 var _filterAction = {} // 动作状态对象 radio_gender: true
-// 存放当前显示的 filter数据 e--》filter的header  filter--》filter的对象映射
 var _curFilter = '' // 当前元素
 var _filterbar = null // 点击元素的父元素
-var _regfilterarr = []
 export default {
   name: 'DgTable',
-  directives: {
-    // 移除选择器触发指令
-    clickoutside: {
-      bind: function(el, binding) {
-        function documentHandler(e) {
-          if (el.contains(e.target)) {
-            return false
-          }
-          if (binding.expression) {
-            binding.value(e)
-          }
-        }
-
-        el.__vueClickOutside__ = documentHandler
-        document.addEventListener('click', documentHandler)
-      },
-      unbind: function(el) {
-        document.removeEventListener('click', el.__vueClickOutside__)
-        delete el.__vueClickOutside__
-      }
-    }
-  },
   props: {
     columnConfig: {// 栏数据
       type: Array,
@@ -275,13 +183,9 @@ export default {
     pageConfig: { // 分页器配置
       type: Object,
       default: function() {
-        return { pagenum: 1, curpage: 1 }
-      }
-    },
-    filterInit: {
-      type: Array,
-      default: function() {
-        return []
+        return {
+          pageNum: 1, curPage: 1
+        }
       }
     },
     rowClick: { // 行点击事件
@@ -311,30 +215,25 @@ export default {
         {
           ftn: '名字',
           label: '王宇'
-        },
-        {
-          ftn: '名字',
-          label: '王宇'
         }
-      ], // 选择的筛选项组合
-      regfilters: {}, // 所有的组件对象 非常的重要
+      ],
+      regFilters: {}, // 所有的组件对象 非常的重要
       filterAction: {}// 动态显示  radio_gender: true
     }
   },
-  destroyed() {
-    // 销毁
-    initFilterData()
-    for (const k in curFilterCount) {
-      curFilterCount[k] = 0
+  watch: {
+    columnConfig(newValue) {
+      if (newValue) {
+        this.columnConfig.forEach((item) => {
+          if (item.filterConfig) {
+            this.doRegFilters(item.filterConfig.type, item)
+          }
+        })
+      }
     }
-    _regFilter = {}
-    _filterAction = {}// 状态对象
-    _curFilter = '' // 当前
-    _filterbar = null// 父级别
   },
   mounted: function() {
-    // this.initFilterBar()
-    this.columnConfig.forEach(item => {
+    this.columnConfig.forEach((item) => {
       if (item.filterConfig) {
         this.doRegFilters(item.filterConfig.type, item)
       }
@@ -342,20 +241,22 @@ export default {
     window.onresize = () => {
       setTimeout(() => {
         if (_filterbar) this.filterPosition(_filterbar, _curFilter)
-      }, 0)
+      }, 100)
     }
   },
+  destroyed() {
+    // initFilterData()
+    _filterAction = {}// 状态对象
+    _curFilter = '' // 当前
+    _filterbar = null// 父级
+  },
   methods: {
-    // 点击分页
     clickpage(val) {
       this.$emit('page-change', val)
     },
-    // 删除tag,筛选条件的增删,点击删除了自己
     handleClose(tag) {
       this.bardata.splice(this.bardata.indexOf(tag), 1)
       var dofilter = doDeleteFilter(tag)
-
-      // 删除再次搜索
       this.$emit('filter-change', dofilter)
     },
     getTime(UTCDateString, type = 'Y-M-D') {
@@ -403,100 +304,77 @@ export default {
     getFilterBridge(val) {
       console.log(val, 'val')
       const formatdata = getFilter(val)
-      // 操作删选项
       this.bardata = formatdata.showfilter
       this.$emit('filter-change', formatdata.dofilter)
-      // 把状态调整
-      this.allfilterHide('none')
+      this.allFilterHide('none')
     },
     // 函数通讯桥梁
-    // func---》页面要执行的函数名字
-    // data---》需要的数据
     commonHanlerBridge({ func, data }) {
       this.$emit(func, data)
     },
-    // 注册筛选器
-    // 根据已经注册的该类型的筛选器的个数来确定
-    // 筛选器的标志
-    // 成功注册后该类型的筛选器 +1
     doRegFilters(ftype, columconfig) {
-      // 注册自定义筛选器
-      if (!myFilterComponts[ftype]) {
-        this.regCustomizeFilter(ftype, columconfig.filterConfig)
+      let filterTag = `${ftype}_${columconfig.prop}`
+      if (!defComponents[ftype]) {
+        this.mixinFilter(ftype, columconfig.filterConfig)
+      } else {
+        columconfig.filterConfig.component = defComponents[ftype]
       }
-      var filtertag = `${ftype}_${columconfig.prop}`
-      if (_regfilterarr.indexOf(filtertag) !== -1) return // 有就返回
-      curFilterCount[ftype] += 1
-      const _filterConfig = columconfig.filterConfig // 拿到过滤器的配置,表格栏目的配置项
-      if (!_filterConfig) return
-      _regfilterarr.push(filtertag)
-      // _regfilterarr, filtertag 标签和数组
-      // 解决vue在 以索引的情况赋值 页面不刷新的问题
+      if (!columconfig.filterConfig) return
       const config = {
         show: false,
-        refName: filtertag,
-        component: myFilterComponts[ftype],
+        refName: filterTag,// 类型加上字段
         position: { top: 0, left: 0 }
       }
-      const filterConfig = Object.assign(config, ComFilterDefConfig, columconfig.filterConfig)
-      this.$set(_regFilter, filtertag, filterConfig)// 循环添加了{}
-      this.regfilters = _regFilter // 所有的头包含的组件
+      let filterConfig = Object.assign(config, ComFilterDefConfig, columconfig.filterConfig)
+
+      this.$set(this.regFilters, filterTag, filterConfig)
+      console.log(this.regFilters, '所有的头包含的组件,会渲染出来')
       this.filterAction = JSON.parse(JSON.stringify(_filterAction)) // 空对象
-      return filtertag
+      return filterTag
     },
-    // 传的组件类型 库里面没有
-    regCustomizeFilter(ftype, fconfig) {
-      if (curFilterCount.hasOwnProperty(ftype)) {
-        // 给库里设个默认值
-        curFilterCount[ftype] = 0
+    mixinFilter(ftype, config) {
+      if (config.component) {
+        let newFilter = { [ftype]: config.component }
+        defComponents = Object.assign({}, defComponents, newFilter)
       }
-      const customizeFilter = {}
-      customizeFilter[ftype] = fconfig.component
-      // 给库添加一个配置项
-      myFilterComponts = Object.assign({}, myFilterComponts, customizeFilter)
     },
-    headerClick(e) {
+    headerClick(e, item) {
+      if (!item.isNeed) return
       e.cancelBubble = true
-      const curElId = e.currentTarget.id // 点击元素
-      const curParentElId = e.currentTarget.parentElement.parentElement // 点击元素的父父元素
-      // 清空状态
+      const curElId = e.currentTarget.id
+      const curParentElId = e.currentTarget.parentElement.parentElement
       if (_filterAction[curElId]) {
-        document.querySelector(`#${curElId} i`) &&
         document.querySelector(`#${curElId} i`).setAttribute('class', 'el-icon-caret-bottom')
       } else {
-        document.querySelector(`#${curElId} i`) &&
         document.querySelector(`#${curElId} i`).setAttribute('class', 'el-icon-caret-top')
       }
-      this.allfilterHide(curElId)
+      this.allFilterHide(curElId)
       this.filterPosition(curParentElId, curElId)
       this.$set(_filterAction, curElId, !_filterAction[curElId])
       this.filterAction = _filterAction// 动作对象
-      console.log(this.filterAction, 'filterAction')
+      console.log(this.filterAction, 'filterAction动作对象')
       var type = curElId.split('_')[0]
       _curFilter = curElId
       _filterbar = curParentElId
-      if (type === 'date' && _filterAction[_curFilter]) {
-        Bus.$emit('OPEN_DGTABLE_DATE_FILTER', curElId)
-      }
-      if (type === 'cascader' && _filterAction[_curFilter]) {
-        Bus.$emit('OPEN_DGTABLE_CASCADER_FILTER', curElId)
-      }
-      if (type === 'radio' && _filterAction[_curFilter]) {
-        Bus.$emit('LOAD_DGTABLE_RADIO_DATA', curElId)
-      }
+      // if (type === 'date' && _filterAction[_curFilter]) {
+      //   Bus.$emit('OPEN_DGTABLE_DATE_FILTER', curElId)
+      // }
+      // if (type === 'cascader' && _filterAction[_curFilter]) {
+      //   Bus.$emit('OPEN_DGTABLE_CASCADER_FILTER', curElId)
+      // }
+      // if (type === 'radio' && _filterAction[_curFilter]) {
+      //   Bus.$emit('LOAD_DGTABLE_RADIO_DATA', curElId)
+      // }
     },
     filterPosition(filterbar, filtertag) {
       var offsetLeft = filterbar.offsetLeft
       var offsetHeight = filterbar.offsetHeight
-      // 调整筛选组件的位置
-      if (_regFilter[filtertag]) {
-        this.$set(_regFilter[filtertag].position, 'top', offsetHeight - 10 + 'px')
-        this.$set(_regFilter[filtertag].position, 'left', offsetLeft + 'px')
+      if (this.regFilters[filtertag]) {
+        this.$set(this.regFilters[filtertag].position, 'top', offsetHeight - 10 + 'px')
+        this.$set(this.regFilters[filtertag].position, 'left', offsetLeft- 20 + 'px')
       }
-      this.regfilters = _regFilter
     },
-    allfilterHide(cfilter) {
-      // 调整上下箭头
+    allFilterHide(cfilter) {
       for (var k in _filterAction) {
         if (k !== cfilter) {
           this.$set(_filterAction, k, false) // 改下箭头的状态,set方法会刷新页面
@@ -509,32 +387,36 @@ export default {
     },
     // 单选或者多选事件
     handleSelectChange(val) {
-      // 解决选择 页面重新渲染的问题
-      // _regFilter = {}
-      // _filterAction = {}
-      // this.regfilters = _regFilter
       this.$emit('select-change', val)
-    },
-    // 用于初始化 filters bar
-    initFilterBar() {
-      // 并不存在啊
-      const initfilters = this.tableInfo.toolsConfig.filters
-      if (typeof initfilters === 'object' && typeof initfilters.length !== 'number') {
-        const tags = []
-        initFilterData(initfilters)
-        for (const k in initfilters) {
-          tags.push(initfilters[k])
+    }
+  },
+  directives: {
+    clickOutSide: {
+      bind: function(el, binding) {
+        function documentHandler(e) {
+          if (el.contains(e.target)) {
+            return false
+          }
+          if (binding.expression) {
+            binding.value(e)
+          }
         }
-        // 删选项
-        this.bardata = tags
+
+        el.__vueClickOutside__ = documentHandler
+        document.addEventListener('click', documentHandler)
+      },
+      unbind: function(el) {
+        document.removeEventListener('click', el.__vueClickOutside__)
+        delete el.__vueClickOutside__
       }
     }
   }
+  //完毕
 }
 </script>
 
 <style scoped>
-  @import './css/common.css';
+  /*@import './css/common.css';*/
 
   .filterbox {
     height: 50px;
