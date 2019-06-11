@@ -2,6 +2,8 @@
 // @import "src/styles/mixin.scss";
 //声明混合宏：@mixin
 //调用混合宏：@include
+@import "./extend.scss";
+
 @mixin clearfix {
   &:after {
     content: "";

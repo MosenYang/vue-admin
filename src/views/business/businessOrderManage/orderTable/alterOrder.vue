@@ -112,6 +112,8 @@ export default {
           type: 'text'
         }
       ]
+      console.log(initTHData.length,'dd')
+      console.log(this.tableData[0],'ttt')
       Object.keys(this.tableData[0]).forEach((item, i) => {
         // 栏目配置
         let defTableConfig = {

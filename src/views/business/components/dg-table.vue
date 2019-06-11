@@ -16,30 +16,27 @@
       </div>
     </div>
     <div v-if="tableData" style="position:relative">
-      <el-table ref="eltable"
+      <el-table ref="elTable" fit border
                 v-loading="isLoading"
                 :data="tableData"
-                style="width: 100%"
                 :show-summary="summary"
                 @row-click="rowClick"
-                fit
-                @selection-change="handleSelectChange"
-      >
+                :header-cell-style="headerCellStyle"
+                @selection-change="handleSelectChange">
         <!-- @selection-change="handleSelectChange" 单选事件-->
-        <!--  element 自带 show-summary字段 是否在表尾显示合计行-->
-        <el-table-column
-          v-if="selection"
-          type="selection"
-          width="35"
-        />
+        <!--  show-summary字段 是否在表尾显示合计行-->
+        <el-table-column v-if="selection" type="selection" width="35"/>
         <!--循环的-->
         <template v-for="(item, index) in columnConfig">
           <el-table-column
             :key="index"
             :prop="item.prop"
             :label="item.label"
+            :resizable="item.resizable"
             :width="item.width"
-          >
+            :align="item.align"
+            :header-align="item.headerAlign"
+            :show-overflow-tooltip="item.showOverflowTooltip">
             <template slot="header" slot-scope="scope">
               <!-- 表格头部-->
               <span :id="`${item.filterConfig.type}_${item.prop}`"
@@ -75,19 +72,16 @@
             </template>
           </el-table-column>
           <!-- 自定义操作 传组件 type === 'customize' -->
-          <el-table-column
-            v-if="actionConfig.type === 'customize' && actionConfig.component"
-            :width="actionConfig.width"
-            :label="actionConfig.label ? actionConfig.label : '操作'"
-            fixed>
+          <el-table-column v-if="actionConfig.type === 'customize' && actionConfig.component"
+                           :width="actionConfig.width"
+                           :label="actionConfig.label ? actionConfig.label : '操作'"
+                           fixed>
             <template slot-scope="scope">
-              <component
-                :is="actionConfig.component"
-                :row="scope.row"
-                :handlers="actionConfig.handlers"
-                @commonHandlerBridge="commonHandlerBridge"
-                @doactive="doactive"
-              />
+              <component :is="actionConfig.component"
+                         :row="scope.row"
+                         :handlers="actionConfig.handlers"
+                         @commonHandlerBridge="commonHandlerBridge"
+                         @doactive="doactive"/>
               <!--  row 是当前行/ handlers 是初始配置的方法传的  -->
             </template>
           </el-table-column>
@@ -205,12 +199,25 @@ export default {
     // 操作栏对象
     actionConfig: {
       type: Object,
-      default: {}
+      default: function() {
+        return {}
+      }
     },
     // element自带显示加载
     isLoading: {
       type: Boolean,
       default: false
+    },
+    tableRowClassName:{
+      type: Function,
+      default:()=>{}
+    },
+    headerCellStyle:{
+      type: Function,
+      default:({row, column, rowIndex, columnIndex})=>{
+        return 'fontWeight:600'
+
+      }
     }
   },
   data() {

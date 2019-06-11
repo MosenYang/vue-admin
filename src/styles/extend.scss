@@ -1,11 +1,23 @@
 // (Mosen) 添加继承样式
-// @extend 语法
+// @extend %xx 语法
+%cyan-btn { // 索邦青绿按钮
+  background: #36c6d3;
+  border: none;
+  color: #fff;
+}
+
+%blue-btn {// 索邦蓝色按钮
+  background: #169bd5;
+  border: none;
+  color: #fff;
+}
 
 //横向弹性布局
 %flex {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+
   &:before,
   &:after {
     display: flex;
@@ -17,6 +29,7 @@
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
+
   &:before,
   &:after {
     display: flex;
@@ -39,18 +52,23 @@
 %end {
   @extend %flex;
   justify-content: flex-end;
+  align-items: center;
+
 }
 
 // x轴平分
 %space-between {
   @extend %flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 // x轴有间隔地平分
 %space-around {
   @extend %flex;
   justify-content: space-around;
+  align-items: center;
+
 }
 
 // 顶部对齐

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <router-view />
+    <router-view/>
   </div>
 </template>
 <script>
@@ -32,7 +32,8 @@ export default {
   }
 }
 </script>
-<style scoped>
-  /*@import "../base/reset.css";*/
+<style lang="scss" scoped>
+  @import "../../../../styles/mixin.scss";
+  @import "../../../../styles/index.scss";
 
 </style>
