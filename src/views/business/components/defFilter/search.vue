@@ -1,13 +1,12 @@
 <template>
   <div style="padding:10px">
     <div>
-      <el-autocomplete
-        v-model="chooseData"
-        popper-class="my-autocomplete"
-        :fetch-suggestions="querySearchAsync"
-        :placeholder="placeholder"
-        clearable="true"
-        @select="handleSelect">
+      <el-autocomplete v-model="chooseData"
+                       popper-class="my-autocomplete"
+                       :fetch-suggestions="querySearchAsync"
+                       :placeholder="placeholder"
+                       clearable="true"
+                       @select="handleSelect">
         <template slot-scope="{ item }">
           <div class="name">678678678{{ item[showkey] }}</div>
         </template>
@@ -18,7 +17,7 @@
 <!--暂时不改,根据业务-->
 <script>
 export default {
-  name:'search',
+  name: 'search',
   props: {
     filterKey: {
       type: String,

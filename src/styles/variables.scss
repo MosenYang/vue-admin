@@ -17,12 +17,16 @@ $menuBg:#304156;
 $menuHover:#263445;
 $subMenuBg:#1f2d3d;
 //$subMenuHover:#001528;
+// (Mosen 制定)
 $subMenuHover:#36c6d3;
 
-
 $sideBarWidth: 210px;
+// (Mosen base制定)
+$defFirstBtnColor:#36c6d3;
+$defSecondBtnColor:#169bd5;
+$defWarningBtnColor:#ff0000;
 
-// the :export directive is the magic sauce for webpack
+// :export 这导出指令是webpack的神奇酱料
 // https://www.bluematador.com/blog/how-to-share-variables-between-js-and-sass
 :export {
   menuText: $menuText;

@@ -36,5 +36,4 @@ module.exports = {
   /**
    * @description 根据情况是否使用mock模拟数据
    */
-  useMockData: false
 }

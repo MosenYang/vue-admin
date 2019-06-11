@@ -1,3 +1,7 @@
+//本项目没有设置自动注入 sass 的 mixin 到全局，所以需要在使用的地方手动引入 mixin. (Mosen 注释)
+// @import "src/styles/mixin.scss";
+//声明混合宏：@mixin
+//调用混合宏：@include
 @mixin clearfix {
   &:after {
     content: "";
@@ -70,7 +74,7 @@
 $base-font-size: 40px;
 @function j($px, $base-font-size: 40px) {
   @if (unitless($px)) {
-    @warn "Assuming #{$px} to be in pixels, attempting to convert it into pixels for you";
+    //@warn "正在 #{$px} 以像素为单位，尝试为你将其转换为像素";
     @return j($px + 0px); // That may fail.
   } @else if (unit($px) == rem) {
     @return $px;

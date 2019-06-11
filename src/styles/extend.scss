@@ -1,9 +1,11 @@
+// (Mosen) 添加继承样式
+// @extend 语法
+
 //横向弹性布局
 %flex {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-
   &:before,
   &:after {
     display: flex;
@@ -15,7 +17,6 @@
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-
   &:before,
   &:after {
     display: flex;

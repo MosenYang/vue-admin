@@ -7,22 +7,22 @@
           <div class="column-name">订单信息</div>
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
             <el-form-item label="订单号" prop="name">
-              <el-input v-model="ruleForm.name" />
+              <el-input v-model="ruleForm.name"/>
             </el-form-item>
           </el-col>
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
             <el-form-item label="开单日期" prop="name">
-              <el-input v-model="ruleForm.name" />
+              <el-input v-model="ruleForm.name"/>
             </el-form-item>
           </el-col>
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
             <el-form-item label="业务类型" prop="name">
-              <el-input v-model="ruleForm.name" />
+              <el-input v-model="ruleForm.name"/>
             </el-form-item>
           </el-col>
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
             <el-form-item label="经办人" prop="name">
-              <el-input v-model="ruleForm.name" />
+              <el-input v-model="ruleForm.name"/>
             </el-form-item>
           </el-col>
         </el-row>
@@ -33,12 +33,12 @@
               <el-row>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
                   <el-form-item label="托运人" prop="name">
-                    <el-input v-model="ruleForm.name" />
+                    <el-input v-model="ruleForm.name"/>
                   </el-form-item>
                 </el-col>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
                   <el-form-item label="托运人电话" prop="name">
-                    <el-input v-model="ruleForm.name" />
+                    <el-input v-model="ruleForm.name"/>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -84,7 +84,7 @@
               <el-row>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
                   <el-form-item label="提车费" prop="name">
-                    <el-input v-model="ruleForm.name" />
+                    <el-input v-model="ruleForm.name"/>
                   </el-form-item>
                 </el-col>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
@@ -113,14 +113,14 @@
               <el-row>
                 <el-col class="column-col" :lg="24" :md="24">
                   <el-form-item label="详细地址" prop="name">
-                    <el-input v-model="ruleForm.name" type="textarea" />
+                    <el-input v-model="ruleForm.name" type="textarea"/>
                   </el-form-item>
                 </el-col>
               </el-row>
               <el-row>
                 <el-col class="column-col" :lg="24" :md="24">
                   <el-form-item label="提车备注" prop="name">
-                    <el-input v-model="ruleForm.name" type="textarea" />
+                    <el-input v-model="ruleForm.name" type="textarea"/>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -131,12 +131,12 @@
               <el-row>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
                   <el-form-item label="收货人" prop="name">
-                    <el-input v-model="ruleForm.name" />
+                    <el-input v-model="ruleForm.name"/>
                   </el-form-item>
                 </el-col>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
                   <el-form-item label="收货人电话" prop="name">
-                    <el-input v-model="ruleForm.name" />
+                    <el-input v-model="ruleForm.name"/>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -182,7 +182,7 @@
               <el-row>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
                   <el-form-item label="送车费" prop="name">
-                    <el-input v-model="ruleForm.name" />
+                    <el-input v-model="ruleForm.name"/>
                   </el-form-item>
                 </el-col>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
@@ -212,14 +212,14 @@
               <el-row>
                 <el-col class="column-col" :lg="24" :md="24">
                   <el-form-item label="详细地址" prop="name">
-                    <el-input v-model="ruleForm.name" type="textarea" />
+                    <el-input v-model="ruleForm.name" type="textarea"/>
                   </el-form-item>
                 </el-col>
               </el-row>
               <el-row>
                 <el-col class="column-col" :lg="24" :md="24">
                   <el-form-item label="送车备注" prop="name">
-                    <el-input v-model="ruleForm.name" type="textarea" />
+                    <el-input v-model="ruleForm.name" type="textarea"/>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -237,46 +237,46 @@
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="车辆名称" prop="name">
                 <el-select v-model="ruleForm.region" placeholder="活动区域">
-                  <el-option label="区域一" value="首钢" />
-                  <el-option label="区域二" value="北京" />
+                  <el-option label="区域一" value="首钢"/>
+                  <el-option label="区域二" value="北京"/>
                 </el-select>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="识别码" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="接车单价" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="发货方回扣" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row class="">
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="保险费" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="发票费" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="垫款" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="合计" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
           </el-row>
@@ -286,39 +286,39 @@
           <el-row>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="付款方式" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="现付" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="到付" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="月结" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
           </el-row>
           <el-row>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="合计费用" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="业务提成" prop="name">
-                <el-input v-model="ruleForm.name" />
+                <el-input v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="回单" prop="delivery">
-                <el-switch v-model="ruleForm.name" />
+                <el-switch v-model="ruleForm.name"/>
               </el-form-item>
             </el-col>
           </el-row>

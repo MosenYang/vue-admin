@@ -14,15 +14,13 @@
       :column-config="columnData"
       @filter-change="getFilter"
       @select-change="getselect"
-      @page-change="getpage"
-    />
+      @page-change="getpage"/>
   </div>
 </template>
 <script>
 import TableComponents from '../../components/dg-table'
 import control from '../../components/defFilter/control.vue'// 自定义按钮组
 import searchText from '../../components/defFilter/searchText.vue'//传组件
-
 import { searchdata, dofilter, cities, createTableDataByRandom } from './mock.js' // 用于模拟表数据的js
 export default {
   name: 'tables',

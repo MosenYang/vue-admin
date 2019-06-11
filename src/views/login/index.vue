@@ -197,12 +197,14 @@ export default {
       })
     },
     handleLogin() {
-      // const params = {
-      //   email: '807037603@qq.com',
+      // let params = {
+      //   name: 'thisyang',
       //   password: '123456'
       // }
-      // testLogin(params).then((res) => {})
-      // return false
+      // testLogin(params).then((res) => {
+      //   console.log('res', res)
+      // })
+      // return
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true

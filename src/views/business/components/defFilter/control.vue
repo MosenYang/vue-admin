@@ -2,6 +2,9 @@
   <div class="control-wrap">
     <el-button @click.stop="click1" size="mini">编辑</el-button>
     <el-button @click.stop="click2" size="mini">删除</el-button>
+    <el-button @click.stop="click2" size="mini">删除</el-button>
+    <el-button @click.stop="click2" size="mini">删除</el-button>
+    <el-button @click.stop="click2" size="mini">上传</el-button>
   </div>
 </template>
 <script>
