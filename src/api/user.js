@@ -1,5 +1,13 @@
 import request from './../utils/request'
 
+export function testLogin(data) {
+  return request({
+    url: '/api/login',
+    method: 'post',
+    data
+  })
+}
+
 export function login(data) {
   return request({
     url: '/user/login',

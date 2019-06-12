@@ -14,7 +14,7 @@
 
       <el-form-item prop="username">
         <span class="svg-container">
-          <svg-icon icon-class="user" />
+          <svg-icon icon-class="user"/>
         </span>
         <el-input
           ref="username"
@@ -30,7 +30,7 @@
       <el-tooltip v-model="capsTooltip" content="Caps lock is On" placement="right" manual>
         <el-form-item prop="password">
           <span class="svg-container">
-            <svg-icon icon-class="password" />
+            <svg-icon icon-class="password"/>
           </span>
           <el-input
             :key="passwordType"
@@ -46,7 +46,7 @@
             @keyup.enter.native="handleLogin"
           />
           <span class="show-pwd" @click="showPwd">
-            <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'" />
+            <svg-icon :icon-class="passwordType === 'password' ? 'eye' : 'eye-open'"/>
           </span>
         </el-form-item>
       </el-tooltip>
@@ -94,7 +94,7 @@
       <br>
       <br>
       <br>
-      <social-sign />
+      <social-sign/>
     </el-dialog>
   </div>
 </template>
@@ -124,8 +124,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '111111',
+        username: 'thisyang',
+        password: '123456',
         authCode: ''
       },
       loginRules: {
@@ -175,7 +175,7 @@ export default {
       if (key && key.length === 1) {
         if (
           (shiftKey && (key >= 'a' && key <= 'z')) ||
-            (!shiftKey && (key >= 'A' && key <= 'Z'))
+          (!shiftKey && (key >= 'A' && key <= 'Z'))
         ) {
           this.capsTooltip = true
         } else {
@@ -197,26 +197,38 @@ export default {
       })
     },
     handleLogin() {
-      // let params = {
-      //   name: 'thisyang',
-      //   password: '123456'
-      // }
+      let params = {
+        name: 'thisyang',
+        password: '123456'
+      }
+      console.log(this.loginForm)
+
       // testLogin(params).then((res) => {
-      //   console.log('res', res)
+      //   console.log('this.redirect', this.redirect)
+      //   this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
       // })
-      // return
+
+      this.loading = true
+      this.$store.dispatch('user/testLogin', params).then(() => {
+        this.$router.push({
+          path: this.redirect || '/',
+          query: this.otherQuery
+        })
+        this.loading = false
+      }).catch(() => {
+        this.loading = false
+      })
+      return
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$store
-            .dispatch('user/login', this.loginForm)
-            .then(() => {
-              this.$router.push({
-                path: this.redirect || '/',
-                query: this.otherQuery
-              })
-              this.loading = false
+          this.$store.dispatch('user/login', this.loginForm).then(() => {
+            this.$router.push({
+              path: this.redirect || '/',
+              query: this.otherQuery
             })
+            this.loading = false
+          })
             .catch(() => {
               this.loading = false
             })

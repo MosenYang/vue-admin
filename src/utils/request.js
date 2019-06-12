@@ -22,7 +22,7 @@ console.log('vue环境api', process.env.VUE_APP_BASE_API)
 */
 const service = axios.create({
   // 为什么没有.因为我需要切换mock和线上地址, 把地址分成两段了,完整url在代理里面拼接了,中间这段就省去
-  baseURL:process.env.VUE_APP_BASE_API,
+  baseURL:'',
   withCredentials: true, // 跨域发送请求
   timeout: 8000,
   headers: {

@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/user'
+import { login, logout, getInfo, testLogin } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 
@@ -29,6 +29,21 @@ const mutations = {
 }
 
 const actions = {
+  //suobang
+  testLogin({ commit },userInfo) {
+    const { username, password } = userInfo
+    return new Promise((resolve,reject)=>{
+      testLogin(userInfo).then((res)=>{
+        const { data } = res
+        commit('SET_TOKEN', data.token)
+        setToken(data.token)
+        console.log('data.token', res.data)
+        resolve()
+      }).catch((err)=>{
+        reject(err)
+      })
+    })
+  },
   // user login
   login({ commit }, userInfo) {
     const { username, password } = userInfo
