@@ -1,5 +1,9 @@
 // (Mosen) 添加继承样式
 // @extend %xx 语法
+
+%bgColor{
+  background: #36c6d3;
+}
 %cyan-btn { // 索邦青绿按钮
   background: #36c6d3;
   border: none;

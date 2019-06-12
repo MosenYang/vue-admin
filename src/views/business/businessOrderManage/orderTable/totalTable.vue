@@ -72,17 +72,16 @@
         </div>
       </div>
       <!--表格-->
-      <table-components
-        :table-data="list"
-        :selection="true"
-        :pagination="false"
-        :row-click="onClickHandle"
-        :page-config="pageData"
-        :column-config="columnData"
-        @filter-change="getFilter"
-        @select-change="getselect"
-        :headerCellStyle="headerCell"
-        @page-change="getpage"/>
+      <table-components :table-data="list" :selection="true"
+                        :pagination="true"
+                        :row-click="onClickHandle"
+                        :action-config="actionConfig"
+                        :page-config="pageData"
+                        :column-config="columnData"
+                        @filter-change="getFilter"
+                        @select-change="getselect"
+                        :headerCellStyle="headerCell"
+                        @page-change="getpage"/>
       <!--弹窗-->
       <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
         <el-form
@@ -142,10 +141,7 @@
           <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
         </span>
       </el-dialog>
-      <el-dialog
-        title="上传"
-        :visible.sync="dialogVisible"
-        width="40%">
+      <el-dialog title="上传" :visible.sync="dialogVisible" width="40%">
         <loadFile/>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
@@ -159,8 +155,9 @@
 import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
 import { getRoles } from '@/api/role'
 import { testLogin } from '@/api/address'
-import TableComponents from '../../components/dg-table'
-import searchText from '../../components/defFilter/searchText.vue'//传组件
+import TableComponents from '../../components/Tables/dg-table'
+import searchText from '../../components/Tables/defFilter/searchText.vue'//搜索
+import comControl from './component/control.vue'//控制器
 
 import waves from '@/directive/waves' // 指令
 import { parseTime } from '@/utils'
@@ -202,10 +199,11 @@ export default {
       list: null,// 表格数据
       columnData: [],
       actionConfig: {
-        type: 'customize', // 分单个 :button  文字 textbtn  自定义customize
-        label: '操作',
-        width: 350,
-        component: 'control',
+        type: 'customize',
+        label: '操作区',
+        width: 370,
+        fixed: true,
+        component: comControl,
         handlers: {
           firsth: (row) => { console.log('first', row) },
           second: (row) => { console.log('second', row) }
@@ -223,7 +221,7 @@ export default {
         sort: '+id'
       },
       pageData: {
-        pageNum: '',
+        pageNum: 10,
         curPage: 1
       },
       option,// 下拉
@@ -260,7 +258,7 @@ export default {
       typeValue: null
     }
   },
-  components: { Pagination, loadFile, TableComponents },
+  components: { Pagination, loadFile, TableComponents, comControl },
   directives: { waves },
   filters: {
     statusFilter(status) {
@@ -295,8 +293,7 @@ export default {
         }, 1.5 * 1000)
       })
     },
-    mapTableTh() {
-      //初始化表格表头名称数据.根据业务来的,顺序必须一致
+    mapTableTh() { //初始化表格表头名称数据.根据业务来的,顺序必须一致
       let initTHData = [
         {
           name: '作者',//表头label
@@ -385,7 +382,6 @@ export default {
         }
       ]
       Object.keys(this.list[0]).forEach((item, i) => {
-        // 栏目配置
         let defTableConfig = {
           prop: '', // 参数字段
           label: '', // 名字
@@ -653,7 +649,6 @@ export default {
 </script>
 <style lang="scss" scoped>
   @import "../../../../styles/mixin.scss";
-
   .totalTable-page {
     height: 100%;
     color: #262626;

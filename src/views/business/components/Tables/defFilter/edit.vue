@@ -57,7 +57,7 @@ export default {
 </script>
 
 <style scoped>
-@import './css/common.css';
+@import '../css/common.css';
 .filterWrap.show {
   opacity: 1;
   height: 100px;

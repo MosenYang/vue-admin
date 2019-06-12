@@ -36,11 +36,11 @@ module.exports = {
       // 详情: https://www.jianshu.com/p/a248b146c55a
       // 详情: https://github.com/chimurai/http-proxy-middleware#proxycontext-config
       [process.env.VUE_APP_BASE_API]: {
-        target: `http://127.0.0.1:${port}/mock`,//(Mosen) 修改
+        target: `http://127.0.0.1:${port}/mock`,
         changeOrigin: true,
         pathRewrite: {
           // 重写请求，比如我们源访问的是api/old-path，那么请求会被解析为/api/new-path
-          ['^' + process.env.VUE_APP_BASE_API]: ''
+          ['^' + process.env.VUE_APP_BASE_API]: ' '
         },
         router: {
           // 如果请求主机 == 'dev.localhost:3000',

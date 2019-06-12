@@ -1,197 +1,509 @@
 <template>
-  <div>
-    <!-- selection="true" 出现多选-->
-    <!-- row-click 行点击四事件-->
-    <!-- @filter-change="getFilter" 搜索事件-->
-    <!-- select-change 单/多选事件-->
-    <table-components
-      :table-data="tableData"
-      :selection="true"
-      :pagination="false"
-      :row-click="onClickHandle"
-      :page-config="pageData"
-      :action-config="actionConfig"
-      :column-config="columnData"
-      @filter-change="getFilter"
-      @select-change="getselect"
-      @page-change="getpage"/>
+  <div class="create-order-page">
+    <h2 class="page-title">创建订单</h2>
+    <div class="page-content">
+      <el-form ref="form" :model="ruleForm" label-width="100px" :label-position="left">
+        <el-row class="column">
+          <div class="column-name">订单信息</div>
+          <el-col class="column-col" :lg="6" :md="12" :sm="12">
+            <el-form-item label="订单号" prop="name">
+              <el-input v-model="ruleForm.name"/>
+            </el-form-item>
+          </el-col>
+          <el-col class="column-col" :lg="6" :md="12" :sm="12">
+            <el-form-item label="开单日期" prop="name">
+              <el-input v-model="ruleForm.name"/>
+            </el-form-item>
+          </el-col>
+          <el-col class="column-col" :lg="6" :md="12" :sm="12">
+            <el-form-item label="业务类型" prop="name">
+              <el-input v-model="ruleForm.name"/>
+            </el-form-item>
+          </el-col>
+          <el-col class="column-col" :lg="6" :md="12" :sm="12">
+            <el-form-item label="经办人" prop="name">
+              <el-input v-model="ruleForm.name"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <div class="column">
+          <el-row>
+            <el-col :lg="12" :md="12" :sm="24">
+              <div class="column-name">发货方信息</div>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="托运人" prop="name">
+                    <el-input v-model="ruleForm.name"/>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="托运人电话" prop="name">
+                    <el-input v-model="ruleForm.name"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="发站归属地" prop="name">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="value" placeholder="请选择发站归属地" style="width: 100%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                    </div>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="发站省/市" prop="name">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="value" placeholder="请选择" style="width:50%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                      <el-select v-model="value" placeholder="请选择" style="width: 50%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+
+                    </div>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="提车费" prop="name">
+                    <el-input v-model="ruleForm.name"/>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="提车司机" prop="name">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="value" placeholder="请选择" style="width:50%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                      <el-select v-model="value" placeholder="请选择" style="width: 50%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                    </div>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="24" :md="24">
+                  <el-form-item label="详细地址" prop="name">
+                    <el-input v-model="ruleForm.name" type="textarea"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="24" :md="24">
+                  <el-form-item label="提车备注" prop="name">
+                    <el-input v-model="ruleForm.name" type="textarea"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+            </el-col>
+            <el-col :lg="12" :md="12" :sm="24">
+              <div class="column-name">收货方信息</div>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="收货人" prop="name">
+                    <el-input v-model="ruleForm.name"/>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="收货人电话" prop="name">
+                    <el-input v-model="ruleForm.name"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="到站归属地" prop="name">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="value" placeholder="请选择到站归属地" style="width: 100%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                    </div>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="到站省/市" prop="name">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="value" placeholder="请选择" style="width:50%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                      <el-select v-model="value" placeholder="请选择" style="width: 50%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+
+                    </div>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="送车费" prop="name">
+                    <el-input v-model="ruleForm.name"/>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="送车司机" prop="name">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="value" placeholder="请选择" style="width:50%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                      <el-select v-model="value" placeholder="请选择" style="width: 50%">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                    </div>
+                  </el-form-item>
+
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="24" :md="24">
+                  <el-form-item label="详细地址" prop="name">
+                    <el-input v-model="ruleForm.name" type="textarea"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="24" :md="24">
+                  <el-form-item label="送车备注" prop="name">
+                    <el-input v-model="ruleForm.name" type="textarea"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="column">
+          <div class="column-name">
+            <div class="flex-between">
+              <div>货物信息</div>
+              <div class="add-Btn" @click="addDomain">添加发货信息</div>
+            </div>
+          </div>
+          <el-row class="">
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="车辆名称" prop="name">
+                <el-select v-model="ruleForm.region" placeholder="活动区域">
+                  <el-option label="区域一" value="首钢"/>
+                  <el-option label="区域二" value="北京"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="识别码" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="接车单价" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="发货方回扣" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row class="">
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="保险费" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="发票费" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="垫款" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="合计" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="column">
+          <div class="column-name">支付方式</div>
+          <el-row>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="付款方式" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="现付" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="到付" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="月结" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="合计费用" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="业务提成" prop="name">
+                <el-input v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="回单" prop="delivery">
+                <el-switch v-model="ruleForm.name"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </div>
+        <div style="width: 100%" class="btns-commit">
+          <el-row>
+            <el-col class="flex-around" :md="8" :xs="8" :sm="8">
+              <el-button type="primary" @click="submitForm('ruleForm')">临时订单</el-button>
+            </el-col>
+            <el-col :md="8" :xs="8" :sm="8" class="flex-around">
+              <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+            </el-col>
+            <el-col :md="8" :xs="8" :sm="8" class="flex-around">
+              <el-button @click="resetForm('ruleForm')">重置订单</el-button>
+            </el-col>
+          </el-row>
+        </div>
+      </el-form>
+    </div>
   </div>
 </template>
 <script>
-import TableComponents from '../../components/dg-table'
-import control from '../../components/defFilter/control.vue'// 自定义按钮组
-import searchText from '../../components/defFilter/searchText.vue'//传组件
-import { searchdata, dofilter, cities, createTableDataByRandom } from './mock.js' // 用于模拟表数据的js
+// import ChildComponents from './ChildComponents.vue'
 export default {
-  name: 'tables',
-  components: {
-    TableComponents
-  },
+  components: {},
   props: {},
   data() {
     return {
-      columnData: [],
-      tableData: [],
-      filters: 3,
-      pageData: {
-        pageNum: '',
-        curPage: 1
+      labelPosition: 'left',
+      title: '组件标题',
+      firstName: '',
+      lastName: '',
+      ruleForm: {
+        name: '隔壁老王'
       },
-      propsCom: {
-        text: searchText
+      dynamicValidateForm: {
+        domains: []
       },
-      select: true,
-      pagination: true,
-      onClickHandle(row) {
-        alert('点击行')
-      },
-      actionConfig: {
-        type: 'customize', // 分单个 :button  文字 textbtn  自定义customize
-        label: '操作',
-        width: 350,
-        component: control,
-        handlers: {
-          firsth: (row) => { console.log('first', row) },
-          second: (row) => { console.log('second', row) }
-        }
+      options: [{
+        value: 'zhinan',
+        label: '指南',
+        children: [{
+          value: 'shejiyuanze',
+          label: '设计原则',
+          children: [{
+            value: 'yizhi',
+            label: '一致'
+          }, {
+            value: 'fankui',
+            label: '反馈'
+          }, {
+            value: 'kekong',
+            label: '可控'
+          }]
+        }, {
+          value: 'daohang',
+          label: '导航'
+        }]
+      }, {
+        value: 'zujian',
+        label: '组件',
+        children: [{
+          value: 'basic',
+          label: 'Basic',
+          children: [{
+            value: 'icon',
+            label: 'Icon 图标'
+          }, {
+            value: 'button',
+            label: 'Button 按钮'
+          }]
+        }, {
+          value: 'form',
+          label: 'Form',
+          children: [{
+            value: 'radio',
+            label: 'Radio 单选框'
+          }, {
+            value: 'inputSelect.vue',
+            label: 'Select 选择器'
+          }, {
+            value: 'upload',
+            label: 'Upload 上传'
+          }]
+        }, {
+          value: 'data',
+          label: 'Data',
+          children: [{
+            value: 'table',
+            label: 'Table 表格'
+          }, {
+            value: 'pagination',
+            label: 'Pagination 分页'
+          }, {
+            value: 'badge',
+            label: 'Badge 标记'
+          }]
+        }, {
+          value: 'notice',
+          label: 'Notice',
+          children: [{
+            value: 'message-box',
+            label: 'MessageBox 弹框'
+          }, {
+            value: 'notification',
+            label: 'Notification 通知'
+          }]
+        }, {
+          value: 'others',
+          label: 'Others',
+          children: [{
+            value: 'dialog',
+            label: 'Dialog 对话框'
+          }, {
+            value: 'carousel',
+            label: 'Carousel 走马灯'
+          }]
+        }]
+      }, {
+        value: 'ziyuan',
+        label: '资源',
+        children: [{
+          value: 'axure',
+          label: 'Axure Components'
+        }, {
+          value: 'jiaohu',
+          label: '组件交互文档'
+        }]
       }
+      ]
     }
   },
-  computed: {},
+  computed: {
+    fullName() {
+      return this.firstName + this.lastName
+    }
+  },
   watch: {},
-  created() {},
+  created() {
+  },
   mounted() {
-    const res = createTableDataByRandom(587)
-    this.tableData = res.data
-    this.pagenum = res.pagenum
-    this.pageData.pageNum = res.pagenum
-    this.mapTableTh()
   },
   methods: {
-    mapTableTh() {
-      //初始化表格表头名称数据.根据业务来的,顺序必须一致
-      let initTHData = [
-        {
-          name: '编号',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'text',// 搜索类型
-          width: '100'
-        },
-        {
-          name: '年龄',
-          isNeed: true,
-          type: 'text',
-          width: '100'
-        },
-        {
-          name: '手机',
-          isNeed: true,
-          type: 'text',
-          width: '100'
-        },
-        {
-          name: '内容',
-          isNeed: false,
-          type: 'text',
-          width: '200'
-        },
-        {
-          name: '名字',
-          isNeed: true,
-          type: 'text',
-          width: '100'
-        },
-        {
-          name: '编号',
-          isNeed: true,
-          type: 'text'
-        },
-        {
-          name: '日期',
-          isNeed: true,
-          type: 'text'
-        }
-      ]
-      console.log(initTHData.length,'dd')
-      console.log(this.tableData[0],'ttt')
-      Object.keys(this.tableData[0]).forEach((item, i) => {
-        // 栏目配置
-        let defTableConfig = {
-          prop: '', // 参数字段
-          label: '', // 名字
-          type: '', // 类型当前表头交互类型
-          isNeed: true,// 是否需要搜索项
-          thIndex: null,
-          component: null,// 表格Td 内部组件可以传
-          fixed: null, // 是否固定
-          width: null, // 宽度
-          'min-width': '80', // 最小宽度
-          resizable: true, // 拖动改变列宽度(需要在 el-table 上设置 border 属性为真)
-          'show-overflow-tooltip': false, // 内容过长隐藏
-          align: 'center', // left/center/right内容对齐方式
-          'header-align': 'center', // left/center/right 头对齐方式
-          'label-class-name': '', // 当前列自定义class
-          sortable: false, // 是否排序
-          formatter: () => {}, // 排序用字段 v-bind绑定
-          filters: [], // 绑定需要条件列表 数组
-          'filter-method': () => {}, // 过滤方法 v-bind绑定
-          'render-header': () => {}, // Label区域渲染  v-bind绑定
-          filterConfig: {// 过滤组件
-            label: null,// filter 组件的table,同表头一致
-            type: null,//filter 组件的类型,同表头一致
-            component: null,// 传入的组件,
-            filterKey: 'uid',//字段对应表头字段
-            placeholder: '输入姓名',
-            comData: [],
-            comProps: '',
-            listInfo: {
-              fetchData() {},
-              callback: () => {}// 回调
-            }
-          }
-        }
-        defTableConfig.prop = item // 数据字段
-        defTableConfig.thIndex = i
-        defTableConfig.isNeed = initTHData[i].isNeed
-        defTableConfig.label = defTableConfig.filterConfig.label = initTHData[i].name
-        defTableConfig.type = defTableConfig.filterConfig.type = initTHData[i].type
-        if (defTableConfig.type === 'text') {// 自定义 可传参
-          defTableConfig.filterConfig.component = searchText
-        }
-        this.columnData.push(defTableConfig)
+    submitForm() {
+
+    },
+    addDomain() {
+      this.dynamicValidateForm.domains.push({
+        value: '',
+        key: Date.now()
       })
-      console.log(this.columnData, '表头数据')
     },
-    // 删选项事件
-    getFilter(val) {
-      // console.log(val, '筛选')
-      const allfilter = {
-        filters: val,
-        page: 1
-      }
-      this.filters = val
-      const res = dofilter(allfilter)
-      this.data = res.data
-      this.pagenum = res.pagenum
-    },
-    //
-    getselect(val) {
-      console.log(val, '单选广播事件')
-    },
-    // 分页事件
-    getpage(page) {
-      this.curpage = page
-      const allfilter = {
-        filters: this.filters,
-        page
-      }
-      const res = dofilter(allfilter)
-      this.data = res.data
+    handleChange() {
+      return new Date().toLocaleDateString()
     }
   }
 }
 </script>
 <style lang="scss" scoped>
-  /*@import "../base/reset.css";*/
+  @import "../../../../styles/mixin.scss";
+
+  .page-title {
+    font-size: j(30);
+    padding-left: j(20);
+  }
+
+  .page-content {
+    .column {
+      .column-col {
+        padding: 0 j(30) 0 0;
+      }
+    }
+
+    .column-name {
+      width: 100%;
+      background: #00EEEE;
+      color: #fff;
+      font-size: j(15);
+      padding: j(10);
+      margin-bottom: j(20);
+    }
+  }
+
+  .btns-commit {
+    padding: j(30);
+  }
 
 </style>

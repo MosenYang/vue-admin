@@ -23,8 +23,6 @@
                 @row-click="rowClick"
                 :header-cell-style="headerCellStyle"
                 @selection-change="handleSelectChange">
-        <!-- @selection-change="handleSelectChange" 单选事件-->
-        <!--  show-summary字段 是否在表尾显示合计行-->
         <el-table-column v-if="selection" type="selection" width="35"/>
         <!--循环的-->
         <template v-for="(item, index) in columnConfig">
@@ -62,27 +60,28 @@
             </template>
           </el-table-column>
           <!-- 传个文字 -->
-          <el-table-column v-if="actionConfig.type === 'textbtn'"
+          <el-table-column v-if="actionConfig.type === 'textBtn'"
                            :width="actionConfig.width"
                            label="操作">
             <template slot-scope="scope">
-              <span style="cursor:pointer;color: #ff0000;" @click.stop="actionConfig.handler(scope)">
+              <span style="cursor:pointer;" @click.stop="actionConfig.handler(scope)">
                 {{ actionConfig.label }}
               </span>
             </template>
           </el-table-column>
-          <!-- 自定义操作 传组件 type === 'customize' -->
+          <!-- 自定组件-->
           <el-table-column v-if="actionConfig.type === 'customize' && actionConfig.component"
                            :width="actionConfig.width"
-                           :label="actionConfig.label ? actionConfig.label : '操作'"
-                           fixed>
+                           :label="actionConfig.label"
+                           align="center"
+                           :fixed="actionConfig.fixed">
             <template slot-scope="scope">
               <component :is="actionConfig.component"
                          :row="scope.row"
                          :handlers="actionConfig.handlers"
                          @commonHandlerBridge="commonHandlerBridge"
                          @doactive="doactive"/>
-              <!--  row 是当前行/ handlers 是初始配置的方法传的  -->
+              <!--  row 是当前行, handlers 是初始配置的方法传的 -->
             </template>
           </el-table-column>
         </template>
@@ -117,14 +116,12 @@
     </div>
     <!--  分页器区域-->
     <div v-if="pagination" class="paginationWrap">
-      <el-pagination
-        background
-        :pager-count="7"
-        layout="prev, pager, next"
-        :page-count="pageConfig.pageNum"
-        :current-page.sync="pageConfig.curPage"
-        @current-change="clickpage"
-      />
+      <el-pagination background
+                     :pager-count="7"
+                     layout="prev, pager, next"
+                     :page-count="pageConfig.pageNum"
+                     :current-page.sync="pageConfig.curPage"
+                     @current-change="clickpage"/>
     </div>
   </div>
 </template>
@@ -134,8 +131,8 @@ import searchFilter from './defFilter/search.vue'
 import { getFilter, doDeleteFilter, initFilterData } from './index.js'
 // 默认筛选器组件
 var defComponents = {
-  // edit: editFilter, // 输入框选择器
-  // search: searchFilter // 自动搜索
+  edit: editFilter, // 输入框选择器
+  search: searchFilter // 自动搜索
 }
 // 默认筛选器字段
 const ComFilterDefConfig = {
@@ -208,15 +205,14 @@ export default {
       type: Boolean,
       default: false
     },
-    tableRowClassName:{
+    tableRowClassName: {
       type: Function,
-      default:()=>{}
+      default: () => {}
     },
-    headerCellStyle:{
+    headerCellStyle: {
       type: Function,
-      default:({row, column, rowIndex, columnIndex})=>{
+      default: ({ row, column, rowIndex, columnIndex }) => {
         return 'fontWeight:600'
-
       }
     }
   },
@@ -303,8 +299,7 @@ export default {
       let filterConfig = Object.assign(config, ComFilterDefConfig, columconfig.filterConfig)
 
       this.$set(this.regFilters, filterTag, filterConfig)
-      // console.log(this.regFilters, '所有的头包含的组件,会渲染出来')
-      this.filterAction = JSON.parse(JSON.stringify(_filterAction)) // 空对象
+      this.filterAction = JSON.parse(JSON.stringify(_filterAction))
       return filterTag
     },
     mixinFilter(ftype, config) {
@@ -327,7 +322,6 @@ export default {
       this.filterPosition(curParentElId, curElId)
       this.$set(_filterAction, curElId, !_filterAction[curElId])
       this.filterAction = _filterAction// 动作对象
-      // console.log(this.filterAction, 'filterAction动作对象')
       var type = curElId.split('_')[0]
       _curFilter = curElId
       _filterbar = curParentElId
@@ -337,13 +331,13 @@ export default {
       var offsetHeight = filterbar.offsetHeight
       if (this.regFilters[filtertag]) {
         this.$set(this.regFilters[filtertag].position, 'top', offsetHeight - 10 + 'px')
-        this.$set(this.regFilters[filtertag].position, 'left', offsetLeft - 20 + 'px')
+        this.$set(this.regFilters[filtertag].position, 'left', offsetLeft + 'px')
       }
     },
     allFilterHide(cfilter) {
       for (var k in _filterAction) {
         if (k !== cfilter) {
-          this.$set(_filterAction, k, false) // 改下箭头的状态,set方法会刷新页面
+          this.$set(_filterAction, k, false)
           if (document.querySelector(`#${k} i`)) {
             document.querySelector(`#${k} i`).setAttribute('class', 'el-icon-caret-bottom')
           }

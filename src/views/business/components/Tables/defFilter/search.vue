@@ -84,7 +84,7 @@ export default {
 </script>
 
 <style scoped>
-  @import './css/common.css';
+  @import '../css/common.css';
 
   .my-autocomplete .li {
     line-height: normal;

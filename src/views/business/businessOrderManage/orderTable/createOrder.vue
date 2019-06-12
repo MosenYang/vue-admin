@@ -1,6 +1,10 @@
 <template>
   <div class="create-order-page">
-    <h2 class="page-title">创建订单</h2>
+    <div class="flex-between page-title">
+      <div class="">创建订单</div>
+      <el-button ype="primary" @click="">返回</el-button>
+    </div>
+
     <div class="page-content">
       <el-form ref="form" :model="ruleForm" label-width="100px" :label-position="left">
         <el-row class="column">
@@ -342,6 +346,8 @@
 </template>
 <script>
 // import ChildComponents from './ChildComponents.vue'
+import { OrderMsg, order,orderIndex,getOrderInfo} from '../../../../api/businessOrder/order'
+
 export default {
   components: {},
   props: {},
@@ -462,8 +468,10 @@ export default {
   mounted() {
   },
   methods: {
+    getFormMsg(){
+      OrderMsg().then(()=>{})
+    },
     submitForm() {
-
     },
     addDomain() {
       this.dynamicValidateForm.domains.push({
@@ -477,33 +485,38 @@ export default {
   }
 }
 </script>
-<style lang="scss" scoped>
-  @import "../../../../styles/mixin.scss";
+<style scoped lang="scss">
+  @import "src/styles/mixin.scss";
 
   .page-title {
     font-size: j(30);
-    padding-left: j(20);
+    padding:j(10) j(20);
+    margin: j(5) 0;
+    /*border: 1px solid #f2f2f2;*/
+    box-shadow: 0 2px 10px #f2f2f2;
   }
-
   .page-content {
+    padding: 0 j(20);
     .column {
       .column-col {
         padding: 0 j(30) 0 0;
       }
     }
-
     .column-name {
+      @extend %bgColor;
       width: 100%;
-      background: #00EEEE;
       color: #fff;
       font-size: j(15);
-      padding: j(10);
+      height: j(35);
       margin-bottom: j(20);
+      line-height: j(35);
+      padding: 0 j(10);
+      box-shadow: 0 2px 10px #f2f2f2;
     }
   }
-
   .btns-commit {
-    padding: j(30);
+    padding: j(30) j(90);
+    /*box-shadow: 2px 2px 10px #f2f2f2;*/
   }
 
 </style>
