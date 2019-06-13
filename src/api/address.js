@@ -3,6 +3,7 @@ import request from './../utils/request'
 
 export function testLogin(data) {
   return request({
+    baseURL:'',
     url: '/api/login',
     method: 'post',
     data

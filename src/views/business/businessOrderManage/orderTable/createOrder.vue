@@ -5,7 +5,7 @@
       <el-button ype="primary" @click="">返回</el-button>
     </div>
     <div class="page-content">
-      <el-form ref="form" :model="ruleForm" :rules="rules" label-width="100px" label-position="right">
+      <el-form ref="ruleForm" :model="ruleForm" :rules="rules" label-width="100px" label-position="right">
         <el-row class="column">
           <div class="column-name">订单信息</div>
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
@@ -20,15 +20,8 @@
           </el-col>
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
             <el-form-item label="业务类型">
-              <el-select v-model="ruleForm.type_of_business" placeholder="请选择业务类型" style="width:100%">
-                <el-option v-for="(item,index) in option"
-                           :key="item.value"
-                           :label="item.label"
-                           :value="item.value"
-                />
-              </el-select>
+              <el-input v-model="t_business" disabled/>
             </el-form-item>
-
           </el-col>
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
             <el-form-item label="经办人">
@@ -39,31 +32,29 @@
         <!--        货人-->
         <div class="column">
           <el-row>
-            <!--            发货人-->
+            <!-- 发货人-->
             <el-col :lg="12" :md="12" :sm="24">
               <div class="column-name">发货方信息</div>
               <el-row>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
-                  <el-form-item label="托运人"
-                                prop="consignor_info.id"
-                                :rules="[
-                                {required: true, message: '请输入邮箱地址', trigger: 'blur'}
-                                ]"
-                  >
-                    <el-autocomplete
-                      style="width: 100%"
-                      class="inline-input"
-                      v-model="ruleForm.consignor_info.id"
-                      :fetch-suggestions="()=>{}"
-                      placeholder="请输入内容"
-                      :trigger-on-focus="false"
-                      @select="handleSelect"
-                    ></el-autocomplete>
+                  <el-form-item label="托运人" prop="consignor_info">
+                    <el-select v-model="ruleForm.consignor_info" filterable
+                               :filter-method="filterMethod"
+                               @change="changeConsignor"
+                               value-key="id"
+                               placeholder="请选择" style="width: 100%">
+                      <el-option
+                        v-for="item in consignerOption"
+                        :key="item.id"
+                        :label="item.username"
+                        :value="item">
+                      </el-option>
+                    </el-select>
                   </el-form-item>
                 </el-col>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
-                  <el-form-item label="托运人电话" prop="consignee_mobile">
-                    <el-input v-model="ruleForm.consignee_mobile"/>
+                  <el-form-item label="托运人电话" prop="consignor_mobile">
+                    <el-input v-model.number="ruleForm.consignor_mobile"/>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -71,34 +62,39 @@
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
                   <el-form-item label="发站归属地" prop="start_attribution">
                     <div style="width: 100%;display: flex">
-                      <el-select v-model="ruleForm.start_attribution" placeholder="发站归属地" style="width: 100%">
+                      <el-select v-model="ruleForm.start_attribution" value-key="id"
+                                 placeholder="发站归属地"
+                                 style="width: 100%">
                         <el-option
-                          v-for="item in option"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
+                          v-for="item in dataOption.place"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item"
                         />
                       </el-select>
                     </div>
                   </el-form-item>
                 </el-col>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
-                  <el-form-item label="发站省/市" prop="value">
+                  <el-form-item label="发站省/市" prop="start_cid_info">
                     <div style="width: 100%;display: flex">
-                      <el-select v-model="ruleForm.start_pid_info.value" placeholder="请选择" style="width:50%">
+                      <el-select v-model="ruleForm.start_pid_info"
+                                 value-key="id"
+                                 @change='changeProvince'
+                                 placeholder="请选择" style="width:50%">
                         <el-option
-                          v-for="(item,index) in option"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
+                          v-for="(item) in dataOption.province"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item"
                         />
                       </el-select>
-                      <el-select v-model="ruleForm.start_cid_info.value" placeholder="请选择" style="width: 50%">
+                      <el-select v-model="ruleForm.start_cid_info" value-key="id" placeholder="请选择" style="width: 50%">
                         <el-option
-                          v-for="item in option"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
+                          v-for="item in cityOption"
+                          :key="item.id"
+                          :label="item.area_name"
+                          :value="item"
                         />
                       </el-select>
                     </div>
@@ -112,22 +108,25 @@
                   </el-form-item>
                 </el-col>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
-                  <el-form-item label="提车司机" prop="value">
+                  <el-form-item label="提车司机">
                     <div style="width: 100%;display: flex">
-                      <el-select v-model="ruleForm.carry_car_info.value" placeholder="请选择" style="width:50%">
+                      <el-select v-model="ruleForm.carry_car_info"
+                                 @change="changeCarTeam"
+                                 placeholder="请选择"
+                                 value-key="value"
+                                 style="width:50%">
                         <el-option
-                          v-for="item in option"
+                          v-for="item in dataOption.acceptCarTeam"
                           :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
-                        />
+                          :label="item.name"
+                          :value="item"/>
                       </el-select>
-                      <el-select v-model="ruleForm.carry_car_info.name" placeholder="请选择" style="width: 50%">
+                      <el-select v-model="ruleForm.carry_car_info" value-key="id" placeholder="请选择" style="width: 50%">
                         <el-option
-                          v-for="item in option"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
+                          v-for="item in driverOption"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item"
                         />
                       </el-select>
                     </div>
@@ -160,7 +159,7 @@
                 </el-col>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
                   <el-form-item label="收货人电话" prop="consignee_mobile">
-                    <el-input v-model="ruleForm.consignee_mobile"/>
+                    <el-input v-model.number="ruleForm.consignee_mobile"/>
                   </el-form-item>
                 </el-col>
               </el-row>
@@ -170,9 +169,9 @@
                     <div style="width: 100%;display: flex">
                       <el-select v-model="ruleForm.end_attribution" placeholder="到站归属地" style="width: 100%">
                         <el-option
-                          v-for="item in option"
+                          v-for="item in dataOption.place"
                           :key="item.value"
-                          :label="item.label"
+                          :label="item.name"
                           :value="item.value"
                         />
                       </el-select>
@@ -180,22 +179,27 @@
                   </el-form-item>
                 </el-col>
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
-                  <el-form-item label="到站省/市" prop="value">
+                  <el-form-item label="到站省/市" prop="end_cid_info">
                     <div style="width: 100%;display: flex">
-                      <el-select v-model="ruleForm.end_pid_info.value" placeholder="请选择省" style="width:50%">
+                      <el-select v-model="ruleForm.end_pid_info"
+                                 value-key="id"
+                                 @change="changeEndProvince" placeholder="请选择省" style="width:50%">
                         <el-option
-                          v-for="item in option"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
+                          v-for="item in dataOption.province"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item"
                         />
                       </el-select>
-                      <el-select v-model="ruleForm.end_cid_info.value" placeholder="请选择市" style="width: 50%">
+                      <el-select v-model="ruleForm.end_cid_info"
+                                 value-key="id"
+                                 placeholder="请选择市"
+                                 style="width: 50%">
                         <el-option
-                          v-for="item in option"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
+                          v-for="item in endCityOption"
+                          :key="item.id"
+                          :label="item.area_name"
+                          :value="item"
                         />
                       </el-select>
 
@@ -212,21 +216,23 @@
                 <el-col class="column-col" :lg="12" :md="12" :sm="12">
                   <el-form-item label="送车司机">
                     <div style="width: 100%;display: flex">
-                      <el-select v-model="ruleForm.send_car_info.value" placeholder="请选择" style="width:50%" size="mini">
+                      <el-select v-model="ruleForm.send_car_info" value-key="value" @change="changeSendCarTeam"
+                                 placeholder="请选择"
+                                 style="width:50%">
                         <el-option
-                          v-for="item in option"
+                          v-for="item in dataOption.sendCarTeam"
                           :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
+                          :label="item.name"
+                          :value="item"
                         />
                       </el-select>
-                      <el-select v-model="ruleForm.send_car_info.value" placeholder="请选择" style="width: 50%"
-                                 size="mini">
+                      <el-select v-model="ruleForm.send_car_info" placeholder="请选择" value-key="value"
+                                 style="width: 50%">
                         <el-option
-                          v-for="item in option"
+                          v-for="item in sendDriverOption"
                           :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
+                          :label="item.name"
+                          :value="item"
                         />
                       </el-select>
                     </div>
@@ -265,22 +271,27 @@
             </div>
             <el-row class="">
               <el-col class="column-col" :lg="6" :md="12" :sm="12">
-                <el-form-item label="车辆名称" prop="name">
+                <el-form-item label="车辆名称" prop="car_model_name">
                   <div style="width: 100%;display: flex">
-                    <el-select v-model="listQuery.limit+'条/每页'" placeholder="10条/页" size="mini">
+                    <el-select v-model="item.car_brand_name" @change="changeCarBrand" value-key="id"
+                               filterable
+                               remote
+                               :remote-method="remoteMethod"
+                               :loading="loading"
+                               placeholder="输入车辆品牌">
                       <el-option
-                        v-for="item in option"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+                        v-for="item in carBrand"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item">
                       </el-option>
                     </el-select>
-                    <el-select v-model="listQuery.limit+'条/每页'" placeholder="10条/页" size="mini">
+                    <el-select v-model="item.car_model_name" value-key="id" placeholder="输入型号">
                       <el-option
-                        v-for="item in option"
-                        :key="item.value"
-                        :label="item.label"
-                        :value="item.value">
+                        v-for="item in carNum"
+                        :key="item.id"
+                        :label="item.system_name"
+                        :value="item">
                       </el-option>
                     </el-select>
                   </div>
@@ -305,11 +316,11 @@
             <el-row class="">
               <el-col class="column-col" :lg="6" :md="12" :sm="12">
                 <el-form-item label="系统报价">
-                  <el-input v-model="item.system_price" disabled/>
+                  <el-input v-model="system_price" disabled/>
                 </el-form-item>
               </el-col>
               <el-col class="column-col" :lg="6" :md="12" :sm="12">
-                <el-form-item label="接单单价" prop="name">
+                <el-form-item label="接单单价" prop="price">
                   <el-input v-model="item.price"/>
                 </el-form-item>
               </el-col>
@@ -342,19 +353,32 @@
               </el-col>
               <el-col class="column-col" :lg="6" :md="12" :sm="12">
                 <el-form-item label="运输方式">
-                  <el-input v-model="item.order_type"/>
+                  <el-select v-model="item.order_type" placeholder="运输方式" style="width: 100%">
+                    <el-option
+                      v-for="item in orderTypeOptions"
+                      :key="item.value"
+                      :label="item.name"
+                      :value="item.value">
+                    </el-option>
+                  </el-select>
                 </el-form-item>
               </el-col>
             </el-row>
           </div>
         </div>
-        <!--        支付-->
+        <!--支付-->
         <div class="column">
           <div class="column-name">支付方式</div>
           <el-row>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="付款方式">
-                <el-input v-model="ruleForm.payment_method"/>
+                <el-select v-model="ruleForm.payment_method" placeholder="付款方式" style="width:100%">
+                  <el-option
+                    v-for="(item,index) in payOptions"
+                    :key="item.value"
+                    :label="item.name"
+                    :value="item.value"/>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
@@ -386,13 +410,12 @@
             </el-col>
             <el-col class="column-col" :lg="6" :md="12" :sm="12">
               <el-form-item label="回单">
-                <el-select v-model="ruleForm.has_receipt.value" placeholder="请选择回单" style="width:100%">
+                <el-select v-model="ruleForm.has_receipt" value-key="value" placeholder="请选择回单" style="width:100%">
                   <el-option
-                    v-for="(item,index) in option"
+                    v-for="(item,index) in hasReceipt"
                     :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
+                    :label="item.name"
+                    :value="item"/>
                 </el-select>
               </el-form-item>
             </el-col>
@@ -423,149 +446,309 @@
 </template>
 <script>
 // import ChildComponents from './ChildComponents.vue'
-import { OrderMsg, order, orderIndex, getOrderInfo } from '../../../../api/businessOrder/order'
+import { getOrderMsg, createOrder, orderIndex, getOrderInfo } from '../../../../api/businessOrder/order'
 
-const option = [{
-  value: '10',
-  label: '10条/页'
-}, {
-  value: '20',
-  label: '30条/页'
-}, {
-  value: '50',
-  label: '50条/页'
-}, {
-  value: '100',
-  label: '100条/页'
-}]
 export default {
   data() {
+    let checkPhone = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error('手机号不能为空'))
+      } else {
+        const reg = /^1[3|4|5|7|8][0-9]\d{8}$/
+        if (reg.test(value)) {
+          callback()
+        } else {
+          return callback(new Error('请输入正确的手机号'))
+        }
+      }
+    }
     return {
       ruleForm: {},
       rules: {
-        // name: [
-        //   { required: true, message: '请输入活动名称', trigger: 'blur' },
-        //   { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
-        // ],
-        id: [
-          { type: 'date', required: true, message: '收货人', trigger: 'change' }
-        ],
-        consignee_mobile: [
-          { required: true, message: '请填入发货人电话', trigger: 'change' }
+        consignor_info: [
+          { required: true, message: '请写托运人信息', trigger: 'change' }
         ],
         start_attribution: [
-          { type: 'date', required: true, message: '发展归属地', trigger: 'change' }
-        ]
-        // type: [
-        //   { type: 'array', required: true, message: '请至少选择一个活动性质', trigger: 'change' }
-        // ],
-        // resource: [
-        //   { required: true, message: '请选择活动资源', trigger: 'change' }
-        // ],
-        // desc: [
-        //   { required: true, message: '请填写活动形式', trigger: 'blur' }
-        // ]
+          { required: true, message: '请选择发站归属地', trigger: 'blur' }
+        ],
+        start_cid_info: [
+          { required: true, message: '请选择发站地区', trigger: 'blur' }
+        ],
+        send_car_detail_address: [
+          { required: true, message: '请输入详细地址', trigger: 'blur' },
+          { min: 1, max: 30, message: '长度在 5 到 50个字符', trigger: 'blur' }
+        ],
+        consignor_mobile: [
+          { validator: checkPhone, trigger: 'blur' }
+        ],
+
+        car_model_name: [
+          { required: true, message: '请选择发车型号', trigger: 'change' }
+        ],
+        heading_code: [
+          { required: true, message: '请输入识别码信息', trigger: 'blur' },
+          { min: 1, max: 10, message: '长度在 1 到 10个字符', trigger: 'blur' }
+        ],
+        price: [
+          { required: true, message: '请输入单价', trigger: 'blur' }
+        ],
+        consignee_mobile: [
+          { validator: checkPhone, trigger: 'blur' }
+        ],
+        carry_car_detail_address: [
+          { required: true, message: '请输入详细地址', trigger: 'blur' },
+          { min: 1, max: 30, message: '长度在 5 到 50个字符', trigger: 'blur' }
+        ],
+        end_attribution: [
+          { required: true, message: '请选择发站归属地', trigger: 'blur' }
+        ],
+        end_cid_info: [
+          { required: true, message: '请选择到站地区', trigger: 'blur' }
+        ],
+        consignee:
+          [
+            { required: true, message: '请输入收货人信息', trigger: 'blur' },
+            { min: 1, max: 10, message: '长度在 1 到 10个字符', trigger: 'blur' }
+          ]
       },//规则
       totalPrice: null,//总合计
       totalIn: null,//总提成
-      dynamicValidateForm: { domains: [] },
-      listQuery: { limit: '' },
+      loading: false,
       value: '',
-      option: option
+      carNum: [],
+      carBrand: [],
+      t_business: '',
+      hasReceipt: [],
+      dataOption: {},
+      cityOption: [],
+      endCityOption: [],
+      payOptions: null,
+      orderTypeOptions: null,
+      consignerOption: null,
+      driverOption: null,
+      sendDriverOption: null
     }
   },
-  computed: {},
-  watch: {},
-  created() {
-  },
-  mounted() {
-    this.getData()
-  },
-  methods: {
-    getData() {
-      let headerParams = {
-        operator: 'thisyang', //经办人姓名
-        operator_id: 1,  //经办人ID
-        order_num: 'DH201906100042343',  //订单号
-        create_time: '2019-06-10 22:58',  //创建时间
-        pay_method: {
-          name: '月结',
-          value: '3'
-        },
-        has_receipt: {
-          name: '无回单',
-          value: '2'
+  computed: {
+    system_price() {
+      return
+      let param = {
+        type: 9,
+        start: 0,
+        end: 0
+      }
+      getOrderInfo(param).then((res) => {
+        if (res.data.hasdata === 1) {
+          // this.consignerOption = res.data.info
         }
-      }
-      let formParams = {
-        name: 'asd',
-        type_of_business: '',// 详情
-        consignor_info: { // 托运人
-          id: '',
-          name: ''
+      })
+      // this.ruleForm
+      return 4000
+    }
+  },
+  watch: {
+    'ruleForm.commission': {
+      handler: function() {
+
+      },
+      immediate: true,
+      deep: true
+    }
+  },
+  created() {
+    this.getPageData()
+  },
+  mounted() {},
+  methods: {
+    async getPageData() {
+      // 获取车牌5 //6 获取归属地 //7省级城市的信息 //8 获取提送车司机的公司
+      let params = [
+        {
+          type: 5
         },
-        consignor_mobile: '',//托运人电话,
-        start_attribution: '',//	发站归属地
-        delivery_money: '',//提车费
-        carry_car_detail_address: '',//提车详细地址
-        carry_car_info: { id: 1267, name: '', company: '' },// 提车司机
-        send_car_info: {},// 送车司机
-        send_car_detail_address: '',
-        deliver_goods_remark: '',
-        carry_car_remark: '',
-        consignee: '',//收货人
-        consignee_mobile: '',
-        end_attribution: '',// 到站归属地
-        start_pid_info: {},//发站省id
-        start_cid_info: {},//发站省id
-        end_pid_info: {},//
-        end_cid_info: {},//到站市
-        cars_info: [
-          {
-            order_type: null,// 运输类型
-            car_brand_id: null, //车辆品牌ID
-            car_brand_name: null, //车辆品牌名称
-            car_model_id: null, //车辆型号ID
-            car_model_name: null, //车辆型号名称
-            price: null, //接车单价
-            discount: null, //发货方回扣
-            premium: null, //保险费
-            invoice_charges: null,  //发票费
-            heading_code: null,  //识别码
-            tran_num: null,  //运单号
-            advance: null,  //垫款
-            total_cost: '10000元',
-            commission: '',// 提成,
-            system_price: ''//系统报价
-          }
-        ],
-        payment_method: 0,
-        has_receipt: 0,//是否回单
-        consignor_company: '',//托运人公司名称
-        is_short_order: null,//是否是临时订单
-        remark: null,//
-        send_money: null,
-        pay_cash: null,//现付
-        freight_collect: null,//到付
-        monthly_statement: '',//月结
-        ...headerParams
-      }
-      let data = Object.assign({}, headerParams, formParams)
-      this.ruleForm = data
-    },
-    loadAll() {
-      return [
-        { 'value': '三全鲜食（北新泾店）', 'address': '长宁区新渔路144号' },
-        { 'value': 'Hot honey 首尔炸鸡（仙霞路）', 'address': '上海市长宁区淞虹路661号' },
-        { 'value': '新旺角茶餐厅', 'address': '上海市普陀区真北路988号创邑金沙谷6号楼113' },
-        { 'value': '泷千家(天山西路店)', 'address': '天山西路438号' }
+        {
+          type: 6
+        },
+        {
+          type: 7
+        },
+        {
+          type: 8
+        }
       ]
+      let dataOption = {}
+      await params.forEach((item, index) => {
+        getOrderInfo(item).then((res) => {
+          if (res.code === 200) {
+            if (index === 0) {
+              dataOption.carBrand = res.data
+            }
+            if (index === 1) {
+              dataOption.place = res.data.info
+            }
+            if (index === 2) {
+              dataOption.province = res.data.info
+            }
+            if (index === 3) {
+              dataOption.sendCarTeam = res.data.info
+              dataOption.acceptCarTeam = res.data.info
+            }
+          }
+        })
+      })
+      this.dataOption = dataOption
+      await getOrderMsg().then((res) => {
+        if (res) {
+          let info = res.data.info
+          let formParams = {
+            type_of_business: '',// 详情
+            consignor_info: {},
+            consignor_mobile: '',//托运人电话,
+            start_attribution: '',//	发站归属地
+            delivery_money: '',//提车费
+            carry_car_detail_address: '',//提车详细地址
+            carry_car_info: {},// 提车司机
+            send_car_info: {},// 送车司机
+            send_car_detail_address: '',
+            deliver_goods_remark: '',
+            carry_car_remark: '',
+            consignee: '',//收货人
+            consignee_mobile: '',
+            end_attribution: '',// 到站归属地
+            start_pid_info: {},//发站省id
+            start_cid_info: {},//发站市id
+            end_pid_info: {},//
+            end_cid_info: {},//到站市
+            cars_info: [
+              {
+                order_type: null,// 运输类型
+                car_brand_id: null, //车辆品牌ID
+                car_brand_name: null, //车辆品牌名称
+                car_model_id: null, //车辆型号ID
+                car_model_name: null, //车辆型号名称
+                price: null, //接车单价
+                discount: null, //发货方回扣
+                premium: null, //保险费
+                invoice_charges: null,  //发票费
+                heading_code: null,  //识别码
+                tran_num: null,  //运单号
+                advance: null,  //垫款
+                total_cost: '10000元',
+                commission: '',// 提成,
+                system_price: ''//系统报价
+              }
+            ],
+            payment_method: null,
+            has_receipt: 0,//是否回单
+            consignor_company: '',//托运人公司名称
+            is_short_order: null,//是否是临时订单
+            remark: null,//
+            send_money: null,
+            pay_cash: null,//现付
+            freight_collect: null,//到付
+            monthly_statement: '',//月结
+            carry_car_company: {},
+            send_car_company: {}
+          }
+          this.ruleForm = { ...info, ...formParams }
+          this.hasReceipt = info.has_receipt
+          this.payOptions = info.pay_method
+          this.orderTypeOptions = info.order_type
+        }
+      })
     },
-    getFormMsg() {
-      OrderMsg().then(() => {})
+    filterMethod(val) {
+      this.consignerOption = []
+      if (val) {
+        let param = {
+          type: 1, usrename: val
+        }
+        getOrderInfo(param).then((res) => {
+          if (res.data.hasdata === 1) {
+            this.consignerOption = res.data.info
+          }
+        })
+      }
     },
-    handleSelect() {},
-    submitForm() {
+    changeConsignor(val) {
+      //货运人修改业务类型
+      this.t_business = val.t_business
+      this.ruleForm.type_of_business = val.t_of_business_id
+    },
+    changeProvince(val) {
+      this.cityOption = []
+      this.ruleForm.start_cid_info = null
+      let param = {
+        id: val.id,
+        type: 4
+      }
+      getOrderInfo(param).then((res) => {
+        if (res.data.hasdata === 1) {
+          this.cityOption = res.data.info
+        }
+      })
+    },
+    changeEndProvince(val) {
+      this.endCityOption = []
+      this.ruleForm.end_cid_info = null
+      let param = {
+        id: val.id,
+        type: 4
+      }
+      getOrderInfo(param).then((res) => {
+        if (res.data.hasdata === 1) {
+          this.endCityOption = res.data.info
+        }
+      })
+    },
+    changeCarTeam(val) {
+      this.driverOption = []
+      this.ruleForm.carry_car_info = null
+      let param = {
+        vehicle_type: val.name,
+        type: 2
+      }
+      getOrderInfo(param).then((res) => {
+        if (res.data.hasdata === 1) {
+          this.driverOption = res.data.info
+        }
+      })
+    },
+    changeSendCarTeam(val) {
+      this.sendDriverOption = []
+      let param = {
+        vehicle_type: val.name,
+        type: 2
+      }
+      getOrderInfo(param).then((res) => {
+        if (res.data.hasdata === 1) {
+          this.sendDriverOption = res.data.info
+        }
+      })
+    },
+    changeCarBrand(val) {
+      let param = {
+        car_pid: val.id,
+        type: 3
+      }
+      getOrderInfo(param).then((res) => {
+        if (res) {
+          this.carNum = res.data.info
+        }
+      })
+    },
+    remoteMethod(query) {
+      if (query !== '') {
+        this.loading = true
+        setTimeout(() => {
+          this.loading = false
+          this.carBrand = this.dataOption.carBrand.filter(item => {
+            return item.name.toLowerCase().indexOf(query.toLowerCase()) > -1
+          })
+        }, 200)
+      } else {
+        this.carBrand = []
+      }
     },
     addDomain() {
       let newDomain = {
@@ -587,13 +770,32 @@ export default {
       }
       this.ruleForm.cars_info.push(newDomain)
     },
+
+    submitForm(el) {
+      let params = this.ruleForm
+      this.$refs[el].validate((valid) => {
+        if (valid) {
+          alert('提交')
+          createOrder().then((res) => {
+
+          })
+        } else {
+          console.log('错误提交!!')
+          return false
+        }
+      })
+
+      console.log(params, 'params')
+    },
     resetForm() {},
     handleChange() {
       return new Date().toLocaleDateString()
     }
   },
   components: {},
-  props: {}
+  props: {},
+  destroyed() {
+  }
 }
 </script>
 <style scoped lang="scss">

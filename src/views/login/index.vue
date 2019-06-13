@@ -124,8 +124,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'thisyang',
-        password: '123456',
+        username: 'admin',
+        password: '111111',
         authCode: ''
       },
       loginRules: {
@@ -197,28 +197,17 @@ export default {
       })
     },
     handleLogin() {
-      let params = {
-        name: 'thisyang',
-        password: '123456'
-      }
-      console.log(this.loginForm)
-
-      // testLogin(params).then((res) => {
-      //   console.log('this.redirect', this.redirect)
-      //   this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
+      // console.log(this.loginForm)
+      // this.$store.dispatch('user/testLogin', this.loginForm).then(() => {
+      //   this.$router.push({
+      //     path: this.redirect || '/',
+      //     query: this.otherQuery
+      //   })
+      //   this.loading = false
+      // }).catch(() => {
+      //   this.loading = false
       // })
-
-      this.loading = true
-      this.$store.dispatch('user/testLogin', params).then(() => {
-        this.$router.push({
-          path: this.redirect || '/',
-          query: this.otherQuery
-        })
-        this.loading = false
-      }).catch(() => {
-        this.loading = false
-      })
-      return
+      // return
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true

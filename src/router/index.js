@@ -66,7 +66,7 @@ export const constantRoutes = [
   {
     path: '/home',
     component: Layout,
-    redirect: '/home',
+    redirect: '/home',// 可以不用
     children: [
       {
         path: 'home',
@@ -77,7 +77,7 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/system',
+    path: '/',
     component: Layout,
     redirect: '/system',
     children: [
@@ -90,7 +90,7 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/',
+    path: '/dashboard',
     component: Layout,
     redirect: '/dashboard',
     children: [
