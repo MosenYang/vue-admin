@@ -3,9 +3,10 @@ import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
-console.log('vue环境api', process.env.VUE_APP_BASE_API)
+// console.log('vue环境api', process.env.VUE_APP_BASE_API)
 // console.log('索邦环境api', process.env.SUO_BANG_BASE_API)
 // console.log('索邦环境url', process.env.SUO_BANG_BASE_URL)
+
 /*
 *请求线上地址 还需要两步骤 //process.env.VUE_APP_BASE_API
 * 1.去掉baseUrl, 2.去掉mock文件夹的相关路由
