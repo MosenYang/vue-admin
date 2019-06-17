@@ -19,7 +19,7 @@ export function createOrder(data) {
     data
   })
 }
-// 订单列表
+// 订单总列表
 export function orderIndex(data) {
   return request({
     baseURL:'',
@@ -33,6 +33,27 @@ export function getOrderInfo(data) {
   return request({
     baseURL:'',
     url: '/api/order/getOrderInfo',
+    method: 'post',
+    data
+  })
+}
+
+
+// 编辑订单 api/orders/7/edit
+export function editOrder(data) {
+  return request({
+    baseURL:'',
+    url: 'api/orders/7/edit',
+    method: 'get',
+    data
+  })
+}
+
+// 修改订单
+export function alterOrder(data) {
+  return request({
+    baseURL:'',
+    url: '/api/order/update',
     method: 'post',
     data
   })
