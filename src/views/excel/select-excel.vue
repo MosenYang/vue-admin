@@ -1,11 +1,13 @@
 <template>
   <div class="app-container">
-    <el-input v-model="filename" placeholder="Please enter the file name (default excel-list)" style="width:350px;" prefix-icon="el-icon-document" />
-    <el-button :loading="downloadLoading" style="margin-bottom:20px" type="primary" icon="document" @click="handleDownload">
-      Export Selected Items
+    <el-input v-model="filename" placeholder="请输入文件名(默认...)"
+              style="width:350px;" prefix-icon="el-icon-document" />
+    <el-button :loading="downloadLoading" style="margin-bottom:20px" type="primary" icon="document"
+               @click="handleDownload">
+      导出选择项目
     </el-button>
     <a href="https://panjiachen.github.io/vue-element-admin-site/feature/component/excel.html" target="_blank" style="margin-left:15px;">
-      <el-tag type="info">Documentation</el-tag>
+      <el-tag type="info">文件说明</el-tag>
     </a>
     <el-table
       ref="multipleTable"

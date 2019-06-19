@@ -488,7 +488,7 @@
   </div>
 </template>
 <script>
-import { getOrderMsg, createOrder, orderIndex, getOrderInfo } from '../../../../api/businessOrder/order'
+import { getOrderMsg, createOrder, getOrderInfo } from '../../../../api/businessOrder/order'
 
 let carInfo = {
   car: {},
@@ -738,14 +738,6 @@ export default {
   },
   methods: {
     async getPageData() {
-      // consignor_company: ""
-
-      // has_receipt: null
-      // is_short_order: null
-      // remark: null
-
-      // send_car_info: null
-
       // 获取车牌5 //6 获取归属地 //7省级城市的信息 //8 获取提送车司机的公司
       let params = [
         {

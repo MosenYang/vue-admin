@@ -1,61 +1,111 @@
 <template>
-  <div style="padding: 10px">
-    <el-input :ref="refName"
-              v-model="inputValue"
-              :placeholder='placeholder'
-              maxlength="20"
-              show-word-limit
-              @blur="handleBlur"
-              @keyup.enter.native="$event.target.blur">
-      <i slot="prefix" class="el-input__icon el-icon-search"></i>
-    </el-input>
+  <!--  输入框匹配下拉-->
+  <div style="padding:10px">
+    <el-autocomplete v-model="chooseData"
+                     popper-class="my-autocomplete"
+                     :fetch-suggestions="querySearchAsync"
+                     :placeholder="placeholder"
+                     clearable="true"
+                     @select="handleSelect">
+      <template slot-scope="{ item }">
+        <div class="name">{{ item[showkey] }}</div>
+      </template>
+    </el-autocomplete>
   </div>
 </template>
+<!--暂时不改,根据业务-->
 <script>
 export default {
-  name: 'searchText',
+  name: 'search',
   props: {
-    placeholder: {
-      type: String,
-      default: '未定义'
-    },
     filterKey: {
       type: String,
       default: ''
     },
-    refName: {
-      type: String,
-      default: ''
+    listInfo: {
+      type: Object,
+      default: function() {
+        return {
+          handler: null,
+          showkey: '',
+          searchkey: ''
+        }
+      }
     },
-    label: {
+    placeholder: {
+      type: String,
+      default: '请选择内容'
+    },
+    ftn: {
       type: String,
       default: ''
     }
   },
   data() {
     return {
-      inputValue: ''
+      chooseData: '',
+      showkey: 'name'
     }
   },
-  computed: {},
-  watch: {},
-  created() {},
-  mounted() {},
+  mounted() {
+    this.showkey = this.listInfo.showkey ? this.listInfo.showkey : 'name'
+  },
   methods: {
-    handleBlur() {
-      if (!this.inputValue) return
+    querySearchAsync(queryString, cb) {
+      if (queryString) {
+        if (typeof this.listInfo.handler === 'function') {
+          var _searchkey = {}
+          if (!this.listInfo.searchkey) return
+          _searchkey[this.listInfo.searchkey] = queryString
+          this.listInfo.handler(_searchkey).then(res => {
+            var showlist = res
+            if (Array.isArray(showlist)) {
+              if (showlist.length === 0) showlist = [{ [this.showkey]: '暂无数据' }]
+              cb(showlist)
+            }
+          })
+        }
+      } else {
+        var t = []
+        cb(t)
+      }
+    },
+    handleSelect(item) {
       this.$emit('getFilterBridge', {
-        type: 'text',
         key: this.filterkey,
-        label: this.label,
-        value: this.inputValue
+        label: item[this.showkey],
+        value: item[this.filterkey],
+        ftn: this.ftn
       })
-      this.inputValue = null
     }
   }
 }
 </script>
-<style scoped>
-  /*@import "../base/reset.css";*/
 
+<style scoped>
+  @import '../css/common.css';
+
+  .my-autocomplete .li {
+    line-height: normal;
+    padding: 7px;
+  }
+
+  .editFilter {
+    position: absolute;
+    width: 300px;
+  }
+
+  .my-autocomplete .li .name {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .my-autocomplete .li .addr {
+    font-size: 12px;
+    color: #b4b4b4;
+  }
+
+  .my-autocomplete .li .highlighted .addr {
+    color: #ddd;
+  }
 </style>

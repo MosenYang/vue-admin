@@ -1,12 +1,10 @@
 <template>
   <div :ref="refName" class="radioWrap">
-    <div
-      v-for="(item, key, index) in data"
-      v-show="innerdata.length === 0"
-      :key="index"
-      class="radioitems"
-      @click="checkchange(item)"
-    >
+    <div v-for="(item, key, index) in data"
+         v-show="innerdata.length === 0"
+         :key="index"
+         class="radioitems"
+         @click="checkchange(item)">
       {{ item.label }}
     </div>
     <div

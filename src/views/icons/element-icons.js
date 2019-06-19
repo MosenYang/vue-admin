@@ -58,7 +58,7 @@ const elementIcons = [
   'picture',
   'picture-outline',
   'delete',
-  'search',
+  'searchSelect.vue',
   'edit',
   'edit-outline',
   'rank',

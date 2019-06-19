@@ -1,554 +1,1013 @@
 <template>
-  <div class="totalTable-page">
-    <div class="totalTable-header flex-row">
-      <div>订单总表</div>
-      <el-button
-        class="filter-item"
-        style="margin-left: 10px;"
-        type="primary"
-        icon="el-icon-document"
-        @click="handleCreate"
-      >
-        创建订单
-      </el-button>
+  <div class="create-order-page">
+    <div class="flex-between page-title">
+      <div class="">修改订单</div>
+      <el-button ype="primary" @click="">返回</el-button>
     </div>
-    <div class="totalTable-container">
-      <!--查询项-->
-      <div class="filter-container">
-        <el-input
-          v-model="listQuery.title"
-          placeholder="请写查询条件"
-          style="width: 200px;"
-          class="filter-item"
-          @keyup.enter.native="handleFilter"
-        />
-        <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-          查询
-        </el-button>
-        <el-button
-          v-waves
-          :loading="downloadLoading"
-          class="filter-item"
-          type="primary"
-          icon="el-icon-download"
-          @click="handleDownload"
-        >
-          导出
-        </el-button>
-        <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleReset">
-          更新数据
-        </el-button>
-        <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="clearFilter">
-          重置筛选
-        </el-button>
-      </div>
-      <!--表格-->
-      <el-table
-        :key="tableKey"
-        ref="filterTable"
-        v-loading="listLoading"
-        :data="list"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%;"
-        :row-class-name="tableRowClassName"
-        :header-cell-style="{background:'rgba(197,201,197,0.01)'}"
-        @sort-change="sortChange"
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column fixed label="操作" align="center" width="410" class-name="small-padding fixed-width">
-          <template slot-scope="{row}">
-            <el-button type="primary" size="mini" @click="handleUpdate(row)">
-              验车
-            </el-button>
-            <el-button type="primary" size="mini" @click="handleUpdate(row)">
-              编辑
-            </el-button>
-            <el-button
-              v-if="row.status!='deleted'"
-              size="mini"
-              type="danger"
-              @click="handleModifyStatus(row,'deleted')"
-            >
-              删除
-            </el-button>
-            <el-button
-              v-if="row.status!='published'"
-              size="mini"
-              type="success"
-              @click="handleModifyStatus(row,'published')"
-            >发行
-            </el-button>
-            <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
-              打样
-            </el-button>
-            <!--            <el-button size="small" type="success" @click="beginUnloadHandle">-->
-            <!--              上传凭证 <i class="el-icon-upload el-icon&#45;&#45;right" />-->
-            <!--            </el-button>-->
-          </template>
-        </el-table-column>
-        <el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
-          <template slot-scope="scope">
-            <span>{{ scope.row.id }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="订单号" prop="id" sortable="custom" align="center" width="120">
-          <template slot-scope="scope">
-            <span>{{ scope.row.id }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column type="selection" width="55" />
-        <el-table-column label="日期" width="150px" align="center">
-          <template slot-scope="scope">
-            <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="标题" min-width="150px" align="center">
-          <template slot-scope="{row}">
-            <span class="link-type" @click="handleUpdate(row)">{{ row.title }}</span>
-            <el-tag>{{ row.type | typeFilter }}</el-tag>
-          </template>
-          <!--//:render-header="customFieldColumn"-->
-          <!--          <el-table-column >-->
-          <!--            <template label="省份" slot="header" slot-scope="scope">-->
-          <!--            </template>-->
-          <!--          </el-table-column>-->
-        </el-table-column>
-        <el-table-column label="作者" width="110px" align="center">
-          <template slot-scope="scope">
-            <span>{{ scope.row.author }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column v-if="showReviewer" label="评审人" width="110px" align="center">
-          <template slot-scope="scope">
-            <span style="color:red;">{{ scope.row.reviewer }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="星级" width="80px">
-          <template slot-scope="scope">
-            <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon" />
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="点击率"
-          align="center"
-          width="95"
-          :filters="[{ text: '家', value: '895' }, { text: '公司', value: '4894' }]"
-          :filter-method="filterTag"
-          filter-placement="bottom-end"
-        >
-          <template slot-scope="{row}">
-            <span
-              v-if="row.pageviews"
-              class="link-type"
-              @click="handleFetchPv(row.pageviews)"
-            >{{ row.pageviews }}</span>
-            <span v-else>0</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="状态" class-name="status-col" width="100">
-          <template slot-scope="{row}">
-            <el-tag :type="row.status | statusFilter">
-              {{ row.status }}
-            </el-tag>
-          </template>
-        </el-table-column>
-      </el-table>
-      <!-- 分页器 -->
-      <pagination
-        v-show="total>0"
-        :total="total"
-        :page.sync="listQuery.page"
-        :limit.sync="listQuery.limit"
-        @pagination="getList"
-      />
-      <!--弹窗-->
-      <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-        <el-form
-          ref="dataForm"
-          :rules="rules"
-          :model="temp"
-          label-position="left"
-          label-width="70px"
-          style="width: 400px; margin-left:50px;"
-        >
-          <el-form-item label="Type" prop="type">
-            <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-              <el-option
-                v-for="item in calendarTypeOptions"
-                :key="item.key"
-                :label="item.display_name"
-                :value="item.key"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Date" prop="timestamp">
-            <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
-          </el-form-item>
-          <el-form-item label="Title" prop="title">
-            <el-input v-model="temp.title" />
-          </el-form-item>
-          <el-form-item label="Status">
-            <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-              <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="Imp">
-            <el-rate
-              v-model="temp.importance"
-              :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-              :max="3"
-              style="margin-top:8px;"
-            />
-          </el-form-item>
-          <el-form-item label="Remark">
-            <el-input
-              v-model="temp.remark"
-              :autosize="{ minRows: 2, maxRows: 4}"
-              type="textarea"
-              placeholder="Please input"
-            />
-          </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取消</el-button>
-          <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">确定</el-button>
+    <div class="page-content">
+      <el-form ref="ruleForm"
+               :model="ruleForm"
+               :rules="rules" label-width="100px"
+               label-position="right">
+        <el-row class="column">
+          <div class="column-name">订单信息</div>
+          <el-col class="column-col" :lg="6" :md="12" :sm="12">
+            <el-form-item label="订单号">
+              <el-input v-model="ruleForm.order_num" disabled/>
+            </el-form-item>
+          </el-col>
+          <el-col class="column-col" :lg="6" :md="12" :sm="12">
+            <el-form-item label="开单日期">
+              <el-input v-model="ruleForm.create_time" disabled/>
+            </el-form-item>
+          </el-col>
+          <el-col class="column-col" :lg="6" :md="12" :sm="12">
+            <el-form-item label="业务类型">
+              <el-input v-model="ruleForm.t_business" disabled/>
+            </el-form-item>
+          </el-col>
+          <el-col class="column-col" :lg="6" :md="12" :sm="12">
+            <el-form-item label="经办人">
+              <el-input v-model="ruleForm.operator" disabled/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <!--货人-->
+        <div class="column">
+          <el-row>
+            <!-- 发货人-->
+            <el-col :lg="12" :md="12" :sm="24">
+              <div class="column-name">发货方信息</div>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="托运人" prop="consignor_info">
+                    <!--                    consignor_company-->
+                    <el-select v-model="ruleForm.consignor_info"
+                               value-key="id"
+                               filterable
+                               remote
+                               clearable
+                               @change="changeConsignor"
+                               :remote-method="filterMethod"
+                               :loading="loading"
+                               style="width: 100%"
+                               placeholder="输入名字">
+                      <el-option
+                        v-for="item in consignerOption"
+                        :key="item.id"
+                        :label="item.username"
+                        :value="item">
+                        <span style="float: left; color: #8492a6;">{{item.username}}</span>
+                        <span style="float: right; color: #8492a6">{{item.company}}</span>
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="托运人电话" prop="consignor_mobile">
+                    <el-input v-model="ruleForm.consignor_mobile"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="发站归属地" prop="start_attribution">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="ruleForm.start_attribution"
+                                 placeholder="发站归属地"
+                                 style="width: 100%">
+                        <el-option
+                          v-for="item in dataOption.place"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.name"/>
+                      </el-select>
+                    </div>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="发站省/市">
+                    <div style="width: 100%;display: flex">
+                      <el-form-item prop="start_pid_info">
+                        <el-select v-model="ruleForm.start_pid_info"
+                                   value-key="id"
+                                   @change='changeProvince'
+                                   placeholder="请选择省">
+                          <el-option
+                            v-for="(item) in dataOption.province"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item"
+                          />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item prop="start_cid_info">
+                        <el-select v-model="ruleForm.start_cid_info"
+                                   value-key="id" placeholder="请选择市"
+                                   @change="computeQuote">
+                          <el-option
+                            v-for="item in cityOption"
+                            :key="item.id"
+                            :label="item.area_name"
+                            :value="item"
+                          />
+                        </el-select>
+                      </el-form-item>
+                    </div>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="提车费">
+                    <el-input v-model="ruleForm.delivery_money"/>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="提车司机">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="ruleForm.carry_car_company"
+                                 @change="changeCarTeam"
+                                 placeholder="请选择"
+                                 value-key="value"
+                                 style="width:50%">
+                        <el-option
+                          v-for="item in dataOption.acceptCarTeam"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item"/>
+                      </el-select>
+                      <el-select v-model="ruleForm.carry_car_info" value-key="id" placeholder="请选择" style="width: 50%">
+                        <el-option
+                          v-for="item in driverOption"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item"
+                        />
+                      </el-select>
+                    </div>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="24" :md="24">
+                  <el-form-item label="详细地址" prop="carry_car_detail_address">
+                    <el-input v-model="ruleForm.carry_car_detail_address" type="textarea"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="24" :md="24">
+                  <el-form-item label="提车备注">
+                    <el-input v-model="ruleForm.carry_car_remark" type="textarea"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-col>
+            <!--            收货人-->
+            <el-col :lg="12" :md="12" :sm="24">
+              <div class="column-name">收货方信息</div>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="收货人" prop="consignee">
+                    <el-input v-model="ruleForm.consignee"/>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="收货人电话" prop="consignee_mobile">
+                    <el-input v-model="ruleForm.consignee_mobile"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="到站归属地" prop="end_attribution">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="ruleForm.end_attribution" placeholder="到站归属地"
+                                 style="width: 100%">
+                        <el-option
+                          v-for="item in dataOption.endPlace"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item.name"
+                        />
+                      </el-select>
+                    </div>
+                  </el-form-item>
+                </el-col>
+
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="到站省/市">
+                    <div style="width: 100%;display: flex">
+                      <el-form-item prop="end_pid_info">
+                        <el-select v-model="ruleForm.end_pid_info"
+                                   value-key="id"
+                                   @change="changeEndProvince"
+                                   placeholder="请选择省">
+                          <el-option
+                            v-for="item in dataOption.endProvince"
+                            :key="item.id"
+                            :label="item.name"
+                            :value="item"
+                          />
+                        </el-select>
+                      </el-form-item>
+                      <el-form-item prop="end_cid_info">
+                        <el-select v-model="ruleForm.end_cid_info"
+                                   value-key="id"
+                                   placeholder="请选择市"
+                                   @change="computeQuote"
+                        >
+                          <el-option
+                            v-for="item in endCityOption"
+                            :key="item.id"
+                            :label="item.area_name"
+                            :value="item"
+                          />
+                        </el-select>
+                      </el-form-item>
+                    </div>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="送车费">
+                    <el-input v-model="ruleForm.send_money"/>
+                  </el-form-item>
+                </el-col>
+                <el-col class="column-col" :lg="12" :md="12" :sm="12">
+                  <el-form-item label="送车司机">
+                    <div style="width: 100%;display: flex">
+                      <el-select v-model="ruleForm.send_car_company" value-key="value"
+                                 @change="changeSendCarTeam"
+                                 placeholder="请选择"
+                                 style="width:50%">
+                        <el-option
+                          v-for="item in dataOption.sendCarTeam"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item"
+                        />
+                      </el-select>
+                      <el-select v-model="ruleForm.send_car_info" placeholder="请选择" value-key="value"
+                                 style="width: 50%">
+                        <el-option
+                          v-for="item in sendDriverOption"
+                          :key="item.value"
+                          :label="item.name"
+                          :value="item"
+                        />
+                      </el-select>
+                    </div>
+                  </el-form-item>
+
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="24" :md="24">
+                  <!--  send_car_detail_address  -->
+                  <el-form-item label="详细地址" prop="send_car_detail_address">
+                    <el-input v-model="ruleForm.send_car_detail_address" type="textarea"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-col class="column-col" :lg="24" :md="24">
+                  <el-form-item label="送车备注">
+                    <el-input v-model="ruleForm.deliver_goods_remark" type="textarea"/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </el-col>
+          </el-row>
         </div>
-      </el-dialog>
-      <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-        <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-          <el-table-column prop="key" label="Channel" />
-          <el-table-column prop="pv" label="Pv" />
-        </el-table>
-        <span slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
-        </span>
-      </el-dialog>
-      <el-dialog
-        title="上传"
-        :visible.sync="dialogVisible"
-        width="40%"
-      >
-        <loadFile />
-        <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-        </span>
-      </el-dialog>
+        <!--货物-->
+        <div class="column">
+          <!-- 单个货物-->
+          <div v-for="(item,index) in ruleForm.cars_info" :key='index'>
+            <div class="column-name">
+              <div class="flex-between">
+                <div>货物信息</div>
+                <div class="add-Btn" @click.stop="addDomain" v-if="index===0">
+                  <i class="el-icon-plus"></i>添加发货信息
+                </div>
+                <div class="add-Btn" @click.stop="deleteDomain" v-else>
+                  <i class="el-icon-plus"></i>删除发货信息
+                </div>
+              </div>
+            </div>
+            <el-row class="">
+              <!--     -->
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="车辆名称">
+                  <div style="width: 100%;display: flex">
+                    <el-form-item :prop="'cars_info.'+ index +'.car'"
+                                  :rules="rulesCar">
+                      <el-select v-model="item.car" @change="changeCarBrand" value-key="id"
+                                 filterable
+                                 remote
+                                 :remote-method="remoteMethod"
+                                 :loading="loading"
+                                 placeholder="搜车辆品牌">
+                        <el-option
+                          v-for="item in carBrand"
+                          :key="item.id"
+                          :label="item.name"
+                          :value="item">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                    <!-- car_model_name-->
+                    <el-form-item :prop="'cars_info.'+ index +'.car_model'" :rules="rulesCarModel">
+                      <el-select v-model="item.car_model" value-key="id" placeholder="选车型">
+                        <el-option
+                          v-for="item in carNum"
+                          :key="item.id"
+                          :label="item.system_name"
+                          :value="item">
+                        </el-option>
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                </el-form-item>
+              </el-col>
+              <!-- prop="heading_code"-->
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="识别码"
+                              :rules="[
+                              {required: true, message: '识别码不能为空', trigger: 'blur'},
+                              { min: 4, max: 20, message: '长度在 4 到 20个字符', trigger: 'blur' }
+                              ]"
+                              :prop="'cars_info.'+ index +'.heading_code'"
+                >
+                  <el-input v-model="item.heading_code"/>
+                </el-form-item>
+              </el-col>
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="运单号">
+                  <el-input v-model="item.tran_num"/>
+                </el-form-item>
+              </el-col>
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="发货方回扣">
+                  <el-input v-model="item.discount"/>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row class="">
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="系统报价">
+                  <el-input v-model="ruleForm.system_price" disabled/>
+                </el-form-item>
+              </el-col>
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="接单单价"
+                              :rules="{required: true, message: '接单单价不能为空', trigger: 'blur'}"
+                              :prop="'cars_info.'+ index +'.price'"
+                >
+                  <el-input v-model.number="item.price"/>
+                </el-form-item>
+              </el-col>
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="保险费">
+                  <el-input v-model="item.premium"/>
+                </el-form-item>
+              </el-col>
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="发票费">
+                  <el-input v-model="item.invoice_charges"/>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row class="">
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="业务提成">
+                  <el-input v-model="item.commission" disabled value="1000"/>
+                </el-form-item>
+              </el-col>
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="垫款">
+                  <el-input v-model="item.advance"/>
+                </el-form-item>
+              </el-col>
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="合计">
+                  <el-input v-model="item.total_cost" disabled/>
+                </el-form-item>
+              </el-col>
+              <el-col class="column-col" :lg="6" :md="12" :sm="12">
+                <el-form-item label="运输方式">
+                  <el-select v-model="item.order_type" placeholder="运输方式" style="width: 100%">
+                    <el-option
+                      v-for="item in orderTypeOptions"
+                      :key="item.value"
+                      :label="item.name"
+                      :value="item.value">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+        </div>
+        <!--支付-->
+        <div class="column">
+          <div class="column-name">支付方式</div>
+          <el-row>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="付款方式">
+                <el-select v-model="ruleForm.payment_method" placeholder="付款方式" style="width:100%">
+                  <el-option
+                    v-for="(item,index) in payOptions"
+                    :key="item.value"
+                    :disabled="item.disabled"
+                    :label="item.name"
+                    :value="item.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="现付" prop="pay_cash">
+                <el-input v-model.number="ruleForm.pay_cash"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="到付" prop="freight_collect">
+                <el-input v-model.number="ruleForm.freight_collect"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="月结" prop="monthly_statement">
+                <el-input v-model.number="ruleForm.monthly_statement"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="合计费用">
+                <el-input v-model="totalPrice" disabled/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="总提成">
+                <el-input v-model="totalIn" disabled/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="回单">
+                <el-select v-model="ruleForm.has_receipt" value-key="value" placeholder="请选择回单" style="width:100%">
+                  <el-option
+                    v-for="(item,index) in hasReceipt"
+                    :key="item.value"
+                    :label="item.name"
+                    :value="item"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-form-item label="备注">
+              <el-input v-model="ruleForm.remark" type="textarea"/>
+            </el-form-item>
+          </el-row>
+        </div>
+        <!--一次运输-->
+        <div class="column">
+          <div class="column-name">一次运输</div>
+          <el-row>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="运输批次">
+                <el-select v-model="ruleForm.payment_method" placeholder="运输批次"
+                           style="width:100%">
+                  <el-option
+                    v-for="(item,index) in payOptions"
+                    :key="item.value"
+                    :disabled="item.disabled"
+                    :label="item.name"
+                    :value="item.value"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="运输司机" prop="pay_cash">
+                <el-input v-model.number="ruleForm.pay_cash"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="司机电话" prop="freight_collect">
+                <el-input v-model.number="ruleForm.freight_collect"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="运输费用" prop="monthly_statement">
+                <el-input v-model.number="ruleForm.monthly_statement"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="发车地">
+                <el-input v-model="totalPrice" disabled/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="途径地" prop="pay_cash">
+                <el-input v-model.number="ruleForm.pay_cash"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="发车地" prop="freight_collect">
+                <el-input v-model.number="ruleForm.freight_collect"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="发车人" prop="monthly_statement">
+                <el-input v-model.number="ruleForm.monthly_statement"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="应收质损">
+                <el-input v-model="totalPrice" disabled/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="应收质损人" prop="pay_cash">
+                <el-input v-model.number="ruleForm.pay_cash"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="应付质损" prop="freight_collect">
+                <el-input v-model.number="ruleForm.freight_collect"/>
+              </el-form-item>
+            </el-col>
+            <el-col class="column-col" :lg="6" :md="12" :sm="12">
+              <el-form-item label="应付质损人" prop="monthly_statement">
+                <el-input v-model.number="ruleForm.monthly_statement"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+        </div>
+
+        <!--提交-->
+        <div style="width: 100%" class="btns-commit">
+          <el-row class="flex-center">
+            <el-col :md="8" :xs="8" :sm="8" class="flex-around">
+              <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+            </el-col>
+          </el-row>
+        </div>
+      </el-form>
     </div>
   </div>
 </template>
 <script>
-import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
-import { getRoles } from '@/api/role'
-import { testLogin } from '@/api/address'
-import waves from '@/directive/waves' // 指令
-import { parseTime } from '@/utils'
-import Pagination from '@/components/Pagination'
-import loadFile from '@/components/Upload/SingleImage'
+import { editOrder, alterOrder, getOrderInfo } from '../../../../api/businessOrder/order'
 
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
-
-// arr to obj, such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
-
+let carInfo = {
+  car: {},
+  car_model: {},
+  order_type: '',// 运输类型
+  car_brand_id: '', //车辆品牌ID
+  car_brand_name: '', //车辆品牌名称
+  car_model_id: '', //车辆型号ID
+  car_model_name: '', //车辆型号名称
+  price: '', //接车单价
+  discount: '', //发货方回扣
+  premium: '', //保险费
+  invoice_charges: '',  //发票费
+  heading_code: '',  //识别码
+  tran_num: '',  //运单号
+  advance: '',  //垫款
+  total_cost: '',
+  commission: '',// 提成,
+  system_price: ''//系统报价
+}
 export default {
-  name: 'ComplexTable',
-  components: { Pagination, loadFile },
-  directives: { waves },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'info',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    },
-    typeFilter(type) {
-      return calendarTypeKeyValue[type]
-    }
-  },
   data() {
+    let checkPhone = (rule, value, callback) => {
+      var reg = /^(((13[0-9]{1})|(14[0-9]{1})|(15[0-9]{1})|(16[0-9]{1})|(17[0-9]{1})|(18[0-9]{1}))+\d{8})$/
+      // const reg = /^1[3|4|5|7|8][0-9]\d{8}$/
+      if (!value) {
+        return callback(new Error('手机号不能为空'))
+      }
+      if (value.length !== 11) {
+        return callback(new Error('请输入11位手机号'))
+      }
+      if (reg.test(value)) {
+        return callback()
+      }
+      return callback(new Error('请输入正确的手机号'))
+    }
+    let checkPrice = (rule, value, callback) => {
+      if (value) {
+        return callback()
+      } else {
+        let a = Number(this.ruleForm.pay_cash)
+        let b = Number(this.ruleForm.freight_collect)
+        let c = Number(this.ruleForm.monthly_statement)
+        let t = a + b + c
+        if (this.totalPrice === t) {
+          return callback()
+        }
+        return callback('分期额度不等于总合计费用!')
+      }
+    }
+    let checkDown = (rule, value, callback) => {
+      if (value && value.id || value && value.value) {
+        callback()
+      } else {
+        return callback(new Error('请选系统匹配的选项'))
+      }
+    }
+    // 自定义验证车
+    let checkCar = (rule, value, callback) => {
+      console.log('自定义验证车value', value)
+      if (value && value.name || value && value.id) {
+        callback()
+      } else {
+        callback('请选择匹配车牌')
+      }
+    }
+    let checkStr = (rule, value, callback) => {
+      let reg = new RegExp('[`~!@#$^&*()=|{}\':\',\\[\\].<>《》/?~！@#￥……&*（）——|{}【】‘；：”“\'。，、？]')
+      let rs = reg.test(value)
+      if (rs) {
+        callback(new Error('内容存在特殊字符!'))
+      } else {
+        callback()
+      }
+    }
     return {
-      tableKey: 0,
-      list: null,
-      total: 0,
-      listLoading: true,
-      dialogVisible: false,
-      listQuery: {
-        page: 1,
-        limit: 11,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
-      },
-      importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-      statusOptions: ['published', 'draft', 'deleted'],
-      showReviewer: false,
-      temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
-      },
-      dialogFormVisible: false,
-      dialogStatus: '',
-      textMap: {
-        update: '编辑',
-        create: '创建'
-      },
-      dialogPvVisible: false,
-      pvData: [],
+      ruleForm: {},
       rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
-      },
-      multipleSelection: [], // 多选的
-      downloadLoading: false,
-      search: '',
-      typeValue: null
+        consignor_info: [//人
+          { required: true, validator: checkDown, trigger: ['change'] }
+        ],
+        start_pid_info: [//发车省 {}
+          { required: true, validator: checkDown, trigger: ['change'] }
+        ],
+        start_cid_info: [//发车市 {}
+          { required: true, validator: checkDown, trigger: ['change'] }
+        ],
+        end_pid_info: [//到站省 {}
+          { required: true, validator: checkDown, trigger: ['change'] }
+        ],
+        end_cid_info: [// 到站市 {}
+          { required: true, validator: checkDown, trigger: ['change'] }
+        ],
+        start_attribution: [//发站归属 str
+          { required: true, message: '请选发站地', trigger: 'change' }
+        ],
+        end_attribution: [//到站归属 str
+          { required: true, message: '请选到站地', trigger: 'change' }
+        ],
+        consignor_mobile: [//托运人电话
+          { required: true, validator: checkPhone, trigger: ['blur'] }
+        ],
+        consignee_mobile: [// 收货人电话
+          { required: true, validator: checkPhone, trigger: ['blur'] }
+        ],
+        send_car_detail_address: [
+          { required: true, message: '请输入详细地址', trigger: 'blur' },
+          { min: 1, max: 30, message: '长度在 5 到 50个字符', trigger: 'blur' }
+        ],
+        carry_car_detail_address: [
+          { required: true, message: '请输入详细地址', trigger: 'blur' },
+          { min: 1, max: 30, message: '长度在 5 到 50个字符', trigger: 'blur' }
+        ],
+        consignee: [// 收货人
+          { required: true, message: '请输入收货人信息', trigger: 'blur' },
+          { min: 2, max: 10, message: '长度在 2 到 10个字符', trigger: 'blur' }
+        ],
+        pay_cash: [
+          { validator: checkPrice, trigger: ['change', 'blur'] }
+        ],
+        freight_collect: [
+          { validator: checkPrice, trigger: ['change', 'blur'] }
+        ],
+        monthly_statement: [
+          { validator: checkPrice, trigger: ['change', 'blur'] }
+        ],
+        remark: [
+          { validator: checkStr, trigger: ['change', 'blur'] }
+        ]
+      },//规则
+      loading: false,
+      value: '',
+      carNum: [],
+      carBrand: [],
+      t_business: '',
+      hasReceipt: [],
+      dataOption: {},
+      cityOption: [],
+      endCityOption: [],
+      payOptions: null,
+      orderTypeOptions: null,
+      consignerOption: [],
+      driverOption: null,
+      sendDriverOption: null,
+      isDisabled: true,
+      rulesCar: { required: true, validator: checkCar, trigger: ['change'] },
+      rulesCarModel: { required: true, validator: checkCar, trigger: 'change' }
     }
   },
-  created() {
-    this.getList()
+  computed: {
+    'totalPrice'() {//总合计
+      let array = this.ruleForm.cars_info instanceof Array
+      if (array) {
+        let totalPrice = 0
+        for (let i = 0; i < this.ruleForm.cars_info.length; i++) {
+          totalPrice += this.ruleForm.cars_info[i].total_cost
+        }
+        this.ruleForm.totalPrice = parseInt(totalPrice)
+        return parseInt(totalPrice)
+      }
+    },
+    'totalIn'() {// 总提成
+      let array = this.ruleForm.cars_info instanceof Array
+      if (array) {
+        let totalIn = 0
+        for (let i = 0; i < this.ruleForm.cars_info.length; i++) {
+          totalIn += this.ruleForm.cars_info[i].commission
+        }
+        this.ruleForm.totalIn = parseInt(totalIn)
+        return parseInt(totalIn)
+      }
+    }
+  },
+  watch: {
+    'ruleForm': {
+      handler: function(nVal, oVal) {
+        let array = nVal.cars_info instanceof Array
+        let time
+        if (time) clearTimeout(time)
+        time = setTimeout(() => {
+          if (nVal && array) {
+            nVal.cars_info.map((item) => {
+              //商品提成
+              if (nVal.system_price && item.price && nVal.system_price && item.price > nVal.system_price) {
+                console.log(nVal.system_price, item.price, '报价 和 单价')
+                let p = 0
+                if (nVal.t_business_id === 3) { // 汽贸客户
+                  p = (item.price - nVal.system_price) * 0.01// 提成
+                  console.log(p, '提成')
+                  item.commission = parseInt(p)
+                } else if (nVal.t_business_id === 5) { // 商品车
+                  nVal.has_receipt = { name: '有回单', value: 1 }
+                  item.commission = 0
+                } else {
+                  item.commission = 10 //其他等于10
+                }
+              }
+              if (item.price < nVal.system_price) {
+                item.commission = ''
+              }
+              // 子合计
+              item.total_cost = Number(item.discount) + Number(item.price) + Number(item.premium) + Number(item.invoice_charges) + Number(nVal.delivery_money) + Number(nVal.send_money)
+              console.log(nVal.totalPrice, '总合计 总提成', nVal.totalIn)
+              //绑定车型
+              if (item.car_model && item.car_model.id) {
+                let { id, name } = item.car
+                item.car_brand_id = id
+                item.car_brand_name = name
+                item.car_model_id = item.car_model.id
+                item.car_model_name = item.car_model.system_name
+              }
+            })
+            // 托运人公司
+            if (nVal.consignor_info && nVal.consignor_info.company) {
+              item.consignor_company = item.consignor_info.company
+            } else {
+              nVal.consignor_company = '未返回公司'
+            }
+          }
+        }, 200)
+      },
+      immediate: true,
+      deep: true
+    },
+    'ruleForm.cars_info': {
+      handler: function(nVal, oVal) {
+        let array = nVal instanceof Array
+        if (array && nVal.length > 1) {
+          this.payOptions.forEach((item) => {
+            if (item.value === 4) {
+              item.disabled = true
+            } else {
+              item.disabled = false
+            }
+          })
+        }
+      },
+      immediate: true,
+      deep: true
+    }
+  },
+  created() {this.getPageData()},
+  mounted() {
+    this.$refs['ruleForm'].resetFields()
   },
   methods: {
-    customFieldColumn(h, { column, $index }) {
-      return h('span', [
-        h('el-input', { props: {}}
-        )
-      ])
-    },
-    beginUnloadHandle() {
-      this.dialogVisible = true
-    },
-    handleTeset() {
-      const params = {
-        email: '807037603@qq.com',
-        password: '123456'
-      }
-      getRoles().then()
-      testLogin(params).then((res) => {
-        console.log('res', res)
-      })
-    },
-    getList(params) {
-      this.listLoading = true
-      if (!params) {
-        params = this.listQuery
-      }
-      fetchList(params).then(response => {
-        console.log(response, 'res')
-        this.list = response.data.items
-        this.total = response.data.total
-
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-      })
-    },
-    // 重置
-    handleReset() {
-      const params = {
-        page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: '+id'
-      }
-      this.getList(params)
-    },
-    handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
-    },
-    handleModifyStatus(row, status) {
-      this.$message({
-        message: '操作Success',
-        type: 'success'
-      })
-      row.status = status
-    },
-    sortChange(data) {
-      const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
-      }
-    },
-    sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
-      } else {
-        this.listQuery.sort = '-id'
-      }
-      this.handleFilter()
-    },
-    resetTemp() {
-      this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
-      }
-    },
-    handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-    },
-    createData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
-            this.list.unshift(this.temp)
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
-              type: 'success',
-              duration: 2000
-            })
-          })
+    async getPageData() {
+      // let p = this.$route.path()
+      let param = { id: 7 }
+      await editOrder(param).then((res) => {
+        console.log(res)
+        if (res.code === 200) {
+          this.ruleForm = res.data.info
+          console.log('修改订单的数据', res)
         }
       })
     },
-    // 表格筛选
-    filterTag(value, row) {
-      return row.tag === value
-    },
-    // 重置表格删选
-    clearFilter() {
-      this.$refs.filterTable.clearFilter()
-    },
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-      console.log('0')
-    },
-    updateData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Update Successfully',
-              type: 'success',
-              duration: 2000
-            })
-          })
+    filterMethod(val) {
+      this.consignerOption = []
+      if (val && val !== ' ') {
+        let param = {
+          type: 1, usrename: val
         }
-      })
-    },
-    handleDelete(row) {
-      this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
-        type: 'success',
-        duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
-    },
-    handleFetchPv(pv) {
-      fetchPv(pv).then(response => {
-        this.pvData = response.data.pvData
-        this.dialogPvVisible = true
-      })
-    },
-    handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal, this.list)
-        excel.export_json_to_excel({
-          header: tHeader,
-          data,
-          filename: 'table-list'
+        getOrderInfo(param).then((res) => {
+          if (res.data.hasdata === 1) {
+            this.consignerOption = res.data.info
+          }
         })
-        this.downloadLoading = false
+      }
+    },
+    changeConsignor(val) {
+      //货运人修改业务类型
+      console.log('业务类型', val)
+      this.ruleForm.t_business = val.t_business
+      this.ruleForm.t_business_id = val.t_business_id
+    },
+    changeProvince(val) {
+      console.log('点击省', val)
+      this.cityOption = []
+      this.ruleForm.start_cid_info = null
+      this.ruleForm.system_price = null
+      let param = {
+        id: val.id,
+        type: 4
+      }
+      getOrderInfo(param).then((res) => {
+        if (res.data.hasdata === 1) {
+          this.cityOption = res.data.info
+        }
       })
     },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
-    },
-    tableRowClassName({ row, rowIndex }) {
-      if (rowIndex === 1) {
-        return 'warning-row'
-      } else if (rowIndex === 3) {
-        return 'success-row'
+    changeEndProvince(val) {
+      this.endCityOption = []
+      this.ruleForm.end_cid_info = null
+      this.ruleForm.system_price = null
+      console.log('到达省', val)
+      let param = {
+        id: val.id,
+        type: 4
       }
-      return ''
+      getOrderInfo(param).then((res) => {
+        if (res.data.hasdata === 1) {
+          this.endCityOption = res.data.info
+        }
+      })
     },
-    handleSelectionChange(val) {
-      console.log('多选', val)
-      this.multipleSelection = val
+    computeQuote(val) {// 报价
+      console.log('计算提成', val)
+      if (this.ruleForm.end_cid_info.id && this.ruleForm.start_cid_info.id) {
+        let param = {
+          type: 9,
+          start: this.ruleForm.start_cid_info.id,
+          end: this.ruleForm.end_cid_info.id
+        }
+        getOrderInfo(param).then((res) => {
+          if (res.code === 200) {
+            this.ruleForm.system_price = res.data
+          }
+        })
+      }
     },
-    tableSearch() {
-      this.listQuery.page = 1
-      this.getList()
+    changeCarTeam(val) {
+      this.driverOption = []
+      this.ruleForm.carry_car_info = null
+      console.log('val', val)
+      let param = {
+        company_id: val.value,
+        type: 2
+      }
+      getOrderInfo(param).then((res) => {
+        if (res.data.hasdata === 1) {
+          this.driverOption = res.data.info
+        }
+      })
+    },
+    changeSendCarTeam(val) {
+      console.log('发车团队', val)
+      this.sendDriverOption = []
+      let param = {
+        vehicle_type: val.value,
+        type: 2
+      }
+      getOrderInfo(param).then((res) => {
+        if (res.data.hasdata === 1) {
+          this.sendDriverOption = res.data.info
+        }
+      })
+    },
+    changeCarBrand(val) {
+      let param = {
+        car_pid: val.id,
+        type: 3
+      }
+      getOrderInfo(param).then((res) => {
+        if (res) {
+          this.carNum = res.data.info
+        }
+      })
+    },
+    remoteMethod(query) {
+      if (query !== '') {
+        this.loading = true
+        setTimeout(() => {
+          this.loading = false
+          this.carBrand = this.dataOption.carBrand.filter(item => {
+            return item.name.toLowerCase().indexOf(query.toLowerCase()) > -1
+          })
+        }, 200)
+      } else {
+        this.carBrand = []
+      }
+    },
+    addDomain() {
+      let car = { ...carInfo }
+      this.ruleForm.cars_info.push(car)
+    },
+    deleteDomain(val) {
+      this.ruleForm.cars_info.splice(val, 1)
+    },
+    submitForm(el, num) {
+      let params = this.ruleForm
+      num ? params.is_short_order = num : params.is_short_order = 0
+      this.$refs[el].validate((valid) => {
+        if (valid) {
+          alert('提交')
+          createOrder().then((res) => {
+            console.log('提交', res)
+          })
+        } else {
+          console.log('错误提交!!')
+          return false
+        }
+      })
+      console.log(params, 'params')
     }
-  }
+  },
+  components: {},
+  props: {},
+  destroyed() {}
 }
 </script>
-<style lang="scss" scoped>
-  .totalTable-page {
-    height: 100%;
+<style scoped lang="scss">
+  @import "src/styles/mixin.scss";
 
-    .totalTable-header {
-      padding: 0 20px;
+  .page-title {
+    font-size: j(30);
+    padding: j(10) j(20);
+    margin: j(5) 0;
+    box-shadow: 0 2px 10px #f2f2f2;
+  }
+
+  .page-content {
+    padding: 0 j(20);
+
+    .column {
+      .column-col {
+        padding: 0 j(30) 0 0;
+      }
     }
 
-    .totalTable-container {
-      padding: 0 20px;
+    .column-name {
+      @extend %bgColor;
+      width: 100%;
+      color: #fff;
+      font-size: j(15);
+      height: j(35);
+      margin-bottom: j(20);
+      line-height: j(35);
+      padding: 0 0 0 j(10);
+      box-shadow: 0 2px 10px #f2f2f2;
     }
   }
+
+  .add-Btn {
+    background: #ffc978;
+    padding: 0 j(20);
+    cursor: pointer;
+  }
+
+  .btns-commit {
+    padding: j(30) j(90);
+    /*box-shadow: 2px 2px 10px #f2f2f2;*/
+  }
+
 </style>

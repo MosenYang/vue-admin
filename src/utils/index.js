@@ -3,7 +3,7 @@
  */
 
 /**
- * Parse the time to string
+ * 时间解析为字符串
  * @param {(Object|string|number)} time
  * @param {string} cFormat
  * @returns {string}

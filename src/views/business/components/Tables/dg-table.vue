@@ -127,12 +127,14 @@
 </template>
 <script>
 import editFilter from './defFilter/edit.vue'
-import searchFilter from './defFilter/search.vue'
+import searchSelectFilter from './defFilter/searchSelect.vue'
+import selectFilter from './defFilter/selectFilter.vue'
 import { getFilter, doDeleteFilter, initFilterData } from './index.js'
 // 默认筛选器组件
 var defComponents = {
   edit: editFilter, // 输入框选择器
-  search: searchFilter // 自动搜索
+  searchSelectFilter,// 自动搜索
+  selectFilter
 }
 // 默认筛选器字段
 const ComFilterDefConfig = {
@@ -283,8 +285,10 @@ export default {
     commonHandlerBridge({ func, data }) {
       this.$emit(func, data)
     },
+    // 循环方法
     doRegFilters(ftype, columconfig) {
       let filterTag = `${ftype}_${columconfig.prop}`
+      console.log('ftype', ftype)
       if (!defComponents[ftype]) {
         this.mixinFilter(ftype, columconfig.filterConfig)
       } else {
@@ -297,27 +301,31 @@ export default {
         position: { top: 0, left: 0 }
       }
       let filterConfig = Object.assign(config, ComFilterDefConfig, columconfig.filterConfig)
-
-      this.$set(this.regFilters, filterTag, filterConfig)
+      this.$set(this.regFilters, filterTag, filterConfig) // 把所有的表头都添加上,循环
+      console.log('表头', this.regFilters)
       this.filterAction = JSON.parse(JSON.stringify(_filterAction))
       return filterTag
     },
+    //添加自定义组件
     mixinFilter(ftype, config) {
       if (config.component) {
         let newFilter = { [ftype]: config.component }
         defComponents = Object.assign({}, defComponents, newFilter)
       }
     },
+    // 表头点击事件
     headerClick(e, item) {
       if (!item.isNeed) return
       e.cancelBubble = true
       const curElId = e.currentTarget.id
       const curParentElId = e.currentTarget.parentElement.parentElement
+
       if (_filterAction[curElId]) {
         document.querySelector(`#${curElId} i`).setAttribute('class', 'el-icon-caret-bottom')
       } else {
         document.querySelector(`#${curElId} i`).setAttribute('class', 'el-icon-caret-top')
       }
+
       this.allFilterHide(curElId)
       this.filterPosition(curParentElId, curElId)
       this.$set(_filterAction, curElId, !_filterAction[curElId])
@@ -327,6 +335,7 @@ export default {
       _filterbar = curParentElId
     },
     filterPosition(filterbar, filtertag) {
+      console.log('filtertag 标签', filtertag)
       var offsetLeft = filterbar.offsetLeft
       var offsetHeight = filterbar.offsetHeight
       if (this.regFilters[filtertag]) {
@@ -345,6 +354,7 @@ export default {
       }
       this.filterAction = _filterAction
     },
+
     // 单选或者多选事件
     handleSelectChange(val) {
       this.$emit('select-change', val)
