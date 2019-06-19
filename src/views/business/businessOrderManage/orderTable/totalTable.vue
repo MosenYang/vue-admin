@@ -33,7 +33,8 @@
       <div class="flex-between control">
         <div class="limit">
           当前显示:
-          <el-select v-model="defParams.pagesize" @change="changePage" placeholder="Please select">
+          <el-select v-model="defParams.pagesize"
+                     @change="changePage" placeholder="Please select">
             <el-option v-for="item in option"
                        :key="item.value"
                        :label="item.label"
