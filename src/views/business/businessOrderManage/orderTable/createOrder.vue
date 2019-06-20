@@ -704,7 +704,7 @@ export default {
             // 托运人公司
             if (nVal.consignor_info && nVal.consignor_info.company) {
               item.consignor_company = item.consignor_info.company
-            }else{
+            } else {
               nVal.consignor_company = '未返回公司'
             }
           }
@@ -783,6 +783,7 @@ export default {
           let formParams = {
             totalPrice: '',//总合计
             totalIn: '',//总提成
+            type_of_business: null,//业务类型
             consignor_info: {},// 托运人信息
             consignor_mobile: '',//托运人电话,
             start_attribution: '',//	发站归属地
@@ -841,6 +842,7 @@ export default {
       console.log('业务类型', val)
       this.ruleForm.t_business = val.t_business
       this.ruleForm.t_business_id = val.t_business_id
+      this.ruleForm.type_of_business = val.t_business_id
     },
     changeProvince(val) {
       console.log('点击省', val)

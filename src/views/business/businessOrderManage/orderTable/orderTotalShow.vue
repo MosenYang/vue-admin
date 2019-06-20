@@ -275,6 +275,7 @@ export default {
         type: undefined,
         sort: '+id'
       },
+      renderTypeHeader(){},
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
       sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
