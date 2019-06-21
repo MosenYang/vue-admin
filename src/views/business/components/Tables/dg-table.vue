@@ -89,14 +89,15 @@
       <!-- 注册的筛选器 -->
       <div v-clickOutSide="allFilterHide">
         <template v-for="(item, key) in regFilters">
-          <div v-show="filterAction[key]" :key="key" :class="{'filterWrap': true}" :style="item.position">
+          <div v-show="filterAction[key]" :key="key" :class="{'filterWrap': true}"
+               :style="item.position">
             <div class="filterContainer">
               <component
                 :is="item.component"
                 :key="key"
                 :refName="item.refName"
                 :dataItems="item.dataItems"
-                :filter-key="item.filterKey"
+                :filterKey="item.filterKey"
                 :listInfo="item.listInfo"
                 :comData="item.comData"
                 :comProps="item.comProps"
@@ -119,9 +120,9 @@
       <el-pagination background
                      :pager-count="7"
                      layout="prev, pager, next"
-                     :page-count="pageConfig.pageNum"
+                     :page-count="pageConfig.totalPageNum"
                      :current-page.sync="pageConfig.curPage"
-                     @current-change="clickpage"/>
+                     @current-change="clickPage"/>
     </div>
   </div>
 </template>
@@ -129,12 +130,11 @@
 import editFilter from './defFilter/edit.vue'
 import searchSelectFilter from './defFilter/searchSelect.vue'
 import selectFilter from './defFilter/selectFilter.vue'
-import { getFilter, doDeleteFilter, initFilterData } from './index.js'
 // 默认筛选器组件
 var defComponents = {
-  edit: editFilter, // 输入框选择器
+  editFilter, // 输入框选择器
   searchSelectFilter,// 自动搜索
-  selectFilter
+  selectFilter//纯下拉
 }
 // 默认筛选器字段
 const ComFilterDefConfig = {
@@ -180,7 +180,7 @@ export default {
       type: Object,
       default: function() {
         return {
-          pageNum: 1,
+          totalPageNum: 10,
           curPage: 1
         }
       }
@@ -222,7 +222,8 @@ export default {
     return {
       barData: [],
       regFilters: {}, // 所有的组件对象 非常的重要
-      filterAction: {}// 动态显示  radio_gender: true
+      filterAction: {},// 动态显示  radio_gender: true
+      emitParams: {}
     }
   },
   watch: {
@@ -245,40 +246,42 @@ export default {
     window.onresize = () => {
       setTimeout(() => {
         if (_filterbar) this.filterPosition(_filterbar, _curFilter)
-      }, 100)
+      }, 1)
     }
   },
   destroyed() {
-    // initFilterData()
     _filterAction = {}// 状态对象
-    _curFilter = '' // 当前
     _filterbar = null// 父级
   },
   methods: {
-    clickpage(val) {
+    clickPage(val) {
       this.$emit('page-change', val)
     },
-    handleClose(tag) {
+    //关闭搜索项
+    handleClose(tag, item) {
       this.barData.splice(this.barData.indexOf(tag), 1)
-      var dofilter = doDeleteFilter(tag)
-      this.$emit('filter-change', dofilter)
+      this.emitParams[item.filterKey] = null || ''
+      this.$emit('filter-change', this.emitParams)
     },
-    // 筛选器组件广播事件
-    getFilterBridge(val) {
+    // 广播事件(被重复复用)
+    getFilterBridge(valObj) {// valObj.value 可能是对象 || 字符
+      console.log(valObj, '筛选数据~!!!!')
+      let isObj = Object.prototype.toString.call(valObj.value) === '[object Object]'
       let option = {
-        value: val.value,
-        label: val.label
+        label: valObj.label,
+        value: valObj.value.name ? valObj.value.name : valObj.value,
+        filterKey: valObj.filterKey
       }
-      const formatdata = getFilter(val)
-      // this.barData.map((item, index, array) => {
-      //   if (item.label === option.label) {
-      //     delete array[index]
-      //   }
-      //   return array
-      // })
+      this.barData.forEach((item, index, array) => {
+        if (item.label === valObj.label) {
+          this.barData.splice(this.barData.indexOf(item), 1)
+        }
+        return array
+      })
+      // 给参数赋值: 这里很坑.关键是接口需要的值 或者文字,或者数字
+      this.emitParams[valObj.filterKey] = valObj.value.id || valObj.value
       this.barData.push(option)
-      console.log(this.barData)
-      this.$emit('filter-change', option)
+      this.$emit('filter-change', this.emitParams)
       this.allFilterHide('none')
     },
     // 函数通讯桥梁
@@ -288,9 +291,11 @@ export default {
     // 循环方法
     doRegFilters(ftype, columconfig) {
       let filterTag = `${ftype}_${columconfig.prop}`
-      console.log('ftype', ftype)
       if (!defComponents[ftype]) {
-        this.mixinFilter(ftype, columconfig.filterConfig)
+        if (columconfig.filterConfig.component) {
+          let newFilter = { [ftype]: columconfig.filterConfig.component }
+          defComponents = Object.assign({}, defComponents, newFilter)
+        }
       } else {
         columconfig.filterConfig.component = defComponents[ftype]
       }
@@ -302,16 +307,8 @@ export default {
       }
       let filterConfig = Object.assign(config, ComFilterDefConfig, columconfig.filterConfig)
       this.$set(this.regFilters, filterTag, filterConfig) // 把所有的表头都添加上,循环
-      console.log('表头', this.regFilters)
       this.filterAction = JSON.parse(JSON.stringify(_filterAction))
       return filterTag
-    },
-    //添加自定义组件
-    mixinFilter(ftype, config) {
-      if (config.component) {
-        let newFilter = { [ftype]: config.component }
-        defComponents = Object.assign({}, defComponents, newFilter)
-      }
     },
     // 表头点击事件
     headerClick(e, item) {
@@ -319,7 +316,6 @@ export default {
       e.cancelBubble = true
       const curElId = e.currentTarget.id
       const curParentElId = e.currentTarget.parentElement.parentElement
-
       if (_filterAction[curElId]) {
         document.querySelector(`#${curElId} i`).setAttribute('class', 'el-icon-caret-bottom')
       } else {
@@ -330,14 +326,14 @@ export default {
       this.filterPosition(curParentElId, curElId)
       this.$set(_filterAction, curElId, !_filterAction[curElId])
       this.filterAction = _filterAction// 动作对象
-      var type = curElId.split('_')[0]
-      _curFilter = curElId
       _filterbar = curParentElId
     },
     filterPosition(filterbar, filtertag) {
-      console.log('filtertag 标签', filtertag)
       var offsetLeft = filterbar.offsetLeft
       var offsetHeight = filterbar.offsetHeight
+      let l = filterbar.getBoundingClientRect().left
+      let h = filterbar.getBoundingClientRect().top
+
       if (this.regFilters[filtertag]) {
         this.$set(this.regFilters[filtertag].position, 'top', offsetHeight - 10 + 'px')
         this.$set(this.regFilters[filtertag].position, 'left', offsetLeft + 'px')
@@ -359,44 +355,7 @@ export default {
     handleSelectChange(val) {
       this.$emit('select-change', val)
     },
-    getTime(UTCDateString, type = 'Y-M-D') {
-      if (!UTCDateString) {
-        return '-'
-      }
-
-      function formatFunc(str) {
-        return str > 9 ? str : '0' + str
-      }
-
-      var date2 = new Date(UTCDateString)
-      var year = date2.getFullYear()
-      var mon = formatFunc(date2.getMonth() + 1)
-      var day = formatFunc(date2.getDate())
-      var hour = date2.getHours()
-      hour = formatFunc(hour)
-      var min = formatFunc(date2.getMinutes())
-      var dateStr
-      if (type === 'Y-M-D') {
-        dateStr = year + '.' + mon + '.' + day
-      } else {
-        dateStr = year + '.' + mon + '.' + day + '   ' + hour + ':' + min
-      }
-      return dateStr
-    },
-    getText(val) {
-      var attarr = val.cc.prop.split('.')
-      var curobj = val.s
-      for (var i = 0; i < attarr.length; i++) {
-        if (!curobj[attarr[i]] && curobj[attarr[i]] !== 0) {
-          return '-'
-        }
-        curobj = curobj[attarr[i]]
-      }
-      if (val.cc.cb) {
-        return val.cc.cb(curobj)
-      }
-      return curobj
-    },
+    //自定义组件广播
     doactive(d) {
       this.$emit(d.func, d.args)
     }

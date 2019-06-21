@@ -189,13 +189,7 @@ export default {
     this.getTableList()
   },
   methods: {
-    /**
-     * 单选事件
-     * */
-    getselect(val) {
-      this.selectRow = val
-      console.log(val, '单选广播事件')
-    },
+
     /**
      * 多装车
      * */
@@ -271,6 +265,13 @@ export default {
      **/
     handleCreate() {
       this.$router.push({ path: '/' })
+    },
+    /**
+     * 单选事件
+     * */
+    getselect(val) {
+      this.selectRow = val
+      console.log(val, '单选广播事件')
     },
     //设置表格样式
     headerCell() {

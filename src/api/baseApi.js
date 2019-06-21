@@ -10,3 +10,4 @@ export function searchType(data, method) {
     data
   })
 }
+

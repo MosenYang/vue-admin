@@ -3,6 +3,8 @@
   <div style="padding: 10px">
     <el-select v-model="inputValue"
                value-key="id"
+               size="small"
+               @change="handleCallback"
                placeholder="请选择">
       <el-option v-for="item in options"
                  :key="item.id"
@@ -13,66 +15,62 @@
   </div>
 </template>
 <script>
-  export default {
-    name: 'select',
-    props: {
-      comData: {
-        type: Array,
-        default: []
-      },
-      placeholder: {
-        type: String,
-        default: '请选择项'
-      },
-      filterKey: {
-        type: String,
-        default: ''
-      },
-      refName: {
-        type: String,
-        default: ''
-      },
-      label: {
-        type: String,
-        default: ''
-      }
+export default {
+  name: 'selectFte',
+  props: {
+    comData: {// 传入下拉数据
+      type: Array,
+      default: []
     },
-    data() {
-      return {
-        inputValue: '',
-        list: [],
-        loading: false,
-        options: []
-      }
+    placeholder: {
+      type: String,
+      default: '请选择项'
     },
-    computed: {},
-    watch: {},
-    created() {},
-    mounted() {
-      console.log('comData', this.comData)
-      this.comData.forEach((item) => {
-        let obj = {
-          id: item.value || item.id,
-          name: item.name || item.label
-        }
-        this.options.push(obj)
+    label: {
+      type: String,
+      default: ''
+    },
+    filterKey: {
+      type: String,
+      default: ''
+    },
+    refName: {
+      type: String,
+      default: ''
+    }
+  },
+  data() {
+    return {
+      inputValue: null,// 绑定的是对象
+      options: []// 下拉项
+    }
+  },
+  computed: {},
+  watch: {},
+  created() {},
+  mounted() {
+    console.log('组件下拉项', this.comData)
+    this.comData.forEach((item) => {
+      let obj = {
+        id: item.value || item.id || item.key,
+        name: item.name || item.label || item.area_name
+      }
+      this.options.push(obj)
+    })
+  },
+  methods: {
+    handleCallback() {
+      console.log('', this.label, this.inputValue)
+      if (!this.inputValue) return console.log('没选中值')
+      this.$emit('getFilterBridge', {
+        label: this.label,// 列名字
+        filterKey: this.filterKey,// 列字段
+        value: this.inputValue// 列数据
       })
-      console.log('this.options', this.options)
-
-    },
-    methods: {
-      handleBlur() {
-        if (!this.inputValue) return
-        this.$emit('getFilterBridge', {
-          type: 'text',
-          key: this.filterkey,
-          label: this.label,
-          value: this.inputValue
-        })
-        this.inputValue = null
-      }
+      this.inputValue = null
     }
   }
+}
 </script>
 <style scoped>
   /*@import "../base/reset.css";*/

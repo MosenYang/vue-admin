@@ -1,16 +1,20 @@
 <template>
   <!-- 输入框选择器 -->
   <div style="padding:10px">
-    <el-input v-model="editdata" :placeholder="placeholderStr" class="input-with-select" clearable>
-      <el-button slot="append" icon="el-icon-search" @click="todoSearch" />
+    <el-input v-model="editData"
+              :placeholder="placeholderStr"
+              @blur="todoSearch"
+              @keyup.enter.native="todoSearch"
+              size="small"
+              class="input-with-select">
+      <!--<el-button slot="append" icon="el-icon-search" @click="todoSearch" />-->
     </el-input>
   </div>
 </template>
-
 <script>
 export default {
   props: {
-    sClass: {
+    label: {
       type: String,
       default: ''
     },
@@ -25,31 +29,31 @@ export default {
     placeholderStr: {
       type: String,
       default: '请输入内容'
+    },
+    sClass: {
+      type: String,
+      default: ''
     }
   },
   data() {
     return {
-      editdata: '',
+      editData: null,
       doanima: false
     }
   },
   mounted() {
-    if (this.sClass) {
-      setTimeout(() => {
-        this.doanima = true
-      }, 600)
-    }
   },
+  destroyed() {},
   methods: {
     todoSearch() {
-      if (this.editdata) {
+      if (this.editData) {
         this.$emit('getFilterBridge', {
-          key: this.filterkey,
-          label: this.editdata,
-          value: this.editdata,
+          filterKey: this.filterKey,
+          label: this.label,
+          value: this.editData,
           ftn: this.ftn
         })
-        this.editdata = ''
+        this.editData = ''
       }
     }
   }
@@ -57,13 +61,5 @@ export default {
 </script>
 
 <style scoped>
-@import '../css/common.css';
-.filterWrap.show {
-  opacity: 1;
-  height: 100px;
-}
-.editFilter {
-  position: absolute;
-  width: 300px;
-}
+  @import '../css/common.css';
 </style>
