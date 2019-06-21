@@ -131,6 +131,13 @@
                       placeholder="请填写"/>
           </el-form-item>
         </el-row>
+        <el-row class="" :lg="24" :md="24" :sm="24">
+          <el-form-item label="业务员信息">
+            <el-radio-group v-model="temp.radio">
+              <el-radio :label="item.id" v-for="(item,i) in mockPeople">{{item.name}}</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-row>
         <el-form-item class="dialog-footer">
           <el-button type="primary" @click="createData('dataForm')">
             保存
@@ -209,6 +216,7 @@ export default {
         wechat: '',//wx
         qq: '',//qq
         remarks: '',// 备注
+        radio:0,
       },
       rules: {
         sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
@@ -219,7 +227,8 @@ export default {
         ],
         business: [{ required: true, message: '商业类型', trigger: 'change' }],
         type: [{ required: true, message: '客户类型', trigger: 'change' }]
-      }
+      },
+      mockPeople: mockPeople
     }
 
   },
@@ -331,6 +340,20 @@ var clientType = [
   {
     key: 2,
     name: '正常用户'
+  }
+]
+var mockPeople = [
+  {
+    'id': 1,  //业务员id
+    'name': '李磊'  //业务员姓名
+  },
+  {
+    'id': 2,  //业务员id
+    'name': '韩梅梅'  //业务员姓名
+  },
+  {
+    'id': 3,  //业务员id
+    'name': '韩梅'  //业务员姓名
   }
 ]
 </script>

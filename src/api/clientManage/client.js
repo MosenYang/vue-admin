@@ -53,3 +53,23 @@ export function updateAccendant(data, method) {
     data
   })
 }
+// 导出
+export function exportCustomer(data, method) {
+  let mtd = method ? method : 'post'
+  return request({
+    baseURL: '',
+    url: '/api/customer/export',
+    method: mtd,
+    data
+  })
+}
+//api/customer/import
+export function importCustomer(data, method) {
+  let mtd = method ? method : 'post'
+  return request({
+    baseURL: '',
+    url: '/api/customer/import',
+    method: mtd,
+    data
+  })
+}
