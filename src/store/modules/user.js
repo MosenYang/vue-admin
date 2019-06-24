@@ -1,6 +1,7 @@
 import { login, logout, getInfo, testLogin } from '@/api/user'// suo bang
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
+import { loginT } from '@/api/login'// suo bang
 
 const state = {
   token: getToken(),
@@ -30,15 +31,15 @@ const mutations = {
 
 const actions = {
   //suo bang
-  testLogin({ commit },userInfo) {
+  testLogin({ commit }, userInfo) {
     const { username, password } = userInfo
-    return new Promise((resolve,reject)=>{
-      testLogin(userInfo).then((res)=>{
+    return new Promise((resolve, reject) => {
+      testLogin(userInfo).then((res) => {
         const { data } = res
-        commit('SET_TOKEN',data.token)
+        commit('SET_TOKEN', data.token)
         setToken(data.token)
         resolve()
-      }).catch((err)=>{
+      }).catch((err) => {
         reject(err)
       })
     })
@@ -50,8 +51,18 @@ const actions = {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
         commit('SET_TOKEN', data.token)
-        let t = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjM0YzU2NDNjOTg4MGFlMDkwNDRjNDUwOTdlMDViM2MwZDVkNWJjZmFiMDFiNGE4MjNkYjdiZjI1Y2ZjZGVhMGM0OTA4NjdmMWYyOGEzMzg3In0.eyJhdWQiOiIxIiwianRpIjoiMzRjNTY0M2M5ODgwYWUwOTA0NGM0NTA5N2UwNWIzYzBkNWQ1YmNmYWIwMWI0YTgyM2RiN2JmMjVjZmNkZWEwYzQ5MDg2N2YxZjI4YTMzODciLCJpYXQiOjE1NjAzOTAwMzIsIm5iZiI6MTU2MDM5MDAzMiwiZXhwIjoxNTYyOTgyMDMyLCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.YfH3km1mQTwaiW_vgG-HUGsBeTOpSX_UXfAIaT0DMJUx8QPQewzBTaL0HGGU7zbZoCMcrNbHxcUp6FK8FunxQt4vVnirS12QJnKh4JqEKklbve6tAWVOoAMzSXVymn2_tYoqzpwA9zg8-TucfeHyW3wc6IymXBPqy-5A6kACyrcs1m5j_hGHL_SHHVvKa6LbDM8S6ZLNw1C3m5jleuJENBGhdHtt-P938wSU02p4xBT397FC9kJ1KlpE4XkfnSfhETVL4j77YTD1euahzH9bf-Gdm1Me8w2f9PqQu_v5nJ9TdXPlCAWhL128eOTrLbYxxvL5O8NBHbxqoKwu6yhgq-R6W12DJwYKpe3yv8NtDZQiyup_BB-mG-S-i3vzg5FGYtbg0MwpAmtR3g83uWJGgUJwbLUTDV6CuTA4i-yjIWFpC-uHS-3P-wu5s-rRCYXr5RY8f7AMzWzOU61zgqre7d1CUAzELsPXvDszNdhp6d1Z4uBs1ZO5N2rtKtj44IesFHYOEH3uIZPDDFE8WQvd4uvbJkIO8XtGgvgns266p2W0n1EqcaUoi9tgQxjSvvniAYPxphMinXLjDI9RRPVYv-bfgk0HG0nU2WImsw7YILfPfUMpfFHuf22FcwnhdE89W2Ra6OEka8ylZ3o8ClM5NTHTKn4PopjIgMs3N8tNhFc'
-        localStorage.setItem('suoBang-token',t)
+        let data2 = {
+          name: 'thisyang',
+          password: '123456'
+        }
+        // 目前登录接口传参需要在body里面,目前登录接口不通
+        let token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImQ5YWM4OGEyM2ZhNDUwYzFhMjFlMGY1NGIwNTk2YTFlYWY5OTc5ZDAzYzk5MjBiMThjYzcyY2JjZDIyZjMyOTY3OGY4NTY4Nzk4NWU1MDZkIn0.eyJhdWQiOiIxIiwianRpIjoiZDlhYzg4YTIzZmE0NTBjMWEyMWUwZjU0YjA1OTZhMWVhZjk5NzlkMDNjOTkyMGIxOGNjNzJjYmNkMjJmMzI5Njc4Zjg1Njg3OTg1ZTUwNmQiLCJpYXQiOjE1NjEzNDEzNTgsIm5iZiI6MTU2MTM0MTM1OCwiZXhwIjoxNTY5MTE3MzU4LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.PS68aJs90Hkl5Q25d25dYh6D5MUcb_RBQYdJxDdVR0SkzpZOivR9yG0kFD35sg0nc9tUmVv5ASdg_xugqcetNfv-L2WNcyZANocw18d0y0TmcXButbJ-lC0fCSV13hK-Kcx5qEgqsKTrNO-5XkOLbWkCjR-rvLkz6pFx_-C-GfwbjFq24d_QQnTYngVLKmXNnDJkN9J2qmSlWKWM4R2zpESlT-pZ6cFKYN48TrDGKj_2pt3lHeeOx7p8ZAyGCzsFzgOZWpmHQC8OSWUHZSNVtHtSVoirkfvOIk4_kjNMo-roBMfjur01K4tEozZbNLWiuHnrzApYC0_DxsCCjcvuGfZcKQxxl3sfyWmwEgxIoQWHHPWjSw-621Ucw2SN59F1PJkb6d46MAl7EaNBrdYAG65N2SV3YqtpNqFvP24PFvcW-HPHazAbiIFHabZ_GoLBnZqcjbN5qn16O81OHPlMeU07wLthNq2d69ZFQEwzF-82pfYQWvpHPfxcjTfdSz-UUkK-r06b7aqcKC7mMJoGJQ-9H_l3MyiDohqyKGQJAP8BtJCoiRDwKga1RfI5gfbRDOscroj6SWPHsWEgatsydnL9Y4FVyPiykJDv8cz_JIg8LXNRSmqVjoXtfqFKpi99LHEsVlVU7ZEkx6tXoZ3l7oVLNPovWUgwWHIUT6dGUHw'
+        localStorage.setItem('suoBang-token', token)
+        loginT(data2).then((res) => {
+          if (res) {
+            console.log('suoBang接口', res)
+          }
+        })
         setToken(data.token)
         resolve()
       }).catch(error => {

@@ -50,7 +50,7 @@ module.exports = {
       //请求url分三段 域名 +/api + 接口Url
       // 匹配请求地址中包含 '/api' 直接代理到这里
       '/api': {
-        target: `http://api.thisyang.online`,//目标服务器
+        target: `https://api.thisyang.online`,//目标服务器
         changeOrigin: true,// 默认false，是否需要改变原始主机头为目标URL
         pathRewrite: {
           // '/api': '' // 没有重复部分,不需要改写

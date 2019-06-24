@@ -145,6 +145,9 @@
           <el-button @click="dialogFormVisible = false">
             返回
           </el-button>
+          <el-button @click="login">
+            test
+          </el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -153,7 +156,7 @@
 <script>
 import { searchType } from '../../../api/baseApi'
 import { clientAdd } from '../../../api/clientManage/client'
-
+import {login} from '../../../api/login'
 export default {
   components: {},
   props: {},
@@ -268,8 +271,7 @@ export default {
     }
   },
   watch: {},
-  created() {
-  },
+  created() {},
   mounted() {
     this.getData()
   },
@@ -328,6 +330,15 @@ export default {
           console.log('提交有误!!')
           return false
         }
+      })
+    },
+    login(){
+      let data={
+        name:'thisyang',
+        password:"123456"
+      }
+      login(data).then((res)=>{
+        console.log('res', res)
       })
     }
   }

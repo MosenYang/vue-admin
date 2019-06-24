@@ -3,22 +3,18 @@ import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
-// console.log('vue环境api', process.env.VUE_APP_BASE_API)
-// console.log('索邦环境api', process.env.SUO_BANG_BASE_API)
-// console.log('索邦环境url', process.env.SUO_BANG_BASE_URL)
-
-/*
-*请求线上地址 还需要两步骤 //process.env.VUE_APP_BASE_API
-* 1.去掉baseUrl, 2.去掉mock文件夹的相关路由
-*/
+/**
+ *请求线上地址 还需要两步骤
+ * 1.去掉baseUrl, 2.去掉mock文件夹的相关路由
+ **/
 const service = axios.create({
   // 为什么没有.因为我需要切换mock和线上地址, 把地址分成两段了,完整url在代理里面拼接了,中间这段就省去
-  baseURL:process.env.VUE_APP_BASE_API,
+  baseURL: process.env.VUE_APP_BASE_API,
   withCredentials: true, // 跨域发送请求
   timeout: 8000,
   headers: {
     Accept: 'application/json',
-    Authorization: localStorage.getItem('suoBang-token') ? 'Bearer '+localStorage.getItem('suoBang-token') : ''// 记得要拼接空格
+    Authorization: localStorage.getItem('suoBang-token') ? 'Bearer ' + localStorage.getItem('suoBang-token') : ''// 记得要拼接空格
   }
 })
 
@@ -48,6 +44,13 @@ service.interceptors.response.use(response => {
       if (res.code === 400) {
         Message({
           message: '接口400了',
+          type: 'warning',
+          duration: 1000
+        })
+      }
+      if (res.code === 401) {
+        Message({
+          message: 'token异常',
           type: 'warning',
           duration: 1000
         })

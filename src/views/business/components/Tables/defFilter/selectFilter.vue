@@ -1,6 +1,6 @@
 <template>
   <!--下拉 匹配远程搜索-->
-  <div style="padding: 10px">
+  <div>
     <el-select v-model="inputValue"
                value-key="id"
                size="small"
@@ -34,6 +34,10 @@ export default {
       type: String,
       default: ''
     },
+    paramKey: {
+      type: String,
+      default: ''
+    },
     refName: {
       type: String,
       default: ''
@@ -49,7 +53,6 @@ export default {
   watch: {},
   created() {},
   mounted() {
-    console.log('组件下拉项', this.comData)
     this.comData.forEach((item) => {
       let obj = {
         id: item.value || item.id || item.key,
@@ -65,7 +68,8 @@ export default {
       this.$emit('getFilterBridge', {
         label: this.label,// 列名字
         filterKey: this.filterKey,// 列字段
-        value: this.inputValue// 列数据
+        value: this.inputValue,// 列数据
+        paramKey:this.paramKey// 接口字段
       })
       this.inputValue = null
     }

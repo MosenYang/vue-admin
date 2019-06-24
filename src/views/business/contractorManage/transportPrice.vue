@@ -1,5 +1,7 @@
 <template>
-  <div />
+  <div>
+    运输报价
+  </div>
 </template>
 <script>
 // import ChildComponents from './ChildComponents.vue'

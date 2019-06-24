@@ -59,9 +59,7 @@
                         @filter-change="getFilter"
                         @select-change="getselect"
                         :headerCellStyle="headerCss"
-                        @page-change="pageChange"
-
-      />
+                        @page-change="pageChange"/>
     </div>
     <!---->
     <el-dialog title="修改维护人" :visible.sync="dialogVisible">
@@ -220,7 +218,7 @@ export default {
       this.$router.push({ path: 'createClientInfo' })
     },
     //改变显示数
-    changePageLimit(val) {
+    changePageLimit() {
       this.getTableList()
     },
     //* 单选事件

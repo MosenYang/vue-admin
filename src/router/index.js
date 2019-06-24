@@ -36,9 +36,7 @@ import businessRouter from './modules/myBusinessRoute'
 
 /**
  * constantRoutes
- * a base page that does not have permission requirements
- * all roles can be accessed
- * 没有权限要求的页面
+ * 没有权限要求的页面,所有角色都可访问
  */
 export const constantRoutes = [
   {

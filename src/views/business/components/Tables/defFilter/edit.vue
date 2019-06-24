@@ -1,6 +1,6 @@
 <template>
   <!-- 输入框选择器 -->
-  <div style="padding:10px">
+  <div>
     <el-input v-model="editData"
               :placeholder="placeholderStr"
               @blur="todoSearch"
@@ -13,8 +13,13 @@
 </template>
 <script>
 export default {
+  name:'editFilter',
   props: {
     label: {
+      type: String,
+      default: ''
+    },
+    paramKey:{
       type: String,
       default: ''
     },
@@ -38,11 +43,9 @@ export default {
   data() {
     return {
       editData: null,
-      doanima: false
     }
   },
-  mounted() {
-  },
+  mounted() {},
   destroyed() {},
   methods: {
     todoSearch() {
@@ -51,7 +54,7 @@ export default {
           filterKey: this.filterKey,
           label: this.label,
           value: this.editData,
-          ftn: this.ftn
+          paramKey: this.paramKey
         })
         this.editData = ''
       }
