@@ -1,13 +1,10 @@
 <template>
   <div>
-    运输报价
   </div>
 </template>
 <script>
 // import ChildComponents from './ChildComponents.vue'
 export default {
-  components: {},
-  props: {},
   data() {
     return {
       title: '组件标题',
@@ -15,24 +12,27 @@ export default {
       lastName: ''
     }
   },
+  props: {},
   computed: {
     fullName() {
       return this.firstName + this.lastName
     }
   },
   watch: {},
-  created() {
-  },
-  mounted() {
-  },
   methods: {
     getCurrentDate() {
       return new Date().toLocaleDateString()
     }
-  }
+  },
+  created() {
+  },
+  mounted() {
+  },
+  components: {}
 }
 </script>
-<style scoped>
-  /*@import "../base/reset.css";*/
+<style lang='scss' scoped>
+  /*@import "src/styles/mixin.scss"*/
+  /*@import "../../../../styles/index.scss";*/
 
 </style>

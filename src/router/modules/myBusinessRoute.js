@@ -103,10 +103,10 @@ const businessRouter = {
           meta: { title: '运输车信息' }
         },
         {
-          path: '/sendInfo',
-          component: () => import('@/views/business/contractorManage/sendInfo'),
-          name: 'sendInfo',
-          meta: { title: '提送信息' }
+          path: '/concatCarInfo',
+          component: () => import('@/views/business/contractorManage/concatCarInfo/concatCarInfo'),
+          name: 'concatCarInfo',
+          meta: { title: '提送车信息' }
         },
         {
           path: '/sendCarPrice',
@@ -116,7 +116,7 @@ const businessRouter = {
         },
         {
           path: '/transportPrice',
-          component: () => import('@/views/business/contractorManage/transportPrice'),
+          component: () => import('@/views/business/contractorManage/transportPrice/transportPrice'),
           name: 'transportPrice',
           meta: { title: '运输报价' }
         },
@@ -133,7 +133,21 @@ const businessRouter = {
           name: 'addTransportCar',
           meta: { title: '添加运输车' },
           hidden: true
-        }
+        },
+        {
+          path: '/addConcatCarInfo',
+          component: () => import('@/views/business/contractorManage/concatCarInfo/addConcatCarInfo'),
+          name: 'addConcatCarInfo',
+          meta: { title: '添加接送车' },
+          hidden: true
+        },
+        {
+          path: '/addTransportPrice',
+          component: () => import('@/views/business/contractorManage/transportPrice/addTransportPrice'),
+          name: 'addTransportPrice',
+          meta: { title: '添加运输报价' },
+          hidden: true
+        },
       ]
     }
   ]
