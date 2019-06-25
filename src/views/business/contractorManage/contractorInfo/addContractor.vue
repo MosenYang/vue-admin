@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="page-title">添加承运商</div>
+    <div class="page-title">{{pageType === 0?'新增':'编辑'}}承运商</div>
     <div>
       <el-form ref="dataForm"
                :rules="rules"
@@ -16,8 +16,7 @@
           </el-col>
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
             <el-form-item label="承运商类型" prop="type">
-              <el-select v-model="temp.type"
-                         class="filter-item"
+              <el-select v-model="temp.type" class="filter-item"
                          style="width: 100%"
                          placeholder="请选择类型">
                 <el-option v-for="item in contractorType"
@@ -47,8 +46,8 @@
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
             <el-form-item label="性别" prop="sex">
               <el-radio-group v-model="temp.sex">
-                <el-radio label="男" value="1"></el-radio>
-                <el-radio label="女" value="0"></el-radio>
+                <el-radio label="1">男</el-radio>
+                <el-radio label="2">女</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
@@ -59,7 +58,7 @@
           </el-col>
           <el-col class="column-col" :lg="6" :md="12" :sm="12">
             <el-form-item label="QQ号">
-              <el-input/>
+              <el-input v-model="temp.qq"/>
             </el-form-item>
           </el-col>
         </el-row>
@@ -72,7 +71,7 @@
                   <el-option v-for="item in statusOptions"
                              :key="item.id" :label="item.area_name" :value="item.id"/>
                 </el-select>
-                <el-select v-model="temp.start_city" @change="getCity" placeholder="请选择市">
+                <el-select v-model="temp.start_city" placeholder="请选择市">
                   <el-option v-for="item in statusOptions1"
                              :key="item.id" :label="item.area_name" :value="item.id"/>
                 </el-select>
@@ -86,7 +85,7 @@
                   <el-option v-for="item in statusOptions"
                              :key="item.id" :label="item.area_name" :value="item.id"/>
                 </el-select>
-                <el-select v-model="temp.end_city" @change="getCity" placeholder="请选择市">
+                <el-select v-model="temp.end_city" placeholder="请选择市">
                   <el-option v-for="item in statusOptions2"
                              :key="item.id" :label="item.area_name" :value="item.id"/>
                 </el-select>
@@ -101,13 +100,14 @@
         </el-row>
         <el-row class="" :lg="24" :md="24" :sm="24">
           <el-form-item label="备注">
-            <el-input v-model="temp.remarks" :autosize="{ minRows: 2, maxRows: 4}" type="textarea"
+            <el-input v-model="temp.remarks"
+                      :autosize="{ minRows: 2, maxRows: 4}" type="textarea"
                       placeholder="请填写"/>
           </el-form-item>
         </el-row>
         <el-form-item class="dialog-footer">
-          <el-button type="primary" @click="addCantroctor('dataForm')">
-            创建
+          <el-button type="primary" @click="addContractor('dataForm')">
+            {{pageType === 0?'创建':'编辑'}}
           </el-button>
           <el-button>
             返回
@@ -119,7 +119,7 @@
 </template>
 <script>
 import { searchType } from '../../../../api/baseApi'
-import { contractorUpdate } from '../../../../api/contractorManage/contractor'
+import { contractorUpdate, contractorAdd } from '../../../../api/contractorManage/contractor'
 
 export default {
   data() {
@@ -154,7 +154,7 @@ export default {
       }
     }
     return {
-      title: '组件标题',
+      pageType: 0,//0 新增 1 编辑
       statusOptions: [],
       statusOptions1: [],
       statusOptions2: [],
@@ -177,15 +177,14 @@ export default {
         mobile: '',
         position: '',
         telephone: '',
-        sex: '',//
+        sex: null,//
         company_address: '',
         remarks: '',
         start_province: '',
         start_city: '',
-        id_card: '',
-        home_address: '',
         end_province: '',
-        end_city: ''
+        end_city: '',
+        qq: ''
       },
       contractorType
     }
@@ -194,19 +193,30 @@ export default {
   computed: {},
   watch: {},
   created() {
-    this.getData()
+    this.getAreaData()
   },
-  mounted() {
+  async mounted() {
+    let id = this.$route.query.id
+    console.log('this.$route.query', this.$route.query)
+    if (id) {
+      this.pageType = 1
+      this.temp = Object.assign({}, this.$route.query)
+      if (this.temp.start_city) {
+        await this.getStartProvince(this.temp.start_city)
+      }
+      if (this.temp.end_city) {
+        await this.getEndProvince(this.temp.end_city)
+      }
+    }
   },
   methods: {
-    getData() {
+    getAreaData() {
       searchType({ type: 'area' }).then((res) => {
         if (res.code === 200) {
           this.statusOptions = res.data
         }
       })
     },
-
     getStartProvince(val) {
       this.statusOptions1 = []
       searchType({ type: 'area', pid: val }).then((res) => {
@@ -214,28 +224,6 @@ export default {
           this.statusOptions1 = res.data
         }
       })
-    },
-    addCantroctor(formName) {
-      console.log('params', this.temp)
-      // this.temp.business = Number(this.temp.business)
-      this.temp.sex = this.temp.sex == '男' ? 1 : 0
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          contractorUpdate(this.temp).then((res) => {
-            console.log('res', res)
-            if (res.code === 200) {
-              this.$message({
-                type: 'success',
-                message: '添加成功'
-              })
-            }
-          })
-        } else {
-          console.log('提交有误!!')
-          return false
-        }
-      })
-
     },
     getEndProvince(val) {
       this.statusOptions2 = []
@@ -246,17 +234,39 @@ export default {
         }
       })
     },
-    getCity() {
-      let id = this.temp.city
-      this.statusOptions3 = []
-      searchType({ type: 'area', pid: id }).then((res) => {
-        if (res.code === 200) {
-          this.statusOptions3 = res.data
+    //添加或者编辑
+    addContractor(formName) {
+      console.log('params参数', this.temp)
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          if (this.pageType === 1) {
+            contractorUpdate(this.temp).then((res) => {
+              if (res.code == 200) {
+                this.$message({
+                  type: 'success',
+                  message: '编辑成功'
+                })
+              }
+            })
+          }
+          if (this.pageType === 0) {
+            contractorAdd(this.temp).then((res) => {
+              if (res.code == 200) {
+                this.$message({
+                  type: 'success',
+                  message: '添加成功'
+                })
+              }
+            })
+          }
+        } else {
+          console.log('提交有误!!')
+          return false
         }
       })
+
     }
   },
-
   components: {}
 }
 var contractorType = [

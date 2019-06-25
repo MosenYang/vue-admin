@@ -1,9 +1,9 @@
 <template>
   <div class="page">
     <div class="page-title flex-between">
-      <span>创建承运商</span>
-      <el-button type="primary" @click="addContractor">
-        添加承运商
+      <span>板车信息</span>
+      <el-button type="primary" icon="el-icon-plus" @click="addContractor">
+        添加运输车辆
       </el-button>
     </div>
     <div class="totalTable-container">
@@ -28,7 +28,10 @@
               style="width: 200px;"
               class="filter-item"
               @keyup.enter.native="handleSearch"/>
-            <el-button @click="handleSearch" class="filter-item" type="primary" icon="el-icon-search">
+            <el-button @click="handleSearch"
+                       class="filter-item"
+                       type="primary"
+                       icon="el-icon-search">
               查询
             </el-button>
           </div>
@@ -44,7 +47,7 @@
           <el-button class="filter-item" type="primary" icon="el-icon-search">
             导入
           </el-button>
-          <el-button class="filter-item" type="primary" icon="el-icon-search">
+          <el-button class="filter-item" type="primary" icon="el-icon-download">
             下载导入模板
           </el-button>
         </div>
@@ -58,7 +61,6 @@
                         :page-config="pageData"
                         :column-config="columnData"
                         @filter-change="getFilter"
-
                         :headerCellStyle="headerCss"
                         @page-change="pageChange"/>
     </div>
@@ -66,8 +68,14 @@
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
-import { contractorRegister, contractorList } from '../../../../api/contractorManage/contractor'
-import { searchType } from '../../../../api/baseApi'// 这接口也可以搜索业务小哥
+import {
+  transportList,
+  transportAdd,
+  transportUpdate,
+  transportDelete,
+  transportUpload
+} from '../../../../api/contractorManage/transportCarInfo'
+import { searchType } from '../../../../api/baseApi'// 这接口搜索业务小哥
 import comControl from './control.vue'//控制器
 // 自定义表格配置
 export default {
@@ -82,12 +90,12 @@ export default {
       actionConfig: {
         type: 'customize',
         label: '操作区',
-        width: 140,
+        width: 230,
         fixed: true,
         component: comControl,
         handlers: {
           editOrder: (row) => {
-            this.$router.push({ path: '/addContractor', query: row })
+            this.$router.push({ path: '/addTransportCar', query: row })
           },
           deleteOrder: this.deleteOrder
         }
@@ -123,7 +131,7 @@ export default {
   methods: {
     getTableList() {
       let params = { ...this.defParams }
-      contractorList(params).then((res) => {
+      transportList(params).then((res) => {
         let { info, total } = res.data
         this.total = total
         this.tableData = info
@@ -143,35 +151,21 @@ export default {
         comConfig.filterKey = item.key
         comConfig.paramKey = item.paramKey ? item.paramKey : item.key
         config.type = comConfig.type = item.type
-        if (item.name === '承运商类别') {
-          let data = [
-            { name: '运输承运商', key: 'transport' },
-            { name: '提送承运商', key: 'tisong' }
-          ]
-          comConfig.comData = data
-        }
-        if (item.name === '性别') {
-          let sex = [
-            { name: '男', key: 1 },
-            { name: '女', key: 2 }
-          ]
-          comConfig.comData = sex
-        }
+
         if (item.name === '黑名单') {
           let list = [
             { name: '是', key: 1 },
-            { name: '否', key: 0 }
+            { name: '否', key: 2 }
           ]
           comConfig.comData = list
         }
-
         config.filterConfig = comConfig
         this.columnData.push(config)
       })
     },
     //去添加客户
     addContractor() {
-      this.$router.push({ path: 'addContractor' })
+      this.$router.push({ path: '/addTransportCar' })
     },
     //改变显示数
     changePageLimit(val) {
@@ -227,7 +221,7 @@ export default {
     // 删除订单
     deleteOrder(row) {
       console.log(row, '删除行')
-      contractorRegister({ id: row.id }).then((res) => {
+      transportDelete({ id: row.id }).then((res) => {
         if (res.code == 200) {
           this.tableData.splice(this.tableData.indexOf(row), 1)
           this.$message({
@@ -239,6 +233,7 @@ export default {
     }
   }
 }
+
 var option = [
   {
     value: '10',
@@ -258,25 +253,20 @@ var defParams = {
   query: '',// 搜索字段
   start: 1,
   length: 10,// 条数
+  driver_name: '',//司机姓名
   company: '',//公司
-  type: '',//公司类别 transport:运输商；tisong:提送
-  name: '',// 姓名
-  position: '',//职位
-  sex: '',//性别
-  mobile: '',//客户手机
-  telephone: '',//电话
-  company_address: '',
-  business_scope: '',// 经营范围
-  start_address: '',
-  end_address: '',
-  wechat: '',//微信
-  qq: '',// qq
-  fax: '',//传真号
-  create_user_name: '',//创建人
-  created_at_from: '',// 创建时间
-  created_at_to: '',//创建时间截止
-  updated_at_from: '',//更新时间起
-  updated_at_to: ''//更新时间截止
+  mobile: '',
+  license_plate_number: '',//车牌号
+  trailer: '',
+  id_card: '',// 身份证
+  linkman: '',//紧急联系人
+  contact_number: '',//紧急联系人手机号
+  parking_spaces_num: '',//车位数
+  main_circuit: '',// 主线数
+  blacklist: '',// 黑名单 1:是;2:否
+  creator: '',// 创建人
+  created_at_form: '',//创建起始时间
+  created_at_to: ''//创建结束时间
 }
 var initThData = [
   {
@@ -285,25 +275,10 @@ var initThData = [
     type: 'editFilter'
   },
   {
-    name: '承运商类别',
-    key: 'type',
-    type: 'selectFilter',
-    width: 150
-  },
-  {
-    name: '职位',
-    key: 'position',
-    type: 'editFilter'
-  },
-  {
     name: '姓名',
-    key: 'name',
-    type: 'editFilter'
-  },
-  {
-    name: '性别',
-    key: 'sex',
-    type: 'selectFilter'
+    key: 'driver_name',
+    type: 'editFilter',
+    width: 150
   },
   {
     name: '手机',
@@ -311,77 +286,73 @@ var initThData = [
     type: 'editFilter'
   },
   {
-    name: '主营出发地',
-    key: 'start_address',
+    name: '车牌号',
+    key: 'license_plate_number',
+    type: 'editFilter'
+  },
+  {
+    name: '车挂号',
+    key: 'trailer',
+    type: 'editFilter'
+  },
+  {
+    name: '身份证',
+    key: 'id_card',
+    type: 'editFilter'
+  },
+  {
+    name: '紧急联系人',
+    key: 'linkman',
     type: 'editFilter',
     width: 150
   },
   {
-    name: '主营到达地',
-    key: 'end_address',
+    name: '联系人电话',
+    key: 'contact_number',
     type: 'editFilter',
     width: 150
-
   },
   {
-    name: '固话',
+    name: '运费总额',
     key: 'end_address',
+    isNeed:false
+  },
+  {
+    name: '保额',
+    key: 'coverage',
+    isNeed:false
+  },
+  {
+    name: '车位数',
+    key: 'parking_spaces_num',
     type: 'editFilter'
   },
   {
-    name: '公司地址',
-    key: 'company_address',
+    name: '主线路',
+    key: 'main_circuit',
     type: 'editFilter'
   },
   {
-    name: '经营范围',
-    key: 'business_scope',
-    type: 'editFilter'
+    name: '黑名单',
+    key: 'blacklist',
+    type: 'selectFilter'
   },
   {
-    name: '微信号',
-    key: 'wechat',
-    type: 'editFilter'
-  },
-  {
-    name: 'QQ号',
-    key: 'qq',
-    type: 'editFilter'
-  },
-  {
-    name: '传真',
-    key: 'fax',
-    type: 'editFilter'
+    name: '创建时间',
+    key: 'created_at',
+    type: 'editFilter',
+    paramKey: 'created_at_form'
   },
   {
     name: '创建人',
-    key: 'create_user_name',
+    key: 'creator',
     type: 'editFilter'
-  },
-  {
-    name: '黑名单',// 没有字段
-    key: 'create_user_name',
-    type: 'selectFilter',
-    paramKey: null
-  },
-  {
-    name: '创建时间',// 没有字段
-    key: 'created_at',
-    type: 'editFilter',
-    paramKey: 'created_at_from'
-  },
-  {
-    name: '更新时间',// 没有字段
-    key: 'updated_at',
-    type: 'editFilter',
-    paramKey: 'updated_at_from'
   },
   {
     name: '备注',// 没有字段
     key: 'remarks',
-    isNeed: false,
-    type: null,
-    paramKey: null
+    paramKey: null,
+    isNeed:false
   }
 ]
 var tableConfig = {

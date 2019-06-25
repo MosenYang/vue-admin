@@ -98,9 +98,9 @@ const businessRouter = {
         },
         {
           path: '/transportCarInfo',
-          component: () => import('@/views/business/contractorManage/transportCarInfo'),
+          component: () => import('@/views/business/contractorManage/transportCarInfo/transportCarInfo'),
           name: 'transportCarInfo',
-          meta: { title: '板车信息' }
+          meta: { title: '运输车信息' }
         },
         {
           path: '/sendInfo',
@@ -125,6 +125,13 @@ const businessRouter = {
           component: () => import('@/views/business/contractorManage/contractorInfo/addContractor'),
           name: 'addContractor',
           meta: { title: '添加承运商' },
+          hidden: true
+        },
+        {
+          path: '/addTransportCar',
+          component: () => import('@/views/business/contractorManage/transportCarInfo/addTransportCar'),
+          name: 'addTransportCar',
+          meta: { title: '添加运输车' },
           hidden: true
         }
       ]

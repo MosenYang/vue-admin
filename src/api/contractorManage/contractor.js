@@ -1,15 +1,5 @@
 import request from '../../utils/request'
 
-// 添加承包商信息
-export function contractorAdd(data) {
-  return request({
-    baseURL: '',
-    url: '/api/carrier/add',
-    method: 'post',
-    data
-  })
-}
-
 //列表
 export function contractorList(data) {
   return request({
@@ -29,7 +19,18 @@ export function contractorRegister(data) {
     data
   })
 }
-//更新
+
+//添加 承运商
+export function contractorAdd(data) {
+  return request({
+    baseURL: '',
+    url: '/api/carrier/add',
+    method: 'post',
+    data
+  })
+}
+
+//更新 承运商
 export function contractorUpdate(data) {
   return request({
     baseURL: '',
