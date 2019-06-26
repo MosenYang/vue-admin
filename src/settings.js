@@ -33,7 +33,5 @@ module.exports = {
    * If you want to also use it in dev, you can pass ['production', 'development']
    */
   errorLog: 'production',
-  /**
-   * @description 根据情况是否使用mock模拟数据
-   */
+
 }

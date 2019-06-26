@@ -12,7 +12,7 @@ export default {
       const docEl = document.documentElement
       const resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize'
       const recalc = function() {
-        var innerWidth = docEl.getBoundingClientRect().width || docEl.clientWidth || window.innerWidth
+        let innerWidth = docEl.getBoundingClientRect().width || docEl.clientWidth || window.innerWidth
         innerWidth < 320 ? innerWidth = 320 : innerWidth
         if (!innerWidth) {
           return false
