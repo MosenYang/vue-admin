@@ -77,7 +77,7 @@
         </el-row>
         <el-form-item class="dialog-footer">
           <el-button type="primary" @click="addContractor('dataForm')">保存</el-button>
-          <el-button>返回</el-button>
+          <el-button  @click="goBack">返回</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -126,10 +126,10 @@ export default {
     let checkDown = (rule, value, callback) => {
       let companyName = this.companyName
       if (!companyName || companyName == '') {
-        this.temp.company_id = null
+        this.temp.carrier_id = null
         return callback(new Error('请填入公司名称'))
       }
-      if (this.temp.company_id) {
+      if (this.temp.carrier_id) {
         callback()
       } else {
         return callback(new Error('请选系统匹配的选项'))
@@ -172,7 +172,6 @@ export default {
   watch: {},
   created() {
     this.getAreaData()
-
   },
   async mounted() {
     let id = this.$route.query.id
@@ -216,10 +215,13 @@ export default {
     // 选公司
     handleSelectCompany(item) {
       console.log(item)
-      this.temp.company_id = item.id
+      this.temp.carrier_id = item.id
       this.companyName = item.value
     },
     //
+    goBack(){
+      this.$router.go(-1)
+    },
     getAreaData() {
       searchType({ type: 'area' }).then((res) => {
         if (res.code === 200) {
@@ -251,12 +253,13 @@ export default {
       console.log('params参数', this.temp)
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          transportAdd(this.temp).then((res) => {
+          addCarPrice(this.temp).then((res) => {
             if (res.code == 200) {
               this.$message({
                 type: 'success',
                 message: '添加成功'
               })
+              this.$router.go(-1)
             }
           })
         } else {

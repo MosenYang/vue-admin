@@ -10,7 +10,7 @@
                style="padding: 30px 40px 20px 0">
         <el-row>
           <el-col class="column-col" :lg="8" :md="12" :sm="12">
-            <el-form-item label="类型" prop="business">
+            <el-form-item label="业务类型" prop="business">
               <el-select v-model="temp.business"
                          class="filter-item"
                          style="width: 100%"
@@ -37,8 +37,8 @@
           <el-col class="column-col" :lg="8" :md="12" :sm="12">
             <el-form-item label="性别" prop="sex">
               <el-radio-group v-model="temp.sex">
-                <el-radio label="男" value="1"></el-radio>
-                <el-radio label="女" value="0"></el-radio>
+                <el-radio label="1">男</el-radio>
+                <el-radio label="2">女</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
@@ -77,7 +77,7 @@
             </el-form-item>
           </el-col>
           <el-col class="column-col" :lg="8" :md="12" :sm="12">
-            <el-form-item label="公司地址">
+            <el-form-item label="公司地址" prop="county">
               <div class="flex">
                 <el-select v-model="province" value-key="id" @change="getProvince" placeholder="请选择省">
                   <el-option v-for="item in statusOptions"
@@ -144,9 +144,6 @@
           </el-button>
           <el-button @click="dialogFormVisible = false">
             返回
-          </el-button>
-          <el-button @click="login">
-            test
           </el-button>
         </el-form-item>
       </el-form>
@@ -227,6 +224,9 @@ export default {
         username: [
           { required: true, message: '用户名不能为空', trigger: 'blur' },
           { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+        ],
+        county:[
+          { required: true, message: '请选择城市', trigger: 'change' }
         ],
         business: [{ required: true, message: '商业类型', trigger: 'change' }],
         type: [{ required: true, message: '客户类型', trigger: 'change' }]
@@ -315,7 +315,6 @@ export default {
     createData(formName) {
       console.log('params', this.temp)
       this.temp.business = Number(this.temp.business)
-      this.temp.sex = this.temp.sex == '男' ? 1 : 0
       this.$refs[formName].validate((valid) => {
         if (valid) {
           clientAdd(this.temp).then((res) => {

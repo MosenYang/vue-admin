@@ -84,12 +84,12 @@ export default {
       actionConfig: {
         type: 'customize',
         label: '操作区',
-        width: 230,
+        width: 140,
         fixed: true,
         component: comControl,
         handlers: {
           editOrder: (row) => {
-            this.$router.push({ path: '/addTransportCar', query: row })
+            this.$router.push({ path: '/addTransportPrice', query: row })
           },
           deleteOrder: this.deleteOrder
         }

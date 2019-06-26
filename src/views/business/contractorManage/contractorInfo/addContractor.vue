@@ -98,7 +98,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row class="" :lg="24" :md="24" :sm="24">
+        <el-row  :lg="24" :md="24" :sm="24">
           <el-form-item label="备注">
             <el-input v-model="temp.remarks"
                       :autosize="{ minRows: 2, maxRows: 4}" type="textarea"

@@ -83,8 +83,8 @@
         </el-row>
         <el-row :lg="24" :md="24" :sm="24">
           <el-form-item label="备注">
-            <el-input :autosize="{ minRows: 2, maxRows: 4}" type="textarea"
-                      placeholder="请填写"/>
+            <el-input v-model="temp.remarks" :autosize="{ minRows: 2, maxRows: 4}" type="textarea"
+                      placeholder="请填写备注"/>
           </el-form-item>
         </el-row>
         <el-form-item class="dialog-footer">
@@ -102,7 +102,7 @@ import { searchType } from '../../../../api/baseApi'
 import { addTransportPrice, updateTransportPrice } from '../../../../api/contractorManage/transportPrice'
 
 let defParams = {
-  carrier_id: '',
+  company: '',
   start_province: '',
   start_city: '',
   end_province: '',
@@ -111,7 +111,8 @@ let defParams = {
   peer_price: '',// 同行价
   network_price: '',
   quotation_user: '',
-  mobile: ''
+  mobile: '',
+  remarks:''
 }
 export default {
   data() {
@@ -158,10 +159,10 @@ export default {
     let checkDownMisIn = (rule, value, callback) => {
       let companyName = this.companyName
       if (!companyName || companyName == '') {
-        this.temp.carrier_id = null
+        this.temp.company = null
         return callback(new Error('请填入公司名称'))
       }
-      if (this.temp.carrier_id) {
+      if (this.temp.company) {
         callback()
       } else {
         return callback(new Error('请选系统匹配的选项'))
@@ -214,7 +215,7 @@ export default {
   },
   async mounted() {
     let id = this.$route.query.id
-    console.log('this.$route.query', this.$route.query)
+    console.log(this.$route.query,'this.$route.query')
     if (id) {
       this.pageType = 1
       this.temp = Object.assign({}, this.$route.query)
@@ -227,20 +228,34 @@ export default {
     }
   },
   methods: {
+    // 匹配
     querySearch(queryString, cb) {
-      let companyOption = this.companyOption
       let createFilter = (query) => {
         return (item) => {
           return (item.value.toLowerCase().indexOf(query.toLowerCase()) === 0)
         }
       }
-      let results = queryString ? companyOption.filter(createFilter(queryString)) : companyOption
-      cb(results)
+      if (queryString) {
+        searchType({ type: 'trans_company', query: queryString }).then((res) => {
+          if (res.code === 200) {
+            let option = this.companyOption = res.data
+            if (option.length >= 1) {
+              option.forEach((item) => {item.value = item.company})
+              let results = option.filter(createFilter(queryString))
+              cb(results)
+            } else {
+              cb(option)
+            }
+          }
+        })
+        return
+      }
+      cb(this.companyOption)
     },
     // 选公司
     handleSelectCompany(item) {
       console.log(item, 'item')
-      this.temp.carrier_id = item.id
+      this.temp.company = item.value
       this.companyName = item.value
     },
     getAreaData() {
@@ -284,6 +299,7 @@ export default {
                   type: 'success',
                   message: '修改成功'
                 })
+                this.$router.go(-1)
               }
             })
           }
@@ -294,6 +310,7 @@ export default {
                   type: 'success',
                   message: '添加成功'
                 })
+                this.$router.go(-1)
               }
             })
           }
