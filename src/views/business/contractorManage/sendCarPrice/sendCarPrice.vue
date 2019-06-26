@@ -1,9 +1,9 @@
 <template>
   <div class="page">
     <div class="page-title flex-between">
-      <span>提送车信息</span>
-      <el-button type="primary" icon="el-icon-plus" @click="addConcatCar">
-        添加提送车辆
+      <span>提送报价信息</span>
+      <el-button type="primary" icon="el-icon-plus" @click="addSendCarPrice">
+        添加提送报价
       </el-button>
     </div>
     <div class="totalTable-container">
@@ -69,15 +69,12 @@
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
 import {
-  concatCarList,
-  addConcatCarList,
-  updateConcatCar,
-  deleteConcatCar,
-  uploadConcatCar,
+  sendCarPriceList,
+  deleteCarPrice,
   templateDownLoad,
-  infoExport,
-  infoImport
-} from '../../../../api/contractorManage/concatCarInfo'
+  templateImport,
+  templateExport
+} from '../../../../api/contractorManage/sendCarPrice'
 import { searchType } from '../../../../api/baseApi'// 这接口搜索业务小哥
 import comControl from './control.vue'//控制器
 // 自定义表格配置
@@ -98,7 +95,7 @@ export default {
         component: comControl,
         handlers: {
           editOrder: (row) => {
-            this.$router.push({ path: '/addConcatCarInfo', query: row })
+            this.$router.push({ path: '/addSendCarPrice', query: row })
           },
           deleteOrder: this.deleteOrder
         }
@@ -134,7 +131,7 @@ export default {
   methods: {
     getTableList() {
       let params = { ...this.defParams }
-      concatCarList(params).then((res) => {
+      sendCarPriceList(params).then((res) => {
         let { info, total } = res.data
         this.total = total
         this.tableData = info
@@ -167,14 +164,13 @@ export default {
       })
     },
     //去添加客户
-    addConcatCar() {
-      this.$router.push({ path: '/addConcatCarInfo' })
+    addSendCarPrice() {
+      this.$router.push({ path: '/addSendCarPrice' })
     },
     //改变显示数
     changePageLimit(val) {
       this.getTableList()
     },
-
     //设置表格样式
     headerCss() {
       return 'font-size:16px; font-weight: 800;'
@@ -224,7 +220,7 @@ export default {
     // 删除订单
     deleteOrder(row) {
       console.log(row, '删除行')
-      transportDelete({ id: row.id }).then((res) => {
+      deleteCarPrice({ id: row.id }).then((res) => {
         if (res.code == 200) {
           this.tableData.splice(this.tableData.indexOf(row), 1)
           this.$message({
@@ -256,17 +252,15 @@ var defParams = {
   query: '',// 搜索字段
   start: 1,
   length: 10,// 条数
-  vehicles: 1,//	车辆所属1.自有车辆 2.外协车辆
   company: '',//公司
-  creator: '',//创建人
-  name: '',//司机名
-  mobile: '',// 手机号
-  car_num: '',//车牌号
-  id_card: '',// 身份证
-  validate: '',// 验车权限
-  warehousing: '',//入库权限
-  blacklist: '',//黑名单
-  business_scope: ''// 经营范围
+  mobile: '',
+  quotation_user: '',//报价人
+  start_address: '',// 地址
+  create_user: '',// 创建人
+  created_at_from: '',//创建时间
+  created_at_to: '',//创建时间止
+  updated_at_from: '',//
+  updated_at_to: ''//
 }
 var initThData = [
   {
@@ -276,7 +270,7 @@ var initThData = [
   },
   {
     name: '姓名',
-    key: 'name',
+    key: 'quotation_user',
     type: 'editFilter',
     width: 150
   },
@@ -286,55 +280,45 @@ var initThData = [
     type: 'editFilter'
   },
   {
-    name: '车牌号',
-    key: 'car_num',
+    name: '提送区域',
+    key: 'start_address',
     type: 'editFilter'
   },
   {
-    name: '身份证号',
-    key: 'id_card',
+    name: '同行价',
+    key: 'peer_price',
     type: 'editFilter'
   },
   {
-    name: '提送费总额',
-    key: 'arrearages',
+    name: '汽贸价',
+    key: 'clients_price',
     type: 'editFilter'
   },
   {
-    name: '验车权限',
-    key: 'validate',
-    type: 'selectFilter',
+    name: '网络价',
+    key: 'network_price',
+    type: 'editFilter',
     width: 150
   },
   {
-    name: '入库权限',
-    key: 'warehousing',
-    type: 'selectFilter',
+    name: '维护人',
+    key: 'create_user',
+    type: 'editFilter',
     width: 150
   },
   {
-    name: '提送范围',
-    key: 'business_scope',
-    type: 'editFilter'
-  },
-  {
-    name: '黑名单',
-    key: 'blacklist',
-    type: 'selectFilter'
+    name: '更新时间',
+    key: 'updated_at',
+    isNeed: false
   },
   {
     name: '创建时间',
     key: 'created_at',
-    type: 'editFilter'
-  },
-  {
-    name: '创建人',
-    key: 'creator',
-    type: 'editFilter'
+    isNeed: false
   },
   {
     name: '备注',// 没有字段
-    key: 'comment',
+    key: 'remarks',
     paramKey: null,
     isNeed: false
   }

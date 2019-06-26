@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="page-title">{{pageType === 0?'新增':'编辑'}}运输报价</div>
+    <div class="page-title">创建提送车报价</div>
     <div>
       <el-form ref="dataForm"
                :rules="rules"
@@ -15,9 +15,8 @@
                 v-model="companyName"
                 style="width: 100%"
                 :fetch-suggestions="querySearch"
-                placeholder="请输入公司名"
+                placeholder="请输入板车公司名"
                 @select="handleSelectCompany"
-                :trigger-on-focus="false"
               ></el-autocomplete>
             </el-form-item>
           </el-col>
@@ -33,37 +32,25 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col class="column-col" :lg="8" :md="12" :sm="12">
-            <el-form-item label="发站地" prop="start_city">
+          <el-col class="column-col" :lg="16" :md="12" :sm="12">
+            <el-form-item label="发站地" prop="start_county">
               <div class="flex">
-                <el-select v-model="temp.start_province" @change="getStartProvince" placeholder="请选择省">
+                <el-select style="flex:1" v-model="temp.start_province" @change="getStartProvince" placeholder="请选择省">
                   <el-option v-for="item in statusOptions"
                              :key="item.id" :label="item.area_name" :value="item.id"/>
                 </el-select>
-                <el-select v-model="temp.start_city" placeholder="请选择市">
+                <el-select style="flex:1" v-model="temp.start_city" @change="getStartCity" placeholder="请选择市">
                   <el-option v-for="item in statusOptions1"
                              :key="item.id" :label="item.area_name" :value="item.id"/>
                 </el-select>
-              </div>
-            </el-form-item>
-          </el-col>
-          <el-col class="column-col" :lg="8" :md="12" :sm="12">
-            <el-form-item label="到站地" prop="end_city">
-              <div class="flex">
-                <el-select v-model="temp.end_province" @change="getEndProvince" placeholder="请选择省">
-                  <el-option v-for="item in statusOptions"
-                             :key="item.id" :label="item.area_name" :value="item.id"/>
-                </el-select>
-                <el-select v-model="temp.end_city" placeholder="请选择市">
+                <el-select style="flex:1" v-model="temp.start_county" placeholder="请选择区/县">
                   <el-option v-for="item in statusOptions2"
                              :key="item.id" :label="item.area_name" :value="item.id"/>
                 </el-select>
               </div>
             </el-form-item>
           </el-col>
-          <el-col class="column-col" :lg="8" :md="12" :sm="12"></el-col>
         </el-row>
-
         <el-row>
           <el-col class="column-col" :lg="8" :md="12" :sm="12">
             <el-form-item label="同行价" prop="peer_price">
@@ -81,17 +68,16 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row :lg="24" :md="24" :sm="24">
+        <el-row class="" :lg="24" :md="24" :sm="24">
           <el-form-item label="备注">
-            <el-input :autosize="{ minRows: 2, maxRows: 4}" type="textarea"
-                      placeholder="请填写"/>
+            <el-input v-model="temp.remarks"
+                      :autosize="{ minRows: 4, maxRows: 6}" type="textarea"
+                      placeholder="请填写备注"/>
           </el-form-item>
         </el-row>
         <el-form-item class="dialog-footer">
-          <el-button type="primary" @click="addContractor('dataForm')">
-            {{pageType === 0?'创建':'编辑'}}
-          </el-button>
-          <el-button @click="goToBack">返回</el-button>
+          <el-button type="primary" @click="addContractor('dataForm')">保存</el-button>
+          <el-button>返回</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -99,19 +85,19 @@
 </template>
 <script>
 import { searchType } from '../../../../api/baseApi'
-import { addTransportPrice, updateTransportPrice } from '../../../../api/contractorManage/transportPrice'
+import { addCarPrice, editCarPrice } from '../../../../api/contractorManage/sendCarPrice'
 
-let defParams = {
-  carrier_id: '',
-  start_province: '',
+var defData = {
+  carrier_id: '',// 承运商公司id
   start_city: '',
-  end_province: '',
-  end_city: '',
-  clients_price: null,//
-  peer_price: '',// 同行价
-  network_price: '',
-  quotation_user: '',
-  mobile: ''
+  start_province: '',
+  start_county: '',// 县id
+  clients_price: null,//汽贸价
+  peer_price: null,// 同行价
+  network_price: null,// 网络价
+  quotation_user: '',// 报价人
+  mobile: '',//手机号
+  remarks: ''//remarks
 }
 export default {
   data() {
@@ -130,7 +116,6 @@ export default {
         return callback(new Error('手机号不能为空'))
       }
       if (value.length !== 11) {
-        console.log('vvvv', value.length)
         return callback(new Error('请输入11位手机号'))
       }
       if (reg.test(value)) {
@@ -138,30 +123,13 @@ export default {
       }
       return callback(new Error('请输入正确的手机号'))
     }
-    //验证(值是对象)
-    let checkDownObj = (rule, value, callback) => {
-      if (value && value.key || value && value.id || value && value.value) {
-        callback()
-      } else {
-        return callback(new Error('请选系统匹配的选项'))
-      }
-    }
-    // 验证(值是id)
-    let checkDownId = (rule, value, callback) => {
-      if (value || value === 0) {
-        callback()
-      } else {
-        return callback(new Error('请选系统匹配的选项'))
-      }
-    }
-    // 模糊查询验证
-    let checkDownMisIn = (rule, value, callback) => {
+    let checkDown = (rule, value, callback) => {
       let companyName = this.companyName
       if (!companyName || companyName == '') {
-        this.temp.carrier_id = null
+        this.temp.company_id = null
         return callback(new Error('请填入公司名称'))
       }
-      if (this.temp.carrier_id) {
+      if (this.temp.company_id) {
         callback()
       } else {
         return callback(new Error('请选系统匹配的选项'))
@@ -172,23 +140,13 @@ export default {
       statusOptions: [],
       statusOptions1: [],
       statusOptions2: [],
-      temp: defParams,
-      contractorType,
       companyOption: mockData,
       companyName: null,
       rules: {
-        company: [
-          { required: true, validator: checkDownMisIn, trigger: ['blur', 'select', 'change'] }
-        ],
-        start_city: [
-          { required: true, message: '请选择城市', trigger: 'change' }
-        ],
-        end_city: [
-          { required: true, message: '请选择城市', trigger: 'change' }
-        ],
+        company: [{ required: true, validator: checkDown, trigger: ['blur', 'select', 'change'] }],
         quotation_user: [
-          { required: true, message: '请填写报价人', trigger: 'blur' },
-          { min: 2, max: 6, message: '长度在 2 到 6个字符', trigger: 'blur' }
+          { required: true, message: '报价人不能为空', trigger: 'blur' },
+          { min: 2, max: 20, message: '长度在 2 到 6 个字符', trigger: 'blur' }
         ],
         clients_price: [
           { required: true, message: '报价不能为空' },
@@ -202,8 +160,11 @@ export default {
           { required: true, message: '报价不能为空' },
           { type: 'number', message: '报价必须为数字值' }
         ],
-        mobile: [{ required: true, validator: checkPhone, trigger: 'blur' }]
-      }
+        mobile: [{ required: true, validator: checkPhone, trigger: 'blur' }],
+        start_county: [{ required: true, message: '请选择发站地区', trigger: 'change' }]
+      },
+      temp: defData,
+      contractorType
     }
   },
   props: {},
@@ -211,6 +172,7 @@ export default {
   watch: {},
   created() {
     this.getAreaData()
+
   },
   async mounted() {
     let id = this.$route.query.id
@@ -227,22 +189,37 @@ export default {
     }
   },
   methods: {
+    // 匹配
     querySearch(queryString, cb) {
-      let companyOption = this.companyOption
       let createFilter = (query) => {
         return (item) => {
           return (item.value.toLowerCase().indexOf(query.toLowerCase()) === 0)
         }
       }
-      let results = queryString ? companyOption.filter(createFilter(queryString)) : companyOption
-      cb(results)
+      if (queryString) {
+        searchType({ type: 'delivery_company', query: queryString }).then((res) => {
+          if (res.code === 200) {
+            let option = this.companyOption = res.data
+            if (option.length >= 1) {
+              option.forEach((item) => {item.value = item.company})
+              let results = option.filter(createFilter(queryString))
+              cb(results)
+            } else {
+              cb(option)
+            }
+          }
+        })
+        return
+      }
+      cb(this.companyOption)
     },
     // 选公司
     handleSelectCompany(item) {
-      console.log(item, 'item')
-      this.temp.carrier_id = item.id
+      console.log(item)
+      this.temp.company_id = item.id
       this.companyName = item.value
     },
+    //
     getAreaData() {
       searchType({ type: 'area' }).then((res) => {
         if (res.code === 200) {
@@ -253,57 +230,43 @@ export default {
     getStartProvince(val) {
       this.statusOptions1 = []
       this.temp.start_city = null
+      this.temp.start_county = null
       searchType({ type: 'area', pid: val }).then((res) => {
         if (res.code === 200) {
           this.statusOptions1 = res.data
         }
       })
     },
-    getEndProvince(val) {
+    getStartCity(val) {
       this.statusOptions2 = []
-      this.temp.end_city = null
-      console.log(val)
+      this.temp.start_county = null
       searchType({ type: 'area', pid: val }).then((res) => {
         if (res.code === 200) {
           this.statusOptions2 = res.data
         }
       })
     },
-    goToBack(){
-      this.$router.go(-1)
-    },
     //添加或者编辑
     addContractor(formName) {
       console.log('params参数', this.temp)
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          if (this.pageType === 1) {
-            updateTransportPrice(this.temp).then((res) => {
-              if (res.code == 200) {
-                this.$message({
-                  type: 'success',
-                  message: '修改成功'
-                })
-              }
-            })
-          }
-          if (this.pageType === 0) {
-            addTransportPrice(this.temp).then((res) => {
-              if (res.code == 200) {
-                this.$message({
-                  type: 'success',
-                  message: '添加成功'
-                })
-              }
-            })
-          }
+          transportAdd(this.temp).then((res) => {
+            if (res.code == 200) {
+              this.$message({
+                type: 'success',
+                message: '添加成功'
+              })
+            }
+          })
         } else {
           console.log('提交有误!!')
           return false
         }
       })
 
-    }
+    },
+    getOptionData() {}
   },
   components: {}
 }

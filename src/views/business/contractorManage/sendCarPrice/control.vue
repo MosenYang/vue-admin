@@ -2,6 +2,7 @@
   <div class="control-wrap">
     <el-button class="edit" @click.stop="edit" size="mini">编辑</el-button>
     <el-button class="delete-btn" @click.stop="deletes" size="mini">删除</el-button>
+    <el-button class="edit" @click.stop="deletes" size="mini">上传凭证</el-button>
   </div>
 </template>
 <script>

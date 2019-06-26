@@ -2,7 +2,7 @@
   <div class="page">
     <div class="page-title flex-between">
       <span>运输报价</span>
-      <el-button type="primary" icon="el-icon-plus" @click="addContractor">
+      <el-button type="primary" icon="el-icon-plus" @click="addTransportPrice">
         添加运输报价
       </el-button>
     </div>
@@ -68,7 +68,7 @@
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
-import { transportPriceList,updateTransportPrice,deleteTransportPrice,template,templateImport,templateExport } from '../../../../api/contractorManage/transportPrice'
+import { transportPriceList,deleteTransportPrice,template,templateImport, templateExport} from '../../../../api/contractorManage/transportPrice'
 import { searchType } from '../../../../api/baseApi'// 这接口搜索业务小哥
 import comControl from './control.vue'//控制器
 // 自定义表格配置
@@ -158,14 +158,13 @@ export default {
       })
     },
     //去添加客户
-    addContractor() {
-      this.$router.push({ path: '/addTransportCar' })
+    addTransportPrice() {
+      this.$router.push({ path: '/addTransportPrice' })
     },
     //改变显示数
     changePageLimit(val) {
       this.getTableList()
     },
-
     //设置表格样式
     headerCss() {
       return 'font-size:16px; font-weight: 800;'
@@ -174,7 +173,6 @@ export default {
     clickRow(row) {
       console.log('', '点击了')
     },
-
     // 筛选事件
     getFilter(val) {
       let param = Object.assign(this.defParams, val, { start: 1 })
@@ -215,8 +213,8 @@ export default {
     // 删除订单
     deleteOrder(row) {
       console.log(row, '删除行')
-      transportDelete({ id: row.id }).then((res) => {
-        if (res.code == 200) {
+      deleteTransportPrice({ id: row.id }).then((res) => {
+        if (res.code === 200) {
           this.tableData.splice(this.tableData.indexOf(row), 1)
           this.$message({
             message: '删除成功',
@@ -255,7 +253,7 @@ var defParams = {
   created_at_from: '',//创建时间
   created_at_to: '',//创建时间止
   updated_at_from: '',//更新时间起
-  updated_at_to: '',// 更新时间止
+  updated_at_to: ''// 更新时间止
 }
 var initThData = [
 
@@ -305,20 +303,20 @@ var initThData = [
   {
     name: '维护人',
     key: 'create_user',
-    isNeed: false,
+    isNeed: false
 
   },
   {
     name: '更新时间',
     key: 'updated_at',
     isNeed: false,
-    paramKey:"updated_at_from"
+    paramKey: 'updated_at_from'
   },
   {
     name: '创建时间',
     key: 'created_at',
     type: 'editFilter',
-    paramKey:'created_at_from'
+    paramKey: 'created_at_from'
   },
   {
     name: '备注',// 没有字段

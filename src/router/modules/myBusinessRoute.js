@@ -86,7 +86,7 @@ const businessRouter = {
       path: 'contractorManage',
       name: 'contractorManage',
       component: () => import('@/views/business/contractorManage/index'),
-      meta: { title: '承运商' },
+      meta: { title: '承运商管理' },
       children: [
         {
           path: '/contractorInfo',
@@ -110,15 +110,23 @@ const businessRouter = {
         },
         {
           path: '/sendCarPrice',
-          component: () => import('@/views/business/contractorManage/sendCarPrice'),
+          component: () => import('@/views/business/contractorManage/sendCarPrice/sendCarPrice'),
           name: 'sendCarPrice',
-          meta: { title: '提送报价' }
+          meta: { title: '提送报价信息' }
         },
+
         {
           path: '/transportPrice',
           component: () => import('@/views/business/contractorManage/transportPrice/transportPrice'),
           name: 'transportPrice',
-          meta: { title: '运输报价' }
+          meta: { title: '运输报价信息' }
+        },
+        {
+          path: '/addSendCarPrice',
+          component: () => import('@/views/business/contractorManage/sendCarPrice/addSendCarPrice'),
+          name: 'addSendCarPrice',
+          meta: { title: '添加提送报价' },
+          hidden: true
         },
         {
           path: '/addContractor',
@@ -147,7 +155,7 @@ const businessRouter = {
           name: 'addTransportPrice',
           meta: { title: '添加运输报价' },
           hidden: true
-        },
+        }
       ]
     }
   ]
