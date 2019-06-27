@@ -1,6 +1,6 @@
 <template>
   <div>
-    回单信息
+    提成
   </div>
 </template>
 <script>

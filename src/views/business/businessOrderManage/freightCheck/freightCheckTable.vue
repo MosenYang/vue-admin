@@ -1,6 +1,6 @@
 <template>
   <div>
-    回单信息
+    运费校验
   </div>
 </template>
 <script>

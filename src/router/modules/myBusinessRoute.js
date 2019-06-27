@@ -53,6 +53,42 @@ const businessRouter = {
           component: () => import('@/views/business/businessOrderManage/orderTable/orderTotalShow2'),
           name: 'businessOrderShow',
           meta: { title: '测试页' }
+        },
+        {
+          path: '/feedbackOrderinfo',
+          component: () => import('@/views/business/businessOrderManage/feedbackOrderinfo/feedbackOrderTable'),
+          name: 'feedbackOrderinfo',
+          meta: { title: '回单信息' }
+        },
+        {
+          path: '/freightCheckTable',
+          component: () => import('@/views/business/businessOrderManage/freightCheck/freightCheckTable'),
+          name: 'freightCheckTable',
+          meta: { title: '运费校验' }
+        },
+        {
+          path: '/kickbackOrder',
+          component: () => import('@/views/business/businessOrderManage/kickbackOrder/kickbackOrder'),
+          name: 'kickbackOrder',
+          meta: { title: '订单回扣' }
+        },
+        {
+          path: '/lossOrder',
+          component: () => import('@/views/business/businessOrderManage/lossOrder/lossOrder'),
+          name: 'lossOrder',
+          meta: { title: '亏损订单' }
+        },
+        {
+          path: '/offerInfo',
+          component: () => import('@/views/business/businessOrderManage/offerInfo/offerInfo'),
+          name: 'offerInfo',
+          meta: { title: '亏损订单' }
+        },
+        {
+          path: '/pushMoney',
+          component: () => import('@/views/business/businessOrderManage/pushMoney/pushMoney'),
+          name: 'pushMoney',
+          meta: { title: '业务提成' }
         }
       ]
     },

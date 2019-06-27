@@ -1,6 +1,5 @@
 <template>
   <div>
-    回单信息
   </div>
 </template>
 <script>

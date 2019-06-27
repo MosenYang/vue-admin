@@ -1,6 +1,6 @@
 <template>
   <div>
-    回单信息
+    报价信息
   </div>
 </template>
 <script>

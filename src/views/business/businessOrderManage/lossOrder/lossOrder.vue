@@ -1,6 +1,6 @@
 <template>
   <div>
-    回单信息
+    亏损订单
   </div>
 </template>
 <script>

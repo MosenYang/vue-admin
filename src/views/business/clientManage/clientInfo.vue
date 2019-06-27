@@ -2,7 +2,7 @@
   <div class="page">
     <div class="page-title flex-between">
       <span>客户信息</span>
-      <el-button type="primary" @click="addClient">
+      <el-button type="primary" icon="el-icon-plus" @click="addClient">
         添加客户
       </el-button>
     </div>
@@ -10,8 +10,7 @@
       <div class="flex-between control">
         <div class="limit">
           当前显示:
-          <el-select v-model="length"
-                     @change="changePageLimit" placeholder="请选择">
+          <el-select v-model="length" @change="changePageLimit" placeholder="请选择">
             <el-option v-for="item in option"
                        :key="item.value"
                        :label="item.label"
@@ -21,68 +20,113 @@
         <div class="filters-btns">
           <div class="inquire-wrap">
             <span>查询:</span>
-            <el-input
-              v-model="defParams.query"
-              placeholder="请写查询内容"
-              style="width: 200px;"
-              class="filter-item"
-              @keyup.enter.native="handleSearch"/>
+            <el-input v-model="defParams.query" placeholder="请写查询内容" style="width: 200px;"
+                      class="filter-item" @keyup.enter.native="handleSearch"/>
             <el-button class="filter-item" type="primary" icon="el-icon-search">
               查询
             </el-button>
           </div>
-          <el-button @click="handleReset"
-                     class="filter-item"
-                     type="primary"
+          <el-button @click="handleReset" class="filter-item" type="primary"
                      icon="el-icon-search">
             重置
           </el-button>
-          <el-button class="filter-item" type="primary" icon="el-icon-search">
+          <el-button class="filter-item" type="primary" @click="exportList"
+                     :loading="downloadLoading" icon="el-icon-download">
             导出
           </el-button>
-          <el-button class="filter-item" type="primary" icon="el-icon-search">
+          <el-button class="filter-item" type="primary" @click="importList"
+                     icon="el-icon-upload">
             导入
           </el-button>
-          <el-button class="filter-item" @click="changePeople" type="primary" icon="el-icon-search">
+          <el-button class="filter-item" @click="changePeople" type="primary"
+                     icon="el-icon-edit">
             修改维护人
           </el-button>
         </div>
       </div>
     </div>
     <div class="table-wrap">
-      <table-components :table-data="tableData" :selection="true"
-                        :pagination="true"
-                        :row-click="clickRow"
+      <table-components :table-data="tableData" :selection="true" :pagination="true" :row-click="clickRow"
                         :action-config="actionConfig"
                         :page-config="pageData"
                         :column-config="columnData"
                         @filter-change="getFilter"
-                        @select-change="getselect"
+                        @select-change="getSelect"
                         :headerCellStyle="headerCss"
                         @page-change="pageChange"/>
     </div>
-    <!---->
+    <!--修改维护人-->
     <el-dialog title="修改维护人" :visible.sync="dialogVisible">
       <el-form ref="dataForm" label-position="left" label-width="70px"
                style="width: 400px; margin-left:50px;">
         <el-form-item>
           <el-radio-group v-model="radio">
-            <el-radio :label="item.id" v-for="(item,i) in mockPeople">{{item.name}}</el-radio>
+            <el-radio :label="item.id" v-for="(item,i) in people" :key="i">{{item.name}}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="editHandle">确定修改</el-button>
+        <el-button type="primary" @click="changePeopleHandle">确定修改</el-button>
+      </div>
+    </el-dialog>
+    <!--联系记录-->
+    <el-dialog title="联系记录" :visible.sync="outerVisible">
+      <div class="block">
+        <el-timeline style="padding-right: 40px">
+          <el-timeline-item
+            v-for="(item,index) in userLogs" :key="index"
+            :timestamp="item.created_at" placement="top">
+            <el-card style="padding: 0 0">
+              <p>客户: {{ item.name}}</p>
+              <h4>内容: {{ item.comment}}</h4>
+              <p>维护人: {{item.username}}</p>
+            </el-card>
+          </el-timeline-item>
+        </el-timeline>
+      </div>
+      <el-dialog width="30%" title="新记录" :visible.sync="innerVisible" append-to-body>
+        <el-form :model="ruleForm" label-position="top" ref="ruleForm" label-width="100px" :rules="rules">
+          <el-form-item label="记录内容" prop="comment">
+            <el-input type="textarea"
+                      v-model="ruleForm.comment"
+                      :autosize="{ minRows: 3, maxRows: 5}"
+                      placeholder="请填写新纪录">
+
+            </el-input>
+          </el-form-item>
+        </el-form>
+        <div class="dialog-footer" slot="footer">
+          <el-button @click="innerVisible = false">取 消</el-button>
+          <el-button type="primary" @click="addLogs('ruleForm')">添加记录</el-button>
+        </div>
+      </el-dialog>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="outerVisible = false">取 消</el-button>
+        <el-button type="primary" @click="innerVisible = true">添加记录</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 <script>
-import TableComponents from '../components/Tables/dg-table'
-import { clientSearch, deleteSearch,importCustomer,exportCustomer, updateSearch, updateAccendant } from '../../../api/clientManage/client'
+import TableComponents from '../components/Tables/dg-table2'
+import {
+  clientAdd,// 添加
+  clientSearch,// 列表
+  deleteList,// 删除
+  updateList,//修改
+  importCustomer,//导入
+  exportCustomer,//导出
+  template,// 模板
+  logsAdd,//维护日志添加
+  logsShow,//查看
+  auditClient,//客户审核
+  updateAccendant// 修改维护人
+} from '../../../api/clientManage/client'
 import { searchType } from '../../../api/baseApi'// 这接口也可以搜索业务小哥
 import comControl from './control.vue'//控制器
+import { parseTime } from '@/utils'
+
 export default {
   components: { TableComponents },
   props: {},
@@ -93,28 +137,40 @@ export default {
       initThData: initThData,
       tableData: [],
       businessType: [],
+      outerVisible: false,
+      innerVisible: false,
+      dialogVisible: false,
+      downloadLoading: false,
       area: [],
       columnData: [],
       selectRow: [],
       actionConfig: {
         type: 'customize',
         label: '操作区',
-        width: 220,
+        width: 200,
         fixed: true,
         component: comControl,
         handlers: {
-          editOrder: (row) => {
-            console.log('first', row)
-          },
+          editOrder: (row) => {console.log('编辑', row)},
           deleteOrder: this.deleteOrder,
-          upLoadOrder: () => {}
+          upLoadOrder: this.getLogList
         }
       },
       filterParam: {},
       totalPage: 0,
       radio: 0,
-      dialogVisible: false,
-      mockPeople: mockPeople
+      ruleForm: {
+        comment: ''
+      },
+      row: [],
+      people: mockPeople,
+      userLogs: mockUserLogs,
+      rules: {
+        comment: [
+          { required: true, message: '请输入新记录内容', trigger: 'blur' },
+          { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+        ]
+      }
     }
   },
   computed: {
@@ -149,11 +205,10 @@ export default {
         config.isNeed = item.isNeed === false ? false : true
         config.label = comConfig.label = item.name
         config.type = comConfig.type = item.type
-        config.width = item.width ? item.width : '120'
+        config.width = item.width ? item.width : '140'
         comConfig.filterKey = item.key
-
+        comConfig.paramKey = item.paramKey ? item.paramKey : item.key
         if (item.name === '业务类型') {
-          // comConfig.component = selectFilter // 自定义
           comConfig.comData = this.businessType
         }
         if (item.name === '省份') {
@@ -211,6 +266,13 @@ export default {
           this.area = res.data
         }
       })
+      searchType({ type: 'saleman' }).then((res) => {
+        if (res.code === 200) {
+          if (res.data.length !== 0) {
+            this.people = res.data
+          }
+        }
+      })
       this.mapTableTh()
     },
     //去添加客户
@@ -222,7 +284,7 @@ export default {
       this.getTableList()
     },
     //* 单选事件
-    getselect(val) {
+    getSelect(val) {
       this.selectRow = val
       console.log(val, '单选广播事件')
     },
@@ -232,7 +294,7 @@ export default {
     },
     //表行点击
     clickRow(row) {
-      console.log('', '点击了')
+      console.log(row, '点击了')
     },
     // 筛选事件
     getFilter(val) {
@@ -256,41 +318,77 @@ export default {
     handleSearch() {
       this.getTableList()
     },
-    // 删除订单
-    deleteOrder(row) {
-      console.log(row)
-      deleteSearch({ id: row.id }).then((res) => {
-        if (res.code == 200) {
-          this.tableData.splice(this.tableData.indexOf(row), 1)
-          this.$message({
-            message: '删除成功',
-            type: 'success'
+    // 添加记录
+    addLogs(formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          let id = this.userLogs[0].customer_id
+          let param = { comment: this.ruleForm.comment, customer_id: id }
+          logsAdd(param).then((res) => {
+            if (res.code == 200) {
+              this.getLogList()
+              this.$message({
+                message: '添加成功!',
+                type: 'success'
+              })
+              this.ruleForm.comment = null
+              this.innerVisible = false
+            }
           })
+        } else {
+          console.log('表单错误!!')
+          return false
         }
       })
     },
-    editHandle() {
-      let row = []
-      this.selectRow.forEach((item, index) => {
-        row.push(item.id)
-      })
-
-      let data = {
-        id: row,
-        accendant: null,
-        accendant_id: this.radio
-      }
-      this.mockPeople.forEach((item) => {
-        if (item.id == this.radio) {
-          data.accendant = item.name
+    getLogList(row) {
+      if (row) this.row = row
+      logsShow({ id: this.row.id }).then((res) => {
+        if (res.code == 200) {
+          if (res.data.length !== 0) {// 没数据,使用mock
+            this.userLogs = res.data
+          }
+          console.log('记录列表!', res.data)
+          this.outerVisible = true
         }
       })
-
-      updateAccendant(data).then((res) => {
-        if (res.code == 200) {
-          this.dialogVisible = false
+    },
+    importList() {},
+    exportList() {
+      // let param = this.defParams
+      // if (this.selectRow.length > 0) {
+      //   param = this.selectRow
+      // } else {
+      //   param = this.tableData
+      // }
+      exportCustomer().then(() => {})
+      return
+      this.downloadLoading = true
+      let keyVal = []
+      let keyName = []
+      this.initThData.forEach((item) => {
+        keyVal.push(item.key)
+        keyName.push(item.name)
+      })
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = keyName
+        const filterVal = keyVal
+        const data = this.formatJson(filterVal, this.tableData)
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: '客户信息'
+        })
+        this.downloadLoading = false
+      })
+    },
+    // 删除订单
+    deleteOrder(row) {
+      deleteList({ id: row.id }).then((res) => {
+        if (res.code === 200) {
+          this.tableData.splice(this.tableData.indexOf(row), 1)
           this.$message({
-            message: '修改成功!',
+            message: '删除成功',
             type: 'success'
           })
         }
@@ -304,6 +402,56 @@ export default {
       return this.$message({
         message: '请选择客户信息,再修改维护人!'
       })
+    },
+    changePeopleHandle() {
+      let row = []
+      this.selectRow.forEach((item, index) => {
+        row.push(item.id)
+      })
+      let data = {
+        id: row,
+        accendant: null,
+        accendant_id: this.radio
+      }
+      this.people.forEach((item) => {
+        if (item.id == this.radio) {
+          data.accendant = item.name
+        }
+      })
+      console.log('data', data)
+      updateAccendant(data).then((res) => {
+        if (res.code === 200) {
+          this.dialogVisible = false
+          this.$message({
+            message: '修改业务员成功!',
+            type: 'success'
+          })
+        }
+      })
+    },
+    // 前端调导出
+    exportExcel() {
+      this.downloadLoading = true
+      import('@/vendor/Export2Excel').then(excel => {
+        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
+        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
+        const data = this.formatJson(filterVal, this.list)
+        excel.export_json_to_excel({
+          header: tHeader,
+          data,
+          filename: 'table-list'
+        })
+        this.downloadLoading = false
+      })
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => {
+        if (j === 'timestamp') {
+          return parseTime(v[j])
+        } else {
+          return v[j]
+        }
+      }))
     }
   },
   directives: {}
@@ -488,6 +636,24 @@ var mockPeople = [
     'name': '韩梅'  //业务员姓名
   }
 ]
+var mockUserLogs = [
+  {
+    'id': 1,
+    'customer_id': 17, //客户id
+    'name': '隔壁老王',  //客户姓名
+    'username': 'Sandy',  //维护人
+    'comment': '吃饭睡觉打豆豆',  //维护内容
+    'created_at': '2019-06-12 19:22:32'  //记录添加时间
+  },
+  {
+    'id': 1,
+    'customer_id': 17, //客户id
+    'name': '隔壁老李',  //客户姓名
+    'username': 'Mosen',  //维护人
+    'comment': '吃饭睡觉打飞机',  //维护内容
+    'created_at': '2019-06-15 10:22:32'  //记录添加时间
+  }
+]
 </script>
 <style lang="scss" scoped>
   @import "src/styles/mixin.scss";
@@ -528,6 +694,7 @@ var mockPeople = [
     }
 
   }
+
 
   .table-wrap {
     padding: 0 j(20);
