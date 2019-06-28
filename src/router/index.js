@@ -2,10 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 Vue.use(Router)
-
 /* Layout */
 import Layout from '@/layout'
-
 /* Router Modules */
 import componentsRouter from './modules/components'
 import chartsRouter from './modules/charts'
@@ -14,10 +12,7 @@ import nestedRouter from './modules/nested'
 import businessRouter from './modules/myBusinessRoute'
 
 /**
- *
  * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
- * /
- /**
  * 没有权限要求的页面,所有角色都可访问
  */
 export const constantRoutes = [
@@ -46,7 +41,7 @@ export const constantRoutes = [
   {
     path: '/home',
     component: Layout,
-    redirect: '/home',// 可以不用
+    redirect: '/home',
     children: [
       {
         path: 'home',
@@ -57,7 +52,7 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/',
+    path: '/system',
     component: Layout,
     redirect: '/system',
     children: [
@@ -122,10 +117,8 @@ export const constantRoutes = [
     ]
   }
 ]
-
 /**
- * asyncRoutes
- * 根据用户角色动态加载的路由
+ * asyncRoutes 根据用户角色动态加载的路由
  */
 export const asyncRoutes = [
   {
@@ -384,15 +377,12 @@ export const asyncRoutes = [
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
-
 const createRouter = () => new Router({
   mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRoutes
 })
-
 const router = createRouter()
-
 // Detail see: https://github.com/vuejs/vue-router/issues/1234#issuecomment-357941465
 // Detail see: https://blog.csdn.net/suolong914/article/details/89432563
 export function resetRouter() {

@@ -1,5 +1,7 @@
 <template>
-  <div />
+  <div>
+    详情表
+  </div>
 </template>
 <script>
 // import ChildComponents from './ChildComponents.vue'

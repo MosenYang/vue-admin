@@ -1,5 +1,7 @@
 <template>
-  <div />
+  <div>
+    提送信息
+  </div>
 </template>
 <script>
 // import ChildComponents from './ChildComponents.vue'

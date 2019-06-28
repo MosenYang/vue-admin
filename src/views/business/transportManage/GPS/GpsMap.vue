@@ -1,5 +1,7 @@
 <template>
-  <div />
+  <div>
+    <div>gps运输</div>
+  </div>
 </template>
 <script>
 // import ChildComponents from './ChildComponents.vue'

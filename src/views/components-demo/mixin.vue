@@ -90,7 +90,7 @@
             <span>hover text</span>
           </div>
           <div class="component-item">
-            <mallki class-name="mallki-text" text="vue-element-admin" />
+            <mallki class-name="mallki-text" text="索邦" />
           </div>
         </el-card>
       </el-col>

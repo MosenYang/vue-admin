@@ -19,10 +19,16 @@ import './utils/error-log' //错误日志
 
 import * as filters from './filters' //全局的过滤方法
 
+import Mallki from '@/components/TextHoverEffect/Mallki'
+import MdInput from '@/components/MDinput'
+Vue.component('Mallki', Mallki)
+Vue.component('MdInput', MdInput)
+
 /**
  * 线上环境请关闭mock
  */
 import { mockXHR } from '../mock'
+
 if (process.env.NODE_ENV === 'production') {
   // mockXHR()
 }

@@ -69,6 +69,8 @@ import tableComponents from '../../components/Tables/dg-table2'
 import { contractorRegister, contractorList } from '../../../../api/business/contractorManage/contractor'
 import { searchType } from '../../../../api/baseApi'// 这接口也可以搜索业务小哥
 import comControl from './control.vue'//控制器
+import waves from '@/directive/waves/index.js' // 水波纹指令
+
 // 自定义表格配置
 export default {
   components: { tableComponents },
@@ -237,7 +239,10 @@ export default {
         }
       })
     }
-  }
+  },
+  directives: {
+    waves
+  },
 }
 var option = [
   {

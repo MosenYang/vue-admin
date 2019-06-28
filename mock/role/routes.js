@@ -125,7 +125,7 @@ export const asyncRoutes = [
       }
     ]
   },
-
+// 组件编辑
   {
     path: '/components',
     component: 'layout/Layout',

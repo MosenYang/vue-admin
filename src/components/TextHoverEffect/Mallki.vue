@@ -8,6 +8,7 @@
 
 <script>
 export default {
+  name:'mallki',
   props: {
     className: {
       type: String,
@@ -15,7 +16,7 @@ export default {
     },
     text: {
       type: String,
-      default: 'vue-element-admin'
+      default: '索邦轿运'
     }
   }
 }
@@ -25,8 +26,8 @@ export default {
 /* Mallki */
 
 .link--mallki {
-  font-weight: 800;
-  color: #4dd9d5;
+  /*color: #4dd9d5;*/
+  color: rgba(32, 30, 32, 0.89);
   font-family: 'Dosis', sans-serif;
   -webkit-transition: color 0.5s 0.25s;
   transition: color 0.5s 0.25s;
@@ -77,7 +78,6 @@ export default {
 
 .link--mallki span::before {
   content: attr(data-letters);
-  color: red;
   position: absolute;
   left: 0;
   width: 100%;
