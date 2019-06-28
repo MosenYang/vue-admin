@@ -1,5 +1,5 @@
-//Mosen 开发
-import request from './../../utils/request'
+//订单总表
+import request from '../../../utils/request'
 
 /**
  * 创建订单页面

@@ -1,43 +1,45 @@
 <template>
-  <div>系统设置</div>
+  <div>
+    <!--详情  https://blog.csdn.net/xr510002594/article/details/84108882-->
+    <baidu-map class="bm-view" ak="Um8BbQX25uFFn8kqYukNmUP5a0y9jU0y"
+               :zoom="zoom" @ready="handler" :scroll-wheel-zoom="true"
+               center="上海">
+      <bm-navigation anchor="BMAP_ANCHOR_TOP_LEFT"></bm-navigation>
+    </baidu-map>
+  </div>
 </template>
 <script>
+import BaiduMap from 'vue-baidu-map/components/map/Map.vue'
+import { BmNavigation } from 'vue-baidu-map'
+
 export default {
-  components: {},
+  components: {
+    BaiduMap, BmNavigation
+  },
   props: {},
-  // 组件私有数据（必须是function，而且要return对象类型）
   data() {
-    return {}
-  },
-  computed: {
-    fullName() {
-      return this.firstName + this.lastName
+    return {
+      center: { lng: 0, lat: 0 },
+      zoom: 0
     }
   },
-  watch: {
-    title(preVal, newVal) {
-      console.log(`改变之前的值：；改变之后的值：`)
-    }
-  },
-  // 生命周期钩子：组件实例完成创建之后调用
-  created() {
-    console.log('组件实例完成创建component created')
-  },
-  // 生命周期钩子：组件实例渲染完成时调用
-  mounted() {
-    console.log('组件实例渲染完成component mounted')
-  },
+  computed: {},
+  watch: {},
+  created() {},
+  mounted() {},
   methods: {
-    getCurrentDate() {
-      return new Date().toLocaleDateString()
+    handler({ BMap, map }) {
+      console.log(BMap, map)
+      this.center.lng = 116.404
+      this.center.lat = 39.915
+      this.zoom = 10
     }
-  },
-  // 生命周期钩子：实例初始化之后，数据观测(data observer) 和 event/watcher 事件配置之前被调用
-  beforeCreated() {
-    console.log('component before created')
   }
 }
 </script>
-<style scoped>
-
+<style lang="scss" scoped>
+  .bm-view {
+    width: 100%;
+    height: 500px;
+  }
 </style>

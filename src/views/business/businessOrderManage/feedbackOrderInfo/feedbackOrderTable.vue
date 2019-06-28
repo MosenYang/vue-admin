@@ -1,9 +1,9 @@
 <template>
   <div class="page">
     <div class="page-title flex-between">
-      <span>客户信息</span>
+      <span>回单信息</span>
       <el-button type="primary" icon="el-icon-plus" @click="addClient">
-        添加客户
+        添加回单信息
       </el-button>
     </div>
     <div class="totalTable-container">
@@ -34,14 +34,6 @@
                      :loading="downloadLoading" icon="el-icon-download">
             导出
           </el-button>
-          <el-button class="filter-item" type="primary" @click="importList"
-                     icon="el-icon-upload">
-            导入
-          </el-button>
-          <el-button class="filter-item" @click="changePeople" type="primary"
-                     icon="el-icon-edit">
-            修改维护人
-          </el-button>
         </div>
       </div>
     </div>
@@ -55,21 +47,6 @@
                         :headerCellStyle="headerCss"
                         @page-change="pageChange"/>
     </div>
-    <!--修改维护人-->
-    <el-dialog title="修改维护人" :visible.sync="dialogVisible">
-      <el-form ref="dataForm" label-position="left" label-width="70px"
-               style="width: 400px; margin-left:50px;">
-        <el-form-item>
-          <el-radio-group v-model="radio">
-            <el-radio :label="item.id" v-for="(item,i) in people" :key="i">{{item.name}}</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible=false">取消</el-button>
-        <el-button type="primary" @click="changePeopleHandle">确定修改</el-button>
-      </div>
-    </el-dialog>
     <!--联系记录-->
     <el-dialog title="联系记录" :visible.sync="outerVisible">
       <div class="block">
@@ -109,7 +86,7 @@
   </div>
 </template>
 <script>
-import TableComponents from '../components/Tables/dg-table2'
+import TableComponents from '../../components/Tables/dg-table2'
 import {
   clientAdd,// 添加
   clientSearch,// 列表
@@ -122,8 +99,8 @@ import {
   logsShow,//查看
   auditClient,//客户审核
   updateAccendant// 修改维护人
-} from '../../../api/business/clientManage/client'
-import { searchType } from '../../../api/baseApi'// 这接口也可以搜索业务小哥
+} from '../../../../api/business/clientManage/client'
+import { searchType } from '../../../../api/baseApi'// 这接口也可以搜索业务小哥
 import comControl from './control.vue'//控制器
 import { parseTime } from '@/utils'
 
@@ -139,7 +116,6 @@ export default {
       businessType: [],
       outerVisible: false,
       innerVisible: false,
-      dialogVisible: false,
       downloadLoading: false,
       area: [],
       columnData: [],
@@ -353,7 +329,6 @@ export default {
         }
       })
     },
-    importList() {},
     exportList() {
       // let param = this.defParams
       // if (this.selectRow.length > 0) {
@@ -389,41 +364,6 @@ export default {
           this.tableData.splice(this.tableData.indexOf(row), 1)
           this.$message({
             message: '删除成功',
-            type: 'success'
-          })
-        }
-      })
-    },
-    changePeople() {
-      if (this.selectRow.length >= 1) {
-        this.dialogVisible = true
-        return
-      }
-      return this.$message({
-        message: '请选择客户信息,再修改维护人!'
-      })
-    },
-    changePeopleHandle() {
-      let row = []
-      this.selectRow.forEach((item, index) => {
-        row.push(item.id)
-      })
-      let data = {
-        id: row,
-        accendant: null,
-        accendant_id: this.radio
-      }
-      this.people.forEach((item) => {
-        if (item.id == this.radio) {
-          data.accendant = item.name
-        }
-      })
-      console.log('data', data)
-      updateAccendant(data).then((res) => {
-        if (res.code === 200) {
-          this.dialogVisible = false
-          this.$message({
-            message: '修改业务员成功!',
             type: 'success'
           })
         }

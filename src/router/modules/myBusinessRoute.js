@@ -32,32 +32,29 @@ const businessRouter = {
               path: '/businessCreateOrder',
               component: () => import('@/views/business/businessOrderManage/orderTable/createOrder'),
               name: 'businessCreateOrder',
-              meta: { title: '创建订单' }
+              meta: { title: '创建订单' },
+              hidden: true
             },
             {
               path: '/businessAlterOrder',
               component: () => import('@/views/business/businessOrderManage/orderTable/alterOrder'),
               name: 'businessAlterOrder',
-              meta: { title: '修改订单' }
+              meta: { title: '修改订单' },
+              hidden: true
             },
             {
               path: '/businessOrderInfo',
               component: () => import('@/views/business/businessOrderManage/orderTable/orderInfo'),
               name: 'businessOrderInfo',
-              meta: { title: '订单详情' }
+              meta: { title: '订单详情' },
+              hidden: true
             }
           ]
         },
         {
-          path: '/businessOrderShow',
-          component: () => import('@/views/business/businessOrderManage/orderTable/orderTotalShow2'),
-          name: 'businessOrderShow',
-          meta: { title: '测试页' }
-        },
-        {
-          path: '/feedbackOrderinfo',
-          component: () => import('@/views/business/businessOrderManage/feedbackOrderinfo/feedbackOrderTable'),
-          name: 'feedbackOrderinfo',
+          path: '/feedbackOrderInfo',
+          component: () => import('@/views/business/businessOrderManage/feedbackOrderInfo/feedbackOrderTable'),
+          name: 'feedbackOrderInfo',
           meta: { title: '回单信息' }
         },
         {
@@ -82,7 +79,7 @@ const businessRouter = {
           path: '/offerInfo',
           component: () => import('@/views/business/businessOrderManage/offerInfo/offerInfo'),
           name: 'offerInfo',
-          meta: { title: '亏损订单' }
+          meta: { title: '报价信息'}
         },
         {
           path: '/pushMoney',
@@ -193,7 +190,13 @@ const businessRouter = {
           hidden: true
         }
       ]
-    }
+    },
+    {
+      path: '/businessOrderShow',
+      component: () => import('@/views/business/businessOrderManage/orderTable/orderTotalShow2'),
+      name: 'businessOrderShow',
+      meta: { title: '测试页' }
+    },
   ]
 }
 

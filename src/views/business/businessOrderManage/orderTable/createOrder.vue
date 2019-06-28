@@ -488,7 +488,7 @@
   </div>
 </template>
 <script>
-import { getOrderMsg, createOrder, getOrderInfo } from '../../../../api/businessOrder/order'
+import { getOrderMsg, createOrder, getOrderInfo } from '../../../../api/business/businessOrder/order'
 
 let carInfo = {
   car: {},

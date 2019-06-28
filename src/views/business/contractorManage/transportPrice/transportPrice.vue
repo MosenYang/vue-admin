@@ -68,7 +68,7 @@
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
-import { transportPriceList,deleteTransportPrice,template,templateImport, templateExport} from '../../../../api/contractorManage/transportPrice'
+import { transportPriceList,deleteTransportPrice,template,templateImport, templateExport} from '../../../../api/business/contractorManage/transportPrice'
 import { searchType } from '../../../../api/baseApi'// 这接口搜索业务小哥
 import comControl from './control.vue'//控制器
 // 自定义表格配置

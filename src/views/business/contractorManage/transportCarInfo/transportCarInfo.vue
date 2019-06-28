@@ -74,7 +74,7 @@ import {
   transportUpdate,
   transportDelete,
   transportUpload
-} from '../../../../api/contractorManage/transportCarInfo'
+} from '../../../../api/business/contractorManage/transportCarInfo'
 import { searchType } from '../../../../api/baseApi'// 这接口搜索业务小哥
 import comControl from './control.vue'//控制器
 // 自定义表格配置

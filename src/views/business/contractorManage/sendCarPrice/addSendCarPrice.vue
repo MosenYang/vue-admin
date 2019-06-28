@@ -85,7 +85,7 @@
 </template>
 <script>
 import { searchType } from '../../../../api/baseApi'
-import { addCarPrice, editCarPrice } from '../../../../api/contractorManage/sendCarPrice'
+import { addCarPrice, editCarPrice } from '../../../../api/business/contractorManage/sendCarPrice'
 
 var defData = {
   carrier_id: '',// 承运商公司id

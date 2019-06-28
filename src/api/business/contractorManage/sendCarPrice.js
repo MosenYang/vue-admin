@@ -1,4 +1,4 @@
-import request from '../../utils/request'
+import request from '../../../utils/request'
 //列表
 export function sendCarPriceList(data) {
   return request({

@@ -532,7 +532,7 @@
   </div>
 </template>
 <script>
-import { editOrder, alterOrder, getOrderInfo } from '../../../../api/businessOrder/order'
+import { editOrder, alterOrder, getOrderInfo } from '../../../../api/business/businessOrder/order'
 
 let car = {
   car_brand_id: '117', //车辆品牌ID

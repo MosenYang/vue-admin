@@ -94,7 +94,7 @@
 </template>
 <script>
 import { searchType } from '../../../../api/baseApi'
-import { contractorUpdate, contractorAdd } from '../../../../api/contractorManage/contractor'
+import { contractorUpdate, contractorAdd } from '../../../../api/business/contractorManage/contractor'
 
 let defParam = {
   // id: null,

@@ -74,7 +74,7 @@ import {
   templateDownLoad,
   templateImport,
   templateExport
-} from '../../../../api/contractorManage/sendCarPrice'
+} from '../../../../api/business/contractorManage/sendCarPrice'
 import { searchType } from '../../../../api/baseApi'// 这接口搜索业务小哥
 import comControl from './control.vue'//控制器
 // 自定义表格配置

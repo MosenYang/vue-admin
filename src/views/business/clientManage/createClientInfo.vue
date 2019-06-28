@@ -152,7 +152,7 @@
 </template>
 <script>
 import { searchType } from '../../../api/baseApi'
-import { clientAdd } from '../../../api/clientManage/client'
+import { clientAdd } from '../../../api/business/clientManage/client'
 import {login} from '../../../api/login'
 export default {
   components: {},

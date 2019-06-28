@@ -77,7 +77,7 @@ import {
   templateDownLoad,
   infoExport,
   infoImport
-} from '../../../../api/contractorManage/concatCarInfo'
+} from '../../../../api/business/contractorManage/concatCarInfo'
 import { searchType } from '../../../../api/baseApi'// 这接口搜索业务小哥
 import comControl from './control.vue'//控制器
 // 自定义表格配置

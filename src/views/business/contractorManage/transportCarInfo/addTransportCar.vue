@@ -96,7 +96,7 @@
 </template>
 <script>
 import { searchType } from '../../../../api/baseApi'
-import { transportAdd } from '../../../../api/contractorManage/transportCarInfo'
+import { transportAdd } from '../../../../api/business/contractorManage/transportCarInfo'
 
 var defData = {
   vehicle_belong: '外协车辆',//车辆所属

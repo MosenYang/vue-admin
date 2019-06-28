@@ -7,7 +7,6 @@
                remote
                reserve-keyword
                placeholder="请输入关键词"
-               :remote-method="remoteMethod"
                :loading="loading">
       <el-option v-for="item in options"
                  :key="item.value"
@@ -18,7 +17,7 @@
   </div>
 </template>
 <script>
-import { getOrderInfo } from '@/api/businessOrder/order'
+// import { getOrderInfo } from '@/api/business/businessOrder/order'
 
 export default {
   name: 'searchText',
@@ -63,6 +62,7 @@ export default {
       })
       this.inputValue = null
     },
+/*
     remoteMethod(query) {
       if (query !== '') {
         this.loading = true
@@ -80,6 +80,7 @@ export default {
         this.options = []
       }
     }
+*/
   }
 }
 </script>

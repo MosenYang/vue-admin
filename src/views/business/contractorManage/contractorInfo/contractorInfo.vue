@@ -66,7 +66,7 @@
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
-import { contractorRegister, contractorList } from '../../../../api/contractorManage/contractor'
+import { contractorRegister, contractorList } from '../../../../api/business/contractorManage/contractor'
 import { searchType } from '../../../../api/baseApi'// 这接口也可以搜索业务小哥
 import comControl from './control.vue'//控制器
 // 自定义表格配置

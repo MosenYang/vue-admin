@@ -97,7 +97,6 @@
       </el-dialog>
       <!--上传-->
       <el-dialog title="导入Excel文件" :visible.sync="dialogExcelVisible" width="70%">
-        <unLoadExcel/>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogExcelVisible = false">取 消</el-button>
           <el-button type="primary" @click="dialogExcelVisible = false">确 定</el-button>
@@ -107,7 +106,9 @@
   </div>
 </template>
 <script>
-import { checkOrder, destroyOrder, orderIndex, getOrderInfo } from '@/api/businessOrder/order'
+
+import { checkOrder, destroyOrder, orderIndex, getOrderInfo } from '../../../../api/business/businessOrder/order'
+//api/business/businessOrder/order
 import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
 import TableComponents from '../../components/Tables/dg-table'//动态表格
 // import searchText from '../../components/Tables/defFilter/searchText.vue'//搜索
@@ -116,8 +117,8 @@ import selectFilter from '../../components/Tables/defFilter/selectFilter.vue'//�
 import comControl from './component/control.vue'//控制器
 import waves from '@/directive/waves' // 指令
 import { parseTime } from '@/utils'
-import unLoadExcel from '../../components/uploadExcel/Excel'// 图片上传
-import loadFile from '@/components/Upload/SingleImage'// 文件上传
+// import unLoadExcel from '@/components/uploadExcel/Excel'// 文件上传(并没有写)
+import loadFile from '@/components/Upload/SingleImage'// 图片上传
 
 export default {
   name: 'totalTable',
@@ -173,7 +174,7 @@ export default {
     }
   },
   //searchSelect, select,searchText
-  components: { unLoadExcel, loadFile, TableComponents, comControl, selectFilter },
+  components: {loadFile, TableComponents, comControl, selectFilter },
   directives: { waves },
   filters: {
     statusFilter(status) {
@@ -189,7 +190,6 @@ export default {
     this.getTableList()
   },
   methods: {
-
     /**
      * 多装车
      * */

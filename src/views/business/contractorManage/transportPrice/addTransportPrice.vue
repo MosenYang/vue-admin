@@ -99,7 +99,7 @@
 </template>
 <script>
 import { searchType } from '../../../../api/baseApi'
-import { addTransportPrice, updateTransportPrice } from '../../../../api/contractorManage/transportPrice'
+import { addTransportPrice, updateTransportPrice } from '../../../../api/business/contractorManage/transportPrice'
 
 let defParams = {
   company: '',
