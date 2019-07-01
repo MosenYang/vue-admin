@@ -2,13 +2,11 @@
   <div class="app-container">
     <!--查询项-->
     <div class="filter-container">
-      <el-input
-        v-model="listQuery.title"
-        placeholder="请写查询条件"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleFilter"
-      />
+      <el-input v-model="listQuery.title"
+                placeholder="请写查询条件"
+                style="width: 200px;"
+                class="filter-item"
+                @keyup.enter.native="handleFilter"/>
       <el-select v-model="listQuery.importance" placeholder="下拉" clearable style="width: 90px" class="filter-item">
         <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item"/>
       </el-select>
@@ -44,30 +42,22 @@
       </el-button>
     </div>
     <!--表格-->
-    <el-table
-      v-if="a==true"
-      :key="tableKey"
-      ref="filterTable"
-      v-loading="listLoading"
-      :data="list"
-      border
-      fit
-      highlight-current-row
-      style="width: 100%;"
-      :row-class-name="tableRowClassName"
-      @sort-change="sortChange"
-      @selection-change="handleSelectionChange">
+    <el-table :key="tableKey" ref="filterTable" v-loading="listLoading" :data="list" border fit
+              highlight-current-row
+              style="width: 100%;"
+              :row-class-name="tableRowClassName"
+              @sort-change="sortChange"
+              @selection-change="handleSelectionChange">
+
       <el-table-column fixed label="操作" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
           </el-button>
-          <el-button
-            v-if="row.status!='published'"
-            size="mini"
-            type="success"
-            @click="handleModifyStatus(row,'published')"
-          >
+          <el-button v-if="row.status!='published'"
+                     size="mini"
+                     type="success"
+                     @click="handleModifyStatus(row,'published')">
             发行
           </el-button>
           <el-button v-if="row.status!='draft'" size="mini" @click="handleModifyStatus(row,'draft')">
@@ -78,68 +68,50 @@
           </el-button>
         </template>
       </el-table-column>
+      <el-table-column type="selection" width="55"/>
       <el-table-column label="ID" prop="id" sortable="custom" align="center" width="80">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <!-- 新的交互-->
-      <el-table-column label="主题" width="100px" align="center">
-        <template slot="header" slot-scope="scope">
-          <el-popover placement="bottom"
-                      width="100"
-                      trigger="hover">
-            <el-input v-model="search"
-                      size="mini"
-                      @blur="blur00"
-                      placeholder="输入关键字搜索"/>
-            <div slot="reference">主题</div>
+      <el-table-column label="栏" width="100px" align="center">
+        <template slot="header" slot-scope="scope"> <!-- 新的交互-->
+          <el-popover placement="bottom" width="100" trigger="hover">
+            <el-input v-model="search" size="mini" @blur="blurHandle" placeholder="新语法搜索"/>
+            <div slot="reference">主题栏</div>
           </el-popover>
         </template>
         <template slot-scope="{row}">
           <span class="link-type" @click="handleUpdate(row)">{{ row.author }}</span>
         </template>
       </el-table-column>
-
       <el-table-column label="订单号" prop="id" sortable="custom" align="center" width="120">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column type="selection" width="55"/>
-      <el-table-column label="日期" width="150px" align="center">
+      <el-table-column label="日期" width="140px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="标题" min-width="150px" align="center">
+      <el-table-column label="原标题" min-width="150px" align="center">
         <template slot="header" slot-scope="scope">
-          <div>标题</div>
-          <el-input
-            v-model="search"
-            size="mini"
-            placeholder="输入关键字搜索"/>
+          <div>新标题</div>
+          <el-input v-model="search" size="mini" placeholder="输入标题字搜索"/>
         </template>
         <template slot-scope="{row}">
           <span class="link-type" @click="handleUpdate(row)">{{ row.title }}</span>
           <el-tag>{{ row.type | typeFilter }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="作者" width="100px" align="center">
+      <el-table-column label="作者" width="120px" align="center">
         <template slot="header" slot-scope="scope">
           <div>作者</div>
-          <el-input v-model="search"
-                    size="mini"
-                    placeholder="输入关键字搜索"/>
+          <el-input v-model="search" size="mini" placeholder="输入作者字搜索"/>
         </template>
         <template slot-scope="{row}">
           <span class="link-type" @click="handleUpdate(row)">{{ row.author }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="作者" width="110px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.author }}</span>
         </template>
       </el-table-column>
       <el-table-column v-if="showReviewer" label="评审人" width="110px" align="center">
@@ -152,14 +124,11 @@
           <svg-icon v-for="n in +scope.row.importance" :key="n" icon-class="star" class="meta-item__icon"/>
         </template>
       </el-table-column>
-      <el-table-column
-        label="点击率"
-        align="center"
-        width="95"
-        :filters="[{ text: '家', value: '895' }, { text: '公司', value: '4894' }]"
-        :filter-method="filterTag"
-        filter-placement="bottom-end"
-      >
+      <el-table-column label="点击率" align="center"
+                       width="95"
+                       :filters="[{ text: '家', value: '895' }, { text: '公司', value: '4894' }]"
+                       :filter-method="filterTag"
+                       filter-placement="bottom-end">
         <template slot-scope="{row}">
           <span v-if="row.pageviews" class="link-type" @click="handleFetchPv(row.pageviews)">{{ row.pageviews }}</span>
           <span v-else>0</span>
@@ -173,7 +142,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <!---->
+    <!--动态表格-->
     <table-component :table-data="list"
                      :selection="true"
                      :pagination="true"
@@ -186,17 +155,14 @@
                      :headerCellStyle="headerCell"
                      @page-change="getpage"
     ></table-component>
-
     <!--弹窗-->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form
-        ref="dataForm"
-        :rules="rules"
-        :model="temp"
-        label-position="left"
-        label-width="70px"
-        style="width: 400px; margin-left:50px;"
-      >
+      <el-form ref="dataForm"
+               :rules="rules"
+               :model="temp"
+               label-position="left"
+               label-width="70px"
+               style="width: 400px; margin-left:50px;">
         <el-form-item label="Type" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
             <el-option
@@ -208,7 +174,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="Date" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date"/>
+          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="请选择日期"/>
         </el-form-item>
         <el-form-item label="Title" prop="title">
           <el-input v-model="temp.title"/>
@@ -246,7 +212,7 @@
         <el-table-column prop="pv" label="Pv"/>
       </el-table>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">Confirm</el-button>
+        <el-button type="primary" @click="dialogPvVisible = false">确定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -256,11 +222,12 @@
 import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
 import { getRoles } from '@/api/role'
 import { testLogin } from '@/api/address'
-import waves from '@/directive/waves' // waves directive
+import waves from '@/directive/waves'
 import { parseTime } from '@/utils'
-import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import Pagination from '@/components/Pagination' //分页器
 import tableComponent from '../../components/Tables/dg-table2'
 import comControl from './component/control.vue'//控制器
+import TdControl from './component/tdComponent'//控制器
 
 const calendarTypeOptions = [
   { key: 'CN', display_name: 'China' },
@@ -276,7 +243,7 @@ const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
 }, {})
 
 export default {
-  name: 'ComplexTable',
+  name: 'totalTable',
   components: { Pagination, tableComponent },
   directives: { waves },
   filters: {
@@ -294,13 +261,12 @@ export default {
   },
   data() {
     return {
-      a: false,
       visible: false,
       columnData: [],
       actionConfig: {
         type: 'customize',
         label: '操作区',
-        width: 260,
+        width: 240,
         fixed: true,
         component: comControl,
         handlers: {
@@ -323,7 +289,7 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 11,
+        limit: 5,
         importance: undefined,
         title: undefined,
         type: undefined,
@@ -367,8 +333,43 @@ export default {
     this.getList()
   },
   methods: {
-    blur00() {
-      alert('1')
+    mapTableTh() {
+      console.log(initTHData.length, '订单总表表格列数')
+      this.columnData = []
+      initTHData.forEach((item, index) => {
+        let config = { ...tableConfig }
+        let comConfig = { ...tableConfig.filterConfig }
+        config.prop = item.key // 数据字段
+        config.thIndex = index
+        config.isNeed = true
+        config.isNeed = item.isNeed ? item.isNeed : false
+        config.label = comConfig.label = item.name
+        config.type = comConfig.type = item.type
+        config.width = item.width ? item.width : '120'
+        comConfig.filterKey = item.key
+        config.filterConfig = comConfig
+        this.columnData.push(config)
+        if (item.key === 'comment_disabled') {
+          config.tdComponent = TdControl
+          config.tdConfig={
+            t:1
+          }
+        }
+      })
+      console.log(this.columnData, '表头数据')
+    },
+    getList(params) {
+      this.listLoading = true
+      if (!params) {
+        params = this.listQuery
+      }
+      fetchList(params).then(response => {
+        console.log(response.data.items[0], 'res数据')
+        this.list = response.data.items
+        this.total = response.data.total
+        this.listLoading = false
+        this.mapTableTh()
+      })
     },
     getFilter() {},
     getselect() {},
@@ -385,148 +386,11 @@ export default {
     },
     getpage() {},
     onClickHandle() {},
-    mapTableTh() {
-      let initTHData = [
-        {
-          name: '作者',
-          isNeed: true,//是否需要搜索,
-          key: 'author'
-        },
-        {
-          name: '模块有无',
-          isNeed: true,//是否需要搜索,
-          key: 'comment_disabled'
-        },
-        {
-          name: '内容',//表头label
-          key: 'content'
-        },
-        {
-          name: '订单状态',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'editFilter',
-          key: 'order_status'
-        },
-        {
-          name: '内容排序',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'editFilter',
-          key: 'content_short'
-        },
-        {
-          name: '显示时间',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'editFilter',
-          key: 'display_time'
-        },
-        {
-          name: '常量',//表头label
-          isNeed: true,//是否需要搜索
-          key: 'forecast'
-        },
-        {
-          name: 'ID',//表头label
-          width: 160,
-          type: 'editFilter',// 搜索类型
-          key: 'id'
-        },
-        {
-          name: '图片地址',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'editFilter',
-          width: 160,
-          key: 'image_uri'
-        },
-        {
-          name: '导出',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'editFilter',
-          key: 'importance'
-        },
-        {
-          name: '页面视图',
-          isNeed: true,
-          type: 'editFilter',
-          width: 160,
-          key: 'pageviews'
-        },
-        {
-          name: '托运表单',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'editFilter',// 搜索类型
-          key: 'platforms'
-        },
-        {
-          name: '重置',//表头label
-          isNeed: true,//是否需要搜索
-          width: 140,
-          key: 'reviewer'
-        },
-        {
-          name: '状态',//表头label
-          isNeed: true,//是否需要搜索
-          key: 'status'
-        },
-        {
-          name: '时间戳',//表头label
-          isNeed: false,//是否需要搜索
-          width: 140,
-          key: 'timestamp'
-        },
-        {
-          name: '标题',//表头label
-          isNeed: true,//是否需要搜索
-          key: 'title'
-        },
-        {
-          name: '类型',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'editFilter',// 搜索类型
-          key: 'type'
-        }
-      ]
-      console.log(initTHData.length, '订单总表表格列数')
-      this.columnData = []
-      initTHData.forEach((item, index) => {
-        let config = { ...tableConfig }
-        let comConfig = { ...tableConfig.filterConfig }
-        config.prop = item.key // 数据字段
-        config.thIndex = index
-        config.isNeed = true
-        config.isNeed = item.isNeed ? item.isNeed : false
-        config.label = comConfig.label = item.name
-        config.type = comConfig.type = item.type
-        config.width = item.width ? item.width : '120'
-        comConfig.filterKey = item.key
-        if (config.type) {
-          comConfig.component = item.type // searchFilter
-        }
-        if (item.name === '运输次数') {
-          // comConfig.component = selectFilter
-        }
-        config.filterConfig = comConfig
-        this.columnData.push(config)
-      })
-      console.log(this.columnData, '表头数据')
-    },
-    getList(params) {
-      this.listLoading = true
-      if (!params) {
-        params = this.listQuery
-      }
-      fetchList(params).then(response => {
-        console.log(response, 'res数据')
-        this.list = response.data.items
-        this.total = response.data.total
-        this.listLoading = false
-        this.mapTableTh()
-      })
-    },
     // 重置
     handleReset() {
       const params = {
         page: 1,
-        limit: 20,
+        limit: 8,
         importance: undefined,
         title: undefined,
         type: undefined,
@@ -612,7 +476,7 @@ export default {
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
-      console.log('0')
+      console.log('编辑')
     },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
@@ -641,7 +505,7 @@ export default {
     handleDelete(row) {
       this.$notify({
         title: 'Success',
-        message: 'Delete Successfully',
+        message: '删除',
         type: 'success',
         duration: 2000
       })
@@ -692,6 +556,9 @@ export default {
     tableSearch() {
       this.listQuery.page = 1
       this.getList()
+    },
+    blurHandle() {
+      alert('光标事件')
     }
   }
 }
@@ -702,7 +569,8 @@ var tableConfig = {
   hidden: false,//当前数据多.是否需要渲染
   isNeed: true,// 是否需要搜索项
   thIndex: null,
-  component: null,// 表格Td 内部组件可以传
+  tdComponent: null,// 表格Td 内部组件可以传
+  tdConfig: {},// 表格Td 配置项
   fixed: null, // 是否固定
   width: null, // 宽度
   minWidth: '80', // 最小宽度
@@ -719,17 +587,114 @@ var tableConfig = {
   filterConfig: {// 过滤组件
     label: null,// filter 组件的table,同表头一致
     type: null,//filter 组件的类型,同表头一致
-    component: null,// 传入的组件|| 或组件名称
-    filterKey: 'uid',//字段对应表头字段
+    component: null,// 传入的组件,
+    filterKey: null,//字段对应表头字段
+    paramKey: null,
     placeholder: '输入姓名',
     comData: [],
-    comProps: '',
+    comProps: null,
     listInfo: {
       fetchData() {},
       callback: () => {}// 回调
     }
   }
 }
+var initTHData = [
+  {
+    name: '作者',
+    isNeed: true,//是否需要搜索,
+    key: 'author'
+  },
+  {
+    name: '模块有无',
+    isNeed: true,//是否需要搜索,
+    key: 'comment_disabled',
+    component: ''
+  },
+  {
+    name: '内容',//表头label
+    key: 'content',
+    isNeed: true,//是否需要搜索
+    type: 'editFilter'
+  },
+  {
+    name: '内容排序',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',
+    key: 'content_short'
+  },
+  {
+    name: '显示时间',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',
+    key: 'display_time'
+  },
+  {
+    name: '常量',//表头label
+    isNeed: true,//是否需要搜索
+    key: 'forecast'
+  },
+  {
+    name: 'ID',//表头label
+    width: 160,
+    type: 'editFilter',// 搜索类型
+    key: 'id'
+  },
+  {
+    name: '图片地址',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',
+    width: 160,
+    key: 'image_uri'
+  },
+  {
+    name: '导出',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',
+    key: 'importance'
+  },
+  {
+    name: '页面视图',
+    isNeed: true,
+    type: 'editFilter',
+    width: 160,
+    key: 'pageviews'
+  },
+  {
+    name: '托运表单',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',// 搜索类型
+    key: 'platforms'
+  },
+  {
+    name: '重置',//表头label
+    isNeed: true,//是否需要搜索
+    width: 140,
+    key: 'reviewer'
+  },
+  {
+    name: '状态',//表头label
+    isNeed: true,//是否需要搜索
+    key: 'status'
+  },
+  {
+    name: '时间戳',//表头label
+    isNeed: false,//是否需要搜索
+    width: 140,
+    key: 'timestamp'
+  },
+  {
+    name: '标题',//表头label
+    isNeed: true,//是否需要搜索
+    key: 'title'
+  },
+  {
+    name: '类型',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',// 搜索类型
+    key: 'type'
+  }
+]
 </script>
 <style lang="scss" scoped>
 

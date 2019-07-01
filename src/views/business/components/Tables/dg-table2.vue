@@ -15,17 +15,18 @@
       </div>
     </div>
     <div v-if="tableData" style="position:relative">
-      <el-table ref="elTable" fit border
-                v-loading="isLoading"
+      <el-table ref="elTable" fit border v-loading="isLoading"
                 :data="tableData"
                 :show-summary="summary"
                 @row-click="rowClick"
                 :header-cell-style="headerCellStyle"
                 @selection-change="handleSelectChange">
+        <!--多选 -->
         <el-table-column v-if="selection" type="selection" width="35"/>
-        <!--新写法-->
+        <!--循环项-->
         <template v-for="(item,idx) in columnConfig">
-          <el-table-column v-if="item.component" :key="idx"
+          <!--1.表格自定义-->
+          <el-table-column v-if="item.tdComponent" :key="idx"
                            :prop="item.prop"
                            :label="item.label"
                            :width="item.width"
@@ -33,63 +34,24 @@
                            :resizable="item.resizable"
                            :header-align="item.headerAlign"
                            :show-overflow-tooltip="item.showOverflowTooltip">
-            <!-- 自定义头部 -->
-            <template slot="header" slot-scope="scope">
-              <el-popover placement="bottom" width="100"
-                          @show="inshow"
-                          trigger="hover"
-                          :disabled="item.isNeed?false:true">
-                <component
-                  v-if="item.filterConfig && item.isNeed"
-                  :is="item.filterConfig.component"
-                  :paramKey="item.filterConfig.paramKey"
-                  :filterKey="item.filterConfig.filterKey"
-                  :listInfo="item.filterConfig.listInfo"
-                  :comData="item.filterConfig.comData"
-                  :comProps="item.filterConfig.comProps"
-                  :placeholder="item.filterConfig.placeholder"
-                  :label='item.filterConfig.label'
-                  :type='item.filterConfig.type'
-                  @getFilterBridge="getFilterBridge"/>
-                <div slot="reference">
-                  <span>{{item.label}}</span>
-                  <!--                  el-icon-caret-top-->
-                  <i class="el-icon-caret-bottom" v-if="item.isNeed"></i>
-                </div>
-              </el-popover>
-            </template>
-            <!--td内容-->
-            <template slot-scope="scope" v-if='item.component'>
-              <component :is="item.component" :row="scope.row"></component>
-            </template>
-          </el-table-column>
-          <el-table-column :key="item.thIndex" v-else
-                           :prop="item.prop"
-                           :label="item.label"
-                           :width="item.width"
-                           :align="item.align"
-                           :resizable="item.resizable"
-                           :header-align="item.headerAlign"
-                           :show-overflow-tooltip="item.showOverflowTooltip">
-            <!-- 自定义头部 -->
+            <!-- 自定义头部 新写法-->
             <template slot="header" slot-scope="scope">
               <el-popover placement="bottom" width="100"
                           @show="curId=idx"
                           @hide="curId=-1"
                           trigger="hover"
                           :disabled="item.isNeed?false:true">
-                <component
-                  v-if="item.filterConfig && item.isNeed"
-                  :is="item.filterConfig.component"
-                  :paramKey="item.filterConfig.paramKey"
-                  :filterKey="item.filterConfig.filterKey"
-                  :listInfo="item.filterConfig.listInfo"
-                  :comData="item.filterConfig.comData"
-                  :comProps="item.filterConfig.comProps"
-                  :placeholder="item.filterConfig.placeholder"
-                  :label='item.filterConfig.label'
-                  :type='item.filterConfig.type'
-                  @getFilterBridge="getFilterBridge"/>
+                <component v-if="item.filterConfig && item.isNeed"
+                           :is="item.filterConfig.component"
+                           :paramKey="item.filterConfig.paramKey"
+                           :filterKey="item.filterConfig.filterKey"
+                           :listInfo="item.filterConfig.listInfo"
+                           :comData="item.filterConfig.comData"
+                           :comProps="item.filterConfig.comProps"
+                           :placeholder="item.filterConfig.placeholder"
+                           :label='item.filterConfig.label'
+                           :type='item.filterConfig.type'
+                           @getFilterBridge="getFilterBridge"/>
                 <div slot="reference">
                   <span>{{item.label}}</span>
                   <i :style="{color:curId==idx?'blue':''}"
@@ -98,17 +60,58 @@
                 </div>
               </el-popover>
             </template>
-            <!--td内容-->
+            <!--td内容 在使用v-if控制自定义组件失效,所以使用本办法-->
+            <template slot-scope="scope" v-if='item.tdComponent'>
+              <component :is="item.tdComponent" :row="scope.row" :tdConfig="item.tdConfig"></component>
+            </template>
+          </el-table-column>
+
+          <!--2.表格默认-->
+          <el-table-column v-else :key="idx"
+                           :prop="item.prop"
+                           :label="item.label"
+                           :width="item.width"
+                           :align="item.align"
+                           :resizable="item.resizable"
+                           :header-align="item.headerAlign"
+                           :show-overflow-tooltip="item.showOverflowTooltip">
+            <!-- 自定义头部 新写法-->
+            <template slot="header" slot-scope="scope">
+              <el-popover placement="bottom" width="100"
+                          @show="curId=idx"
+                          @hide="curId=-1"
+                          trigger="hover"
+                          :disabled="item.isNeed?false:true">
+                <component v-if="item.filterConfig && item.isNeed"
+                           :is="item.filterConfig.component"
+                           :paramKey="item.filterConfig.paramKey"
+                           :filterKey="item.filterConfig.filterKey"
+                           :listInfo="item.filterConfig.listInfo"
+                           :comData="item.filterConfig.comData"
+                           :comProps="item.filterConfig.comProps"
+                           :placeholder="item.filterConfig.placeholder"
+                           :label='item.filterConfig.label'
+                           :type='item.filterConfig.type'
+                           @getFilterBridge="getFilterBridge"/>
+                <div slot="reference">
+                  <span>{{item.label}}</span>
+                  <i :style="{color:curId==idx?'blue':''}"
+                     :class="curId==idx?'el-icon-caret-top':'el-icon-caret-bottom'"
+                     v-if="item.isNeed"></i>
+                </div>
+              </el-popover>
+            </template>
+            <!--td内容 在使用v-if控制自定义组件失效-->
+            <!--<template></template>-->
           </el-table-column>
         </template>
-        <!-- end-->
         <!--操控按钮栏目-->
         <template v-if="actionConfig">
           <el-table-column v-if="actionConfig.component"
                            :width="actionConfig.width||120"
                            :label="actionConfig.label"
-                           align="center"
-                           :fixed="actionConfig.fixed">
+                           :fixed="actionConfig.fixed"
+                           align="center">
             <template slot-scope="scope">
               <component :is="actionConfig.component" :row="scope.row" :handlers="actionConfig.handlers"/>
               <!--  row 是当前行, handlers 是初始配置的方法传的 -->
@@ -116,7 +119,6 @@
           </el-table-column>
         </template>
       </el-table>
-
     </div>
     <!--  分页器区域-->
     <div v-if="pagination" class="paginationWrap">
@@ -352,7 +354,6 @@ export default {
       }
       this.filterAction = _filterAction
     },
-
     // 单选或者多选事件
     handleSelectChange(val) {
       this.$emit('select-change', val)
@@ -379,7 +380,45 @@ export default {
       }
     }
   }
-  //完
+  //end
+}
+// 标准的入参 循环数据的基本格式,字段务必正确
+var tableConfig = {
+  prop: '', // 参数字段
+  label: '', // 名字
+  type: '', // 类型当前表头交互类型
+  hidden: false,//当前数据多.是否需要渲染
+  isNeed: true,// 是否需要搜索项
+  thIndex: null,// 下标
+  tdComponent: null,// 表格Td 内部组件可以传
+  tdConfig: {},// 表格Td 配置项
+  fixed: null, // 是否固定
+  width: null, // 宽度
+  minWidth: '80', // 最小宽度
+  resizable: true, // 拖动改变列宽度(需要在 el-table 上设置 border 属性为真)
+  showOverflowTooltip: true, // 内容过长隐藏
+  align: 'center', // left/center/right内容对齐方式
+  headerAlign: 'center', // left/center/right 头对齐方式
+  labelClassName: '', // 当前列自定义class
+  sortable: false, // 是否排序
+  formatter: () => {}, // 排序用字段 v-bind绑定
+  filters: [], // 绑定需要条件列表 数组
+  filterMethod: () => {}, // 过滤方法 v-bind绑定
+  renderHeader: () => {}, // Label区域渲染  v-bind绑定
+  filterConfig: {// 过滤组件
+    label: null,// filter 组件的table,同表头一致
+    type: null,//filter 组件的类型,同表头一致
+    component: null,// 传入的组件,
+    filterKey: null,//字段对应表头字段
+    paramKey: null,
+    placeholder: '输入姓名',
+    comData: [],
+    comProps: null,
+    listInfo: {
+      fetchData() {},
+      callback: () => {}// 回调
+    }
+  }
 }
 </script>
 <style scoped>
@@ -406,7 +445,6 @@ export default {
     display: flex;
     align-items: center;
   }
-
   .count {
     color: #909399;
     font-size: 12px;
