@@ -1,10 +1,7 @@
 <template>
   <div class="control-wrap">
-    <el-button class="send" @click.stop="click1" size="mini">自提</el-button>
-    <el-button class="state" @click.stop="click2" size="mini">送车</el-button>
+    <el-button class="send" @click.stop="click1" size="mini">查看</el-button>
     <el-button class="edit" @click.stop="click2" size="mini">编辑</el-button>
-    <el-button class="delete-btn" @click.stop="click2" size="mini">删除</el-button>
-    <el-button class="upLoad" @click.stop="click2" size="mini">上传凭证</el-button>
   </div>
 </template>
 <script>

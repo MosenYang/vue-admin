@@ -88,18 +88,11 @@
 <script>
 import TableComponents from '../../components/Tables/dg-table2'
 import {
-  clientAdd,// 添加
-  clientSearch,// 列表
-  deleteList,// 删除
-  updateList,//修改
-  importCustomer,//导入
-  exportCustomer,//导出
-  template,// 模板
-  logsAdd,//维护日志添加
-  logsShow,//查看
-  auditClient,//客户审核
-  updateAccendant// 修改维护人
-} from '../../../../api/business/clientManage/client'
+  addFeedback,
+  getFeedbackList,
+  editFeedbackInfo,
+  FeedbackInfo
+} from '../../../../api/business/businessOrder/feedbackOrderInfo'
 import { searchType } from '../../../../api/baseApi'// 这接口也可以搜索业务小哥
 import comControl from './control.vue'//控制器
 import { parseTime } from '@/utils'
@@ -433,119 +426,188 @@ var tableConfig = {
 }
 var initThData = [
   {
-    name: '业务类型',
-    key: 'business',
+    name: '回单状态',
+    key: 'has_receipt',
     type: 'selectFilter'
   },
   {
-    name: '经营范围',
-    key: 'business_scope',
+    name: '操作人',
+    key: 'opera_user',
     type: 'editFilter'
   },
   {
-    name: '公司名称',
-    key: 'company',
-    type: 'editFilter'
-  },
-  {
-    name: '省份',
-    key: 'province_name',
-    type: 'selectFilter'
-  },
-  {
-    name: '公司地址',
-    key: 'address',
-    type: 'editFilter'
-  },
-  {
-    name: '职务',
-    key: 'position',
-    type: 'editFilter'
-  },
-  {
-    name: '姓名',
-    key: 'username',
-    type: 'editFilter'
-
-  },
-  {
-    name: '性别',
-    key: 'sex',
-    type: 'selectFilter'
-  },
-  {
-    name: '手机号',
-    key: 'mobile',
-    type: 'editFilter'
-  },
-  {
-    name: '订单数量',
+    name: '订单号',
     key: 'order_num',
     type: 'editFilter'
+  },
+  {
+    name: '运输批次',
+    key: 'depart_batch',
+    type: 'selectFilter'
+  },
+  {
+    name: '发站',
+    key: 'start_city_string',
+    type: 'editFilter'
+  },
+  {
+    name: '发站归属地',
+    key: 'start_attribution',
+    type: 'selectFilter'
+  },
+  {
+    name: '到站',
+    key: 'end_city_string',
+    type: 'editFilter'
+  },
+  {
+    name: '到站归属地',
+    key: 'end_attribution',
+    type: 'selectFilter'
+  },
+  {
+    name: '托运人',
+    key: 'consignor',
+    type: 'editFilter'
 
   },
   {
-    name: '客户类型',
-    key: 'type',
+    name: '托运人电话',
+    key: 'consignee_mobile',
     type: 'selectFilter'
   },
   {
-    name: '是否审核',
-    key: 'audit_status',
+    name: '收车人',
+    key: 'consignee',
+    type: 'editFilter'
+
+  },
+  {
+    name: '收车人电话',
+    key: 'consignor_mobile',
     type: 'selectFilter'
   },
   {
-    name: '审核人',
-    key: 'audit_username',
+    name: '货物名称',
+    key: 'car_brand_name',
     type: 'editFilter'
   },
   {
-    name: '创建人',
-    key: 'create_username',
+    name: '识别码',
+    key: 'heading_code',
+    type: 'editFilter'
+
+  },
+  {
+    name: '运输司机',
+    key: 'convey_driver',
+    type: 'selectFilter'
+  },
+  {
+    name: '司机所属公司',
+    key: 'convey_company',
+    type: 'selectFilter'
+  },
+  {
+    name: '车牌号',
+    key: 'convey_plate_number',
     type: 'editFilter'
   },
   {
-    name: '维护人',
-    key: 'accendant',
+    name: '开单日期',
+    key: 'create_order_time',
     type: 'editFilter'
   },
   {
-    name: '最后操作时间',
-    key: 'updated_at',
-    isNeed: false
+    name: '发车日期',
+    key: 'departure_time',
+    type: 'editFilter'
+  },
+  {
+    name: '预期到达时间',
+    key: 'predict_time',
+    type: 'editFilter'
+
+  },
+  {
+    name: '实际到达时间',
+    key: 'fact_time',
+    type: 'editFilter'
+  },
+  {
+    name: '我方收件时间',
+    key: 'receive_time',
+    type: 'editFilter'
+  },
+  {
+    name: '逾期天数',
+    key: 'overdue',
+    type: 'editFilter'
+  },
+  {
+    name: '收件单号/来源',
+    key: 'courier_number',
+    type: 'editFilter'
+  },
+  {
+    name: '收件人',
+    key: 'recipients',
+    type: 'editFilter'
+  },
+  {
+    name: '收件人电话',
+    key: 'recipients_tel',
+    type: 'editFilter'
+  },
+  {
+    name: '寄件时间',
+    key: 'send_time',
+    type: 'editFilter'
+  },
+  {
+    name: '寄件单号/来源',
+    key: 'send_single_number',
+    type: 'editFilter'
   },
   {
     name: '备注',
-    key: 'remarks',
-    isNeed: false
+    key: 'receipt_remark',
+    type: 'editFilter'
   }
 ]
 var defParams = {
   query: '',// 搜索字段
-  start: 1,
-  length: 10,// 条数
-  business: '',// 业务类型
-  business_scope: '',// 经营范围
-  audit_username: '',//昵称
-  audit_status: '',//0未审核，1已审核
-  company: '',//公司名称
-  address: '',//公司地址
-  position: '',//职位
-  sex: '',//性别
-  province: '',//省Id
-  mobile: '',//客户手机
-  wechat: '',//w微信
-  qq: '',// qq
-  id_card: '',// 身份证
-  telephone: '',//客户固定电话
-  fax_number: '',// 传真号
-  type: '',//客户类型
-  create_user: '',// 创建人姓名
-  accendant: '',//业务
-  updated_at_from: '',//开始时间
-  updated_at_to: '',//结束时间
-  order_num: ''//关联数量
-
+  currpage: 1,
+  pagesize: 10,// 条数
+  order_num: '',// 订单号
+  depart_batch: '',// 运输批次号
+  start_city_string: '',//发站
+  start_attribution: '',//发展归属地
+  end_city_string: '',//到站
+  end_attribution: '',//到站归属地
+  consignor: '',//托运人
+  consignor_mobile: '',//托运人电话
+  consignee: '',//收车人
+  consignee_mobile: '',//收车人电话
+  car_brand_name: '',//货物名称
+  heading_code: '',// 识别码
+  convey_driver: '',// 运输司机集合
+  convey_company: '',//运输司机公司集合
+  convey_plate_number: '',// 车牌号集合
+  create_order_time_start: '',//开单日期开始值
+  create_order_time_end: '',// 开单日期结束值
+  predict_time_start: '',//预期到达时间开始值
+  predict_time_end: '',//预期到达时间结束值
+  fact_time_start: '',//实际到达时间开始
+  fact_time_end: '',//实际到达时间结束
+  receive_time_start:'',//我方收件时间开始
+  receive_time_end:'',//我方收件时间结束
+  courier_number:'',//收件单号
+  recipients:'',//收件人
+  recipients_tel:"",//收件人电话
+  send_time_start:'',//寄件时间开始
+  send_time_end:'',//寄件时间结束
+  send_single_number:"",//寄件单号
 }
 var option = [
   {

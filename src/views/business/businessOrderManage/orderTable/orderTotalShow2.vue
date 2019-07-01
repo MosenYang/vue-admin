@@ -351,8 +351,8 @@ export default {
         this.columnData.push(config)
         if (item.key === 'comment_disabled') {
           config.tdComponent = TdControl
-          config.tdConfig={
-            t:1
+          config.tdConfig = {
+            t: 1
           }
         }
       })

@@ -33,7 +33,7 @@
               </div>
             </div>
           </div>
-          <div class="icon-line flex-center">
+          <div class="icon-line flex-center" v-if="i!==4">
             <div class="line"></div>
           </div>
         </div>
@@ -255,9 +255,9 @@ var tableConfig = {
   type: '', // 类型当前表头交互类型
   hidden: false,//当前数据多.是否需要渲染
   isNeed: true,// 是否需要搜索项
-  thIndex: null,
-  component: null,// 表格Td 内部组件可以传
-  componentConfig: null,// 表格Td 配置项
+  thIndex: null,// 下标
+  tdComponent: null,// 表格Td 内部组件可以传
+  tdConfig: {},// 表格Td 配置项
   fixed: null, // 是否固定
   width: null, // 宽度
   minWidth: '80', // 最小宽度

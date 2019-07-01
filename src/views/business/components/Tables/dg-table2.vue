@@ -221,6 +221,11 @@ export default {
       default: ({ row, column, rowIndex, columnIndex }) => {
         return 'fontWeight:600'
       }
+    },
+    // 父组件清空所有筛选项
+    isClear: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -233,6 +238,15 @@ export default {
     }
   },
   watch: {
+    isClear(newValue) {
+      if (newValue) {
+        this.barData = []
+        //清掉数据
+        for (let i in this.emitParams) {
+          this.emitParams[i] = ''
+        }
+      }
+    },
     columnConfig(newValue) {
       if (newValue) {
         this.columnConfig.forEach((item) => {
@@ -269,7 +283,7 @@ export default {
       this.emitParams[item.paramKey] = null || ''
       this.$emit('filter-change', this.emitParams)
     },
-    // 广播事件(被重复复用)
+    // 广播事件(复用)
     getFilterBridge(valObj) {// valObj.value 可能是对象 || 字符
       console.log(valObj, '筛选数据~!!!!')
       let isObj = Object.prototype.toString.call(valObj.value) === '[object Object]'
@@ -391,7 +405,7 @@ var tableConfig = {
   isNeed: true,// 是否需要搜索项
   thIndex: null,// 下标
   tdComponent: null,// 表格Td 内部组件可以传
-  tdConfig: {},// 表格Td 配置项
+  tdConfig: {},// 表格Td 配置项 // comData:表格组件的数据
   fixed: null, // 是否固定
   width: null, // 宽度
   minWidth: '80', // 最小宽度
@@ -445,6 +459,7 @@ var tableConfig = {
     display: flex;
     align-items: center;
   }
+
   .count {
     color: #909399;
     font-size: 12px;
