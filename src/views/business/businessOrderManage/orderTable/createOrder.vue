@@ -830,6 +830,7 @@ export default {
         let param = {
           type: 1, usrename: val
         }
+        console.log('param',param)
         getOrderInfo(param).then((res) => {
           if (res.data.hasdata === 1) {
             this.consignerOption = res.data.info

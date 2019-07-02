@@ -12,7 +12,7 @@ export function getOrderMsg(data) {
     baseURL: '',
     url: '/api/orders/create',
     method: 'GET',
-    data
+    params:data
   })
 }
 
@@ -89,10 +89,24 @@ export function alterOrder(data) {
     data
   })
 }
-/**
- * 订单详情
- * */
-// 撤回共享 (待定)
 
+// 多装车
+export function moreLoading(data) {
+  return request({
+    baseURL: '',
+    url: '/api/order/more_loading_list',
+    method: 'post',
+    data
+  })
+}
 
+// 订单总表-导出
+export function importExcel(data) {
+  return request({
+    baseURL: '',
+    url: '/api/download/import',
+    method: 'post',
+    data
+  })
+}
 

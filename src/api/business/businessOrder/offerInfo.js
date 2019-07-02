@@ -6,7 +6,8 @@ import request from '../../../utils/request'
 export function getPrice(data) {
   return request({
     baseURL: '',
-    url: '/api/order/getPrice?start_province=' + data.start_province + '&end_province=' + data.end_province,
-    method: 'GET'
+    url: '/api/order/getPrice',
+    method: 'GET',
+    params: data
   })
 }

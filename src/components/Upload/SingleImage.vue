@@ -4,42 +4,49 @@
       :data="dataObj"
       :multiple="false"
       :show-file-list="false"
+      :on-change="change"
       :on-success="handleImageSuccess"
+      :on-progress="handleProgress"
       class="image-uploader"
       drag
-      action="https://httpbin.org/post"
-    >
-      <i class="el-icon-upload" />
+      action="https://api.thisyang.online/api/utils/upload_file">
+      <i class="el-icon-upload"/>
       <div class="el-upload__text">
         将文件拖到此处，或<em>点击上传</em>
       </div>
     </el-upload>
-    <div class="image-preview">
-      <div v-show="imageUrl.length>1" class="image-preview-wrapper">
-        <img :src="imageUrl+'?imageView2/ 1/w/200/h/200'">
-        <div class="image-preview-action">
-          <i class="el-icon-delete" @click="rmImage" />
+    <div class="image-preview" v-for="(item,index) in fileList">
+      <div v-show="fileList.length>=1" class="image-preview-wrapper">
+        <img :src="item.url">
+        <div class="image-preview-action flex-center">
+          <i class="el-icon-delete" @click="rmImage"/>
         </div>
       </div>
     </div>
   </div>
 </template>
-
 <script>
-import { getToken } from '@/api/qiniu'
+import { uploadPic } from '@/api/baseApi'
 
 export default {
   name: 'SingleImageUpload',
   props: {
     value: {
       type: String,
-      default: ''
+      default: 'https://api.thisyang.online'
     }
   },
   data() {
     return {
       tempUrl: '',
-      dataObj: { token: '', key: '' }
+      fileList: [{
+        name: 'food.jpeg',
+        url: 'https://ss0.baidu.com/73F1bjeh1BF3odCf/it/u=2108445255,2329478258&fm=85&s=7D74068F524736E6B8A51F3C03001058'
+      }, {
+        name: 'food2.jpeg',
+        url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+      }],
+      dataObj: { token: '', type: 1 }// 额外的参数
     }
   },
   computed: {
@@ -49,29 +56,44 @@ export default {
   },
   methods: {
     rmImage() {
+      console.log('00', '查看')
       this.emitInput('')
+    },
+    change(file) {
+      let param = {
+        file: file,
+        type: 1
+      }
+      uploadPic(param).then((res) => {
+        if (res.code == 200) {
+          alert('1')
+        }
+      })
+      console.log('file1', file)
+    },
+    beforeUpload(file) {
+      console.log('file2', file)
+      // uploadPic().then((res)=>{})
+      const isJPG = file.type === 'image/jpeg'
+      const isLt2M = file.size / 1024 / 1024 < 2
+
+      if (!isJPG) {
+        this.$message.error('上传头像图片只能是 JPG 格式!')
+      }
+      if (!isLt2M) {
+        this.$message.error('上传头像图片大小不能超过 2MB!')
+      }
+      return isJPG && isLt2M
+    },
+    handleImageSuccess(res, file) {
+      this.imageUrl = URL.createObjectURL(file.raw)
+      this.emitInput(this.tempUrl)
     },
     emitInput(val) {
       this.$emit('input', val)
     },
-    handleImageSuccess() {
-      this.emitInput(this.tempUrl)
-    },
-    beforeUpload() {
-      const _self = this
-      return new Promise((resolve, reject) => {
-        getToken().then(response => {
-          const key = response.data.qiniu_key
-          const token = response.data.qiniu_token
-          _self._data.dataObj.token = token
-          _self._data.dataObj.key = key
-          this.tempUrl = response.data.qiniu_url
-          resolve(true)
-        }).catch(err => {
-          console.log(err)
-          reject(false)
-        })
-      })
+    handleProgress() {
+      //上传中
     }
   }
 }
@@ -97,11 +119,11 @@ export default {
       position: relative;
       border: 1px dashed #d9d9d9;
       float: left;
-
       .image-preview-wrapper {
         position: relative;
         width: 100%;
         height: 100%;
+        margin-right: 10px;
 
         img {
           width: 100%;
@@ -115,16 +137,12 @@ export default {
         height: 100%;
         left: 0;
         top: 0;
-        cursor: default;
-        text-align: center;
         color: #fff;
         opacity: 0;
         font-size: 20px;
         background-color: rgba(0, 0, 0, .5);
         transition: opacity .3s;
         cursor: pointer;
-        text-align: center;
-        line-height: 200px;
 
         .el-icon-delete {
           font-size: 36px;

@@ -38,8 +38,7 @@
             <el-option v-for="item in option"
                        :key="item.value"
                        :label="item.label"
-                       :value="item.value"
-            />
+                       :value="item.value"/>
           </el-select>
         </div>
         <div class="filters-btns">
@@ -86,17 +85,23 @@
                         @select-change="getselect"
                         :headerCellStyle="headerCell"
                         @page-change="getpage"/>
-
-      <!--上传-->
+      <!--图片上传-->
       <el-dialog title="上传凭证图片" :visible.sync="dialogVisible" width="40%">
-        <loadFile/>
+        <!--        <form id="" enctype="multipart/form-data" method="post">-->
+        <!--          <input id="text" name="file" type="text"></input><br/>-->
+        <!--          <input id="file" name="file"-->
+        <!--                 type="file" @change="changeFile($event)"-->
+        <!--                 ref="avatarInput"></input>-->
+        <!--          <input type="button" value="提交" @click="uploadPic"/>-->
+        <!--        </form>-->
+        <load-pic></load-pic>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
           <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
         </span>
       </el-dialog>
-      <!--上传-->
-      <el-dialog title="导入Excel文件" :visible.sync="dialogExcelVisible" width="70%">
+      <!--导出Excel文件-->
+      <el-dialog title="导出Excel文件" :visible.sync="dialogExcelVisible" width="70%">
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogExcelVisible = false">取 消</el-button>
           <el-button type="primary" @click="dialogExcelVisible = false">确 定</el-button>
@@ -108,17 +113,14 @@
 <script>
 
 import { checkOrder, destroyOrder, orderIndex, getOrderInfo } from '../../../../api/business/businessOrder/order'
-//api/business/businessOrder/order
-import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
-import TableComponents from '../../components/Tables/dg-table'//动态表格
-// import searchText from '../../components/Tables/defFilter/searchText.vue'//搜索
-// import searchSelect from '../../components/Tables/defFilter/searchSelect.vue'//搜索
+import { uploadPic } from '../../../../api/baseApi'
+import TableComponents from '../../components/Tables/dg-table2'//动态表格
 import selectFilter from '../../components/Tables/defFilter/selectFilter.vue'//搜索
 import comControl from './component/control.vue'//控制器
 import waves from '@/directive/waves' // 指令
 import { parseTime } from '@/utils'
 // import unLoadExcel from '@/components/uploadExcel/Excel'// 文件上传(并没有写)
-import loadFile from '@/components/Upload/SingleImage'// 图片上传
+import loadPic from '@/components/Upload/upLoadFile'// 图片上传
 
 export default {
   name: 'totalTable',
@@ -139,6 +141,7 @@ export default {
         pageNum: 10,
         curPage: 1
       },
+      file: '',
       actionConfig: {
         type: 'customize',
         label: '操作区',
@@ -152,20 +155,11 @@ export default {
           },
           btnHandle: this.btnHandle,
           deleteOrder: this.handleDelete,
-          upLoadOrder: () => {this.dialogVisible = true}
+          upLoadOrder: this.upLoadPic
         }
       },
       option,
       showReviewer: false,
-      temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
-      },
       dialogFormVisible: false,
       dialogStatus: '',
       downloadLoading: false,
@@ -173,23 +167,50 @@ export default {
       typeValue: null
     }
   },
-  //searchSelect, select,searchText
-  components: {loadFile, TableComponents, comControl, selectFilter },
+  components: { loadPic, TableComponents, comControl, selectFilter },
   directives: { waves },
-  filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: 'success',
-        draft: 'info',
-        deleted: 'danger'
-      }
-      return statusMap[status]
-    }
-  },
+  filters: {},
   created() {
     this.getTableList()
   },
   methods: {
+    // 提交方法
+    uploadPic() {
+      let files = this.$refs.avatarInput.files
+      let fileData = {}
+      if (files instanceof Array) {
+        fileData = files[0]
+      } else {
+        fileData = this.file
+      }
+      console.log('fileData', typeof fileData, fileData)
+      let data = new FormData()
+      data.append('file', fileData)
+      data.append('type', 1)
+      uploadPic(data).then((res) => {
+        if (res.code == 200) {
+          alert('提交')
+        }
+      })
+    },
+    changeFile(ev) {
+      let file = ev.target.files[0]
+      console.log('ev', ev.target.files[0])
+      if (file) {
+        this.file = file
+        let reader = new FileReader()
+        let that = this
+        reader.readAsDataURL(file)
+        reader.onload = function(e) {
+          // 这里的this 指向reader
+          that.avatar = this.result
+        }
+      }
+    },
+    upLoadPic() {
+
+      this.dialogVisible = true
+    },
     /**
      * 多装车
      * */
@@ -264,7 +285,7 @@ export default {
      * 创建订单
      **/
     handleCreate() {
-      this.$router.push({ path: '/' })
+      this.$router.push({ path: 'businessCreateOrder' })
     },
     /**
      * 单选事件
@@ -275,7 +296,7 @@ export default {
     },
     //设置表格样式
     headerCell() {
-      return 'font-size:16px; font-weight: 800;\n'
+      return 'font-size:16px; font-weight: 800;'
     },
     //表格行点击事件
     onClickHandle() {
@@ -307,25 +328,6 @@ export default {
     handleReset() {
       this.getTableList()
     },
-    // 废弃
-    createData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
-            this.list.unshift(this.temp)
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
-              type: 'success',
-              duration: 2000
-            })
-          })
-        }
-      })
-    },
     // 表格筛选
     filterTag(value, row) {
       return row.tag === value
@@ -344,41 +346,6 @@ export default {
           type: 'warning'
         })
       }
-    },
-
-    handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
-      console.log('0')
-    },
-    updateData() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Update Successfully',
-              type: 'success',
-              duration: 2000
-            })
-          })
-        }
-      })
     },
 
     // 导出时间方法
@@ -478,228 +445,6 @@ export default {
      * 初始化表格表头名称数据
      * */
     mapTableTh() {
-      let initTHData = [
-        {
-          name: '订单号',
-          isNeed: true,//是否需要搜索,
-          type: 'text',// 搜索类型
-          key: 'order_num'
-        },
-        {
-          name: '发车批次',
-          isNeed: true,//是否需要搜索,
-          type: 'text',// 搜索类型
-          key: 'depart_batch'
-        },
-        {
-          name: '运单号',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'text',// 搜索类型
-          key: 'tran_num'
-        },
-        {
-          name: '订单状态',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'selectFilter',
-          key: 'order_status'
-        },
-        {
-          name: '审核状态',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'selectFilter',
-          key: 'is_audit'
-        },
-        {
-          name: '订单分类',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'selectFilter',
-          key: 'order_type'
-        },
-        {
-          name: '发站',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'text',
-          key: 'start_city_string'
-        },
-        {
-          name: '发站归属地',//表头label
-          isNeed: true,//是否需要搜索
-          width: 160,
-          type: 'selectFilter',// 搜索类型
-          key: 'start_attribution'
-        },
-        {
-          name: '中转归属地',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'selectFilter',
-          width: 160,
-          key: 'transfer_place'
-        },
-        {
-          name: '到站',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'text',
-          key: 'end_city_string'
-        },
-        {
-          name: '到站归属地',
-          isNeed: true,
-          type: 'selectFilter',
-          width: 160,
-          key: 'end_attribution'
-        },
-        {
-          name: '托运人',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'text',// 搜索类型
-          key: 'consignor'
-        },
-        {
-          name: '托运人电话',//表头label
-          isNeed: true,//是否需要搜索
-          width: 140,
-          type: 'text',
-          key: 'consignor_mobile'
-        },
-        {
-          name: '收货人',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'text',
-          key: 'consignee'
-        },
-        {
-          name: '收货人电话',//表头label
-          isNeed: true,//是否需要搜索
-          width: 140,
-          type: 'text',// 搜索类型
-          key: 'consignee_mobile'
-        },
-        {
-          name: '货物名称',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'text',// 搜索类型
-          text: 'searchSelect.vue',
-          key: 'car_brand_name'
-        },
-        {
-          name: '识别码',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'text',// 搜索类型
-          key: 'heading_code'
-        },
-        {
-          name: '现付',//表头label
-          type: 'text',// 搜索类型
-          key: 'pay_cash'
-        },
-        {
-          name: '到付',//表头label
-          type: 'text',// 搜索类型
-          key: 'freight_collect'
-
-        },
-        {
-          name: '月结',//表头label
-          type: 'text',// 搜索类型
-          key: 'monthly_statement'
-        },
-        {
-          name: '付款方式',//表头label
-          isNeed: true,//是否需要搜索
-          type: 'selectFilter',
-          key: 'payment_method'
-        },
-        {
-          name: '合计运费',//表头label
-          type: 'text',// 搜索类型
-          isNeed: false,
-          key: 'total_cost'
-        },
-        {
-          name: '经办人',//表头label
-          isNeed: true,
-          type: 'text',
-          key: 'operator'
-        },
-        {
-          name: '业务类型',//表头label
-          isNeed: true,
-          type: 'selectFilter',
-          key: 'type_of_business'
-        },
-        {
-          name: '所属公司',//表头label
-          isNeed: true,
-          type: 'text',
-          key: 'convey_company'
-        },
-        {
-          name: '运输司机名字',//表头label
-          isNeed: true,
-          width: 160,
-          type: 'text',
-          key: 'convey_driver'
-        },
-        {
-          name: '司机电话',//表头label
-          isNeed: true,
-          type: 'text',
-          key: 'convey_driver_tel'
-        },
-        {
-          name: '提车司机',//表头label
-          isNeed: true,
-          type: 'text',
-          key: 'carry_car_name'
-        },
-        {
-          name: '送车司机',//表头label
-          isNeed: true,
-          type: 'text',
-          key: 'send_car_name'
-        },
-        {
-          name: '运输次数',//表头label
-          isNeed: true,
-          type: 'selectFilter',
-          key: 'transfer_status'
-        },
-        {
-          name: '开单日期',//表头label
-          isNeed: true,
-          type: 'text',
-          key: 'create_order_time'
-        },
-        {
-          name: '状态修改人',//表头label
-          isNeed: true,
-          type: 'text',// 搜索类型
-          width: 140,
-          key: 'who_handle_name'
-        },
-        {
-          name: '审核人',//表头label
-          isNeed: true,
-          type: 'text',
-          key: 'audit_people'
-        },
-        {
-          name: '审核时间',//表头label
-          isNeed: true,
-          type: 'text',
-          key: 'audit_time'
-        },
-        {
-          name: '回单',//表头label
-          isNeed: true,
-          type: 'selectFilter',
-          key: 'has_receipt'
-        },
-        {
-          name: '备注',
-          key: 'remark'
-        }
-      ]
       console.log(initTHData.length, '订单总表表格列数')
       this.columnData = []
       initTHData.forEach((item, index) => {
@@ -718,10 +463,7 @@ export default {
         config.isNeed = item.isNeed ? config.isNeed : false
         config.label = comConfig.label = item.name
         config.type = comConfig.type = item.type
-        config.width = item.width ? item.width : '120'
-        // if (config.type === 'text') {
-        //   config.component = searchText // searchFilter
-        // }
+        config.width = item.width ? item.width : '140'
         if (item.name === '发站归属地' || item.name === '中转归属地' || item.name === '到站归属地') {
           comConfig.component = selectFilter
           comConfig.comData = this.area
@@ -756,7 +498,6 @@ export default {
         if (item.name === '回单') {
           comConfig.comData = has_receipt_s
           comConfig.component = selectFilter
-
         }
         config.filterConfig = comConfig
         this.columnData.push(config)
@@ -833,7 +574,6 @@ var defParams = {
   audit_time_start: '',//'审核时间开始值',
   audit_time_end: '',//'审核时间结束值',
   has_receipt: ''//'有无回单'
-
 }
 var option = [
   {
@@ -848,6 +588,228 @@ var option = [
   }, {
     value: '100',
     label: '100条/页'
+  }
+]
+var initTHData = [
+  {
+    name: '订单号',
+    isNeed: true,//是否需要搜索,
+    type: 'editFilter',// 搜索类型
+    key: 'order_num',
+    width: 180
+  },
+  {
+    name: '发车批次',
+    isNeed: true,//是否需要搜索,
+    type: 'editFilter',// 搜索类型
+    key: 'depart_batch'
+  },
+  {
+    name: '运单号',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',// 搜索类型
+    key: 'tran_num'
+  },
+  {
+    name: '订单状态',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'selectFilter',
+    key: 'order_status'
+  },
+  {
+    name: '审核状态',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'selectFilter',
+    key: 'is_audit'
+  },
+  {
+    name: '订单分类',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'selectFilter',
+    key: 'order_type'
+  },
+  {
+    name: '发站',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',
+    key: 'start_city_string'
+  },
+  {
+    name: '发站归属地',//表头label
+    isNeed: true,//是否需要搜索
+    width: 160,
+    type: 'selectFilter',// 搜索类型
+    key: 'start_attribution'
+  },
+  {
+    name: '中转归属地',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'selectFilter',
+    width: 160,
+    key: 'transfer_place'
+  },
+  {
+    name: '到站',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',
+    key: 'end_city_string'
+  },
+  {
+    name: '到站归属地',
+    isNeed: true,
+    type: 'selectFilter',
+    width: 160,
+    key: 'end_attribution'
+  },
+  {
+    name: '托运人',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',// 搜索类型
+    key: 'consignor'
+  },
+  {
+    name: '托运人电话',//表头label
+    isNeed: true,//是否需要搜索
+    width: 140,
+    type: 'editFilter',
+    key: 'consignor_mobile'
+  },
+  {
+    name: '收货人',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',
+    key: 'consignee'
+  },
+  {
+    name: '收货人电话',//表头label
+    isNeed: true,//是否需要搜索
+    width: 140,
+    type: 'editFilter',// 搜索类型
+    key: 'consignee_mobile'
+  },
+  {
+    name: '货物名称',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'text',// 搜索类型
+    text: 'searchSelect.vue',
+    key: 'car_brand_name'
+  },
+  {
+    name: '识别码',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'editFilter',// 搜索类型
+    key: 'heading_code'
+  },
+  {
+    name: '现付',//表头label
+    type: 'editFilter',// 搜索类型
+    key: 'pay_cash'
+  },
+  {
+    name: '到付',//表头label
+    type: 'editFilter',// 搜索类型
+    key: 'freight_collect'
+  },
+  {
+    name: '月结',//表头label
+    type: 'editFilter',// 搜索类型
+    key: 'monthly_statement'
+  },
+  {
+    name: '付款方式',//表头label
+    isNeed: true,//是否需要搜索
+    type: 'selectFilter',
+    key: 'payment_method'
+  },
+  {
+    name: '合计运费',//表头label
+    type: 'editFilter',// 搜索类型
+    isNeed: false,
+    key: 'total_cost'
+  },
+  {
+    name: '经办人',//表头label
+    isNeed: true,
+    type: 'editFilter',
+    key: 'operator'
+  },
+  {
+    name: '业务类型',//表头label
+    isNeed: true,
+    type: 'selectFilter',
+    key: 'type_of_business'
+  },
+  {
+    name: '所属公司',//表头label
+    isNeed: true,
+    type: 'editFilter',
+    key: 'convey_company'
+  },
+  {
+    name: '运输司机名字',//表头label
+    isNeed: true,
+    width: 160,
+    type: 'editFilter',
+    key: 'convey_driver'
+  },
+  {
+    name: '司机电话',//表头label
+    isNeed: true,
+    type: 'editFilter',
+    key: 'convey_driver_tel'
+  },
+  {
+    name: '提车司机',//表头label
+    isNeed: true,
+    type: 'editFilter',
+    key: 'carry_car_name'
+  },
+  {
+    name: '送车司机',//表头label
+    isNeed: true,
+    type: 'editFilter',
+    key: 'send_car_name'
+  },
+  {
+    name: '运输次数',//表头label
+    isNeed: true,
+    type: 'selectFilter',
+    key: 'transfer_status'
+  },
+  {
+    name: '开单日期',//表头label
+    isNeed: true,
+    type: 'editFilter',
+    key: 'create_order_time'
+  },
+  {
+    name: '状态修改人',//表头label
+    isNeed: true,
+    type: 'editFilter',// 搜索类型
+    width: 140,
+    key: 'who_handle_name'
+  },
+  {
+    name: '审核人',//表头label
+    isNeed: true,
+    type: 'editFilter',
+    key: 'audit_people'
+  },
+  {
+    name: '审核时间',//表头label
+    isNeed: true,
+    type: 'editFilter',
+    key: 'audit_time'
+  },
+  {
+    name: '回单',//表头label
+    isNeed: true,
+    type: 'selectFilter',
+    key: 'has_receipt'
+  },
+  {
+    name: '备注',
+    key: 'remark'
   }
 ]
 </script>

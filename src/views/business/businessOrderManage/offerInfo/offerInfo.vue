@@ -35,18 +35,46 @@
         </div>
       </div>
     </div>
-    <div>
-      <h4>运输报价:</h4>
-      <table-components :table-data="transport"
-                        :selection="false"
-                        :pagination="false"
-                        :row-click="onClickHandle"
-                        :action-config="{}"
-                        :page-config="pageData"
-                        :column-config="columnData"
-                        @filter-change="getFilter">
-      </table-components>
+    <div class="table-content">
+      <div class="transport-price">
+        <h4>运输报价:</h4>
+        <table-components :table-data="transportFit"
+                          :selection="false"
+                          :pagination="false"
+                          :row-click="onClickHandle"
+                          :action-config="{}"
+                          :column-config="columnData"
+                          @filter-change="getFilter">
+        </table-components>
+      </div>
+      <div class="flex-between">
+        <div class="bricePrice">
+          <h4>提车报价:</h4>
+          <table-components :table-data="lift_carFit"
+                            :names="'bricePrice'"
+                            :selection="false"
+                            :pagination="false"
+                            :row-click="onClickHandle"
+                            :action-config="{}"
+                            :column-config="columnData2"
+                            @filter-change="getFilter2">
+          </table-components>
+        </div>
+        <div class="sendPrice">
+          <h4>送车报价:</h4>
+          <table-components :table-data="car_deliveryFit"
+                            :names="'sendPrice'"
+                            :selection="false"
+                            :pagination="false"
+                            :row-click="onClickHandle"
+                            :action-config="{}"
+                            :column-config="columnData3"
+                            @filter-change="getFilter3">
+          </table-components>
+        </div>
+      </div>
     </div>
+
   </div>
 </template>
 <script>
@@ -62,15 +90,16 @@ export default {
       defParams: defParams,
       tableData: [],
       columnData: [],
+      columnData2: [],
+      columnData3: [],
       filterParam: {},
       total: 0,
       transport: [],
+      transportFit: [],
       lift_car: [],
+      lift_carFit: [],
       car_delivery: [],
-      pageData: {
-        totalPageNum: 100,
-        curPage: 1
-      }
+      car_deliveryFit: []
     }
   },
   computed: {},
@@ -78,31 +107,14 @@ export default {
   created() {
     this.getTableList()
   },
-  mounted() {
-  },
+  mounted() {},
   methods: {
-    getTableList() {
-      let { start_province, end_province } = this.defParams
-      if (start_province && end_province) {
-        getPrice(this.defParams).then((res) => {
-          if (res.code == 200) {
-            console.log('r', res.data)
-            let { transport, lift_car, car_delivery } = res.data
-            this.transport = transport
-            this.lift_car = lift_car
-            this.car_delivery = car_delivery
-            this.mapTableTh()
-          }
-        })
-      }
-    },
-    mapTableTh() {
-      console.log(this.initTHData, '订单总表表格列数')
-      this.columnData = []
-      this.initTHData.forEach((item, index) => {
+    mapTableTh(array, n) {
+      let columnBox = []
+      array.forEach((item, index) => {
         let config = { ...tableConfig }
         let comConfig = { ...tableConfig.filterConfig }
-        config.prop = item.key // 数据字段
+        config.prop = item.key
         config.thIndex = index
         config.isNeed = true
         config.isNeed = item.isNeed ? item.isNeed : false
@@ -111,21 +123,80 @@ export default {
         config.width = item.width ? item.width : '120'
         comConfig.filterKey = item.key
         config.filterConfig = comConfig
-        this.columnData.push(config)
+        columnBox.push(config)
+        if (!n) this.columnData = columnBox
+        if (n == 2) this.columnData2 = columnBox
+        if (n == 3) this.columnData3 = columnBox
+        return columnBox
       })
-      console.log(this.columnData, '表头数据')
+    },
+    getTableList() {
+      let { start_province, end_province } = this.defParams
+      if (start_province && end_province) {
+        getPrice(this.defParams).then((res) => {
+          if (res.code == 200) {
+            let { transport, lift_car, car_delivery } = res.data
+            this.transportFit = this.transport = transport
+            this.lift_carFit = this.lift_car = lift_car
+            this.car_deliveryFit = this.car_delivery = car_delivery
+          }
+        })
+      }
+      this.mapTableTh(initThData)
+      this.mapTableTh(initThData2, 2)
+      this.mapTableTh(initThData3, 3)
+
     },
     handleSearch() {},
     onClickHandle() {},
-    getFilter() {}
+    getFilter(val) {
+      for (let i in val) {
+        if (val[i] === '') {
+          delete val[i]
+        }
+      }
+      let length = Object.keys(val).length
+      length >= 1 ? this.transportFit = this.fit(val, this.transport) : this.transportFit = this.transport
+    },
+    fit(valObj, array) {
+      let _key = Object.keys(valObj)
+      let newData = array.filter(item => _key.every(k => valObj[k] === item[k]))
+      return newData
+    },
+    getFilter2(val) {
+      if (val.company !== '') {
+        this.lift_carFit = []
+        this.lift_car.forEach((item) => {
+          if (item.company == val.company) {
+            this.lift_carFit.push(item)
+          }
+        })
+        return
+      }
+      this.lift_carFit = this.lift_car
+    },
+    getFilter3(val) {
+      if (val.company !== '') {
+        this.car_deliveryFit = []
+        this.car_delivery.forEach((item) => {
+          if (item.company == val.company) {
+            this.car_deliveryFit.push(item)
+          }
+        })
+        return
+      }
+      this.car_deliveryFit = this.car_delivery
+    }
   }
 }
 
-var initThData2 = [
+var initThData3 = [
   {
     name: '公司名称',
     key: 'company',
-    type: 'editFilter'
+    type: 'editFilter',
+    isNeed: true
+
   },
   {
     name: '提车地区',
@@ -148,11 +219,12 @@ var initThData2 = [
     key: 'clients_price'
   }
 ]
-var initThData3 = [
+var initThData2 = [
   {
     name: '公司名称',
     key: 'company',
-    type: 'editFilter'
+    type: 'editFilter',
+    isNeed: true
   },
   {
     name: '提车地区',
@@ -173,6 +245,61 @@ var initThData3 = [
   {
     name: '更新日期',
     key: 'clients_price'
+  }
+]
+var initThData = [
+  {
+    name: '公司名称',
+    key: 'company',
+    type: 'editFilter',
+    isNeed: true,
+    width: 160
+
+  },
+  {
+    name: '出发地',
+    key: 'start_address',
+    width: 150
+
+  },
+  {
+    name: '出发归属地',
+    key: 'start_province',
+    type: 'editFilter',
+    isNeed: true,
+    width: 150
+  },
+  {
+    name: '到达地',
+    key: 'end_address'
+  },
+  {
+    name: '到达归属地',
+    key: 'end_province',
+    type: 'editFilter',
+    isNeed: true,
+    width: 150
+  },
+  {
+    name: '汽贸',
+    key: 'clients_price'
+  },
+  {
+    name: '同行',
+    key: 'peer_price'
+  },
+  {
+    name: '网络',
+    key: 'network_price'
+  },
+  {
+    name: '更新日期',
+    key: 'updated_at',
+    width: 180
+  },
+  {
+    name: '备注',
+    key: 'remarks'
   }
 ]
 var tableConfig = {
@@ -216,51 +343,6 @@ var defParams = {
   start_province: '山西',
   end_province: '北京'
 }
-var initThData = [
-  {
-    name: '公司名称',
-    key: 'company',
-    type: 'editFilter'
-  },
-  {
-    name: '出发地',
-    key: 'start_address'
-  },
-  {
-    name: '出发归属地',
-    key: 'start_province',
-    type: 'editFilter'
-  },
-  {
-    name: '到达地',
-    key: 'end_address'
-  },
-  {
-    name: '到达归属地',
-    key: 'end_province',
-    type: 'selectFilter'
-  },
-  {
-    name: '汽贸',
-    key: 'clients_price'
-  },
-  {
-    name: '同行',
-    key: 'peer_price'
-  },
-  {
-    name: '网络',
-    key: 'network_price'
-  },
-  {
-    name: '更新日期',
-    key: 'updated_at'
-  },
-  {
-    name: '备注',
-    key: 'remarks'
-  }
-]
 </script>
 <style lang="scss" scoped>
   @import "src/styles/mixin.scss";
@@ -306,4 +388,8 @@ var initThData = [
 
   }
 
+  .table-content {
+    font-size: j(20);
+    padding: 0 j(30);
+  }
 </style>

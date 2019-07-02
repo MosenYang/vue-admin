@@ -161,6 +161,10 @@ var _filterbar = null // 点击元素的父元素
 export default {
   name: 'DgTable',
   props: {
+    names: {
+      type: String,
+      default: ''
+    },
     columnConfig: {//栏数据
       type: Array,
       default: function() {
@@ -292,7 +296,7 @@ export default {
         label: valObj.label,
         value: valObj.value.name ? valObj.value.name : valObj.value,
         filterKey: valObj.filterKey,
-        paramKey: valObj.paramKey
+        paramKey: valObj.paramKey ? valObj.paramKey : valObj.filterKey
       }
       this.barData.forEach((item, index, array) => {
         if (item.label === valObj.label) {
@@ -301,7 +305,7 @@ export default {
         return array
       })
       // 给参数赋值: 这里很坑.关键是接口需要的值 或者文字,或者数字
-      this.emitParams[valObj.paramKey] = valObj.value.id || valObj.value
+      this.emitParams[option.paramKey] = valObj.value.id || valObj.value
       this.barData.push(option)
       this.$emit('filter-change', this.emitParams)
     },
