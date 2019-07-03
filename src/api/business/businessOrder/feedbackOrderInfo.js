@@ -1,5 +1,6 @@
 // 回单接口
 import request from '../../../utils/request'
+
 // 添加回单
 export function addFeedback(data) {
   return request({
@@ -35,6 +36,16 @@ export function editFeedbackInfo(data) {
   return request({
     baseURL: '',
     url: '/api/order/receipt/edit',
+    method: 'POST',
+    data
+  })
+}
+
+// 查看
+export function feedbackDetail(data) {
+  return request({
+    baseURL: '',
+    url: '/api/order/receipt/detail',
     method: 'POST',
     data
   })

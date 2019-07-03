@@ -21,3 +21,12 @@ export function uploadPic(data) {
     data
   })
 }
+// 总表 搜索
+export function getOrderInfo(data) {
+  return request({
+    baseURL: '',
+    url: '/api/order/getOrderInfo',
+    method: 'post',
+    data
+  })
+}

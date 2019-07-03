@@ -2,7 +2,7 @@
   <div class="page">
     <div class="page-title flex-between">
       <span>回单信息</span>
-      <el-button type="primary" icon="el-icon-plus" @click="addClient">
+      <el-button type="primary" icon="el-icon-plus" @click="outerVisible = true">
         添加回单信息
       </el-button>
     </div>
@@ -38,8 +38,9 @@
       </div>
     </div>
     <div class="table-wrap">
-      <table-components :table-data="tableData" :selection="true" :pagination="true" :row-click="clickRow"
+      <table-components :table-data="tableData" :selection="true" :pagination="true"
                         :action-config="actionConfig"
+                        :isClear="isClear"
                         :page-config="pageData"
                         :column-config="columnData"
                         @filter-change="getFilter"
@@ -47,40 +48,59 @@
                         :headerCellStyle="headerCss"
                         @page-change="pageChange"/>
     </div>
-    <!--联系记录-->
-    <el-dialog title="联系记录" :visible.sync="outerVisible">
-      <div class="block">
-        <el-timeline style="padding-right: 40px">
-          <el-timeline-item
-            v-for="(item,index) in userLogs" :key="index"
-            :timestamp="item.created_at" placement="top">
-            <el-card style="padding: 0 0">
-              <p>客户: {{ item.name}}</p>
-              <h4>内容: {{ item.comment}}</h4>
-              <p>维护人: {{item.username}}</p>
-            </el-card>
-          </el-timeline-item>
-        </el-timeline>
-      </div>
-      <el-dialog width="30%" title="新记录" :visible.sync="innerVisible" append-to-body>
-        <el-form :model="ruleForm" label-position="top" ref="ruleForm" label-width="100px" :rules="rules">
-          <el-form-item label="记录内容" prop="comment">
-            <el-input type="textarea"
-                      v-model="ruleForm.comment"
-                      :autosize="{ minRows: 3, maxRows: 5}"
-                      placeholder="请填写新纪录">
 
-            </el-input>
-          </el-form-item>
-        </el-form>
-        <div class="dialog-footer" slot="footer">
-          <el-button @click="innerVisible = false">取 消</el-button>
-          <el-button type="primary" @click="addLogs('ruleForm')">添加记录</el-button>
-        </div>
-      </el-dialog>
+    <!--添加新回单-->
+    <el-dialog title="添加新回单" :visible.sync="outerVisible">
+      <el-form :model="temp" label-position="top" ref="ruleForm" label-width="100px" :rules="rules">
+        <el-row>
+          <el-col class="column-col" :lg="12" :md="12" :sm="12">
+            <el-form-item label="预计到达时间" prop="username">
+              <el-input v-model="temp.predict_time"/>
+            </el-form-item>
+          </el-col>
+          <el-col class="column-col" :lg="12" :md="12" :sm="12">
+            <el-form-item label="实际到达时间" prop="mobile">
+              <el-input v-model="temp.fact_time"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col class="column-col" :lg="12" :md="12" :sm="12">
+            <el-form-item label="收件单号/来源" prop="username">
+              <el-input v-model="temp.courier_number"/>
+            </el-form-item>
+          </el-col>
+          <el-col class="column-col" :lg="12" :md="12" :sm="12">
+            <el-form-item label="寄件单号" prop="mobile">
+              <el-input v-model="temp.mobile"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col class="column-col" :lg="12" :md="12" :sm="12">
+            <el-form-item label="收件人" prop="username">
+              <el-input v-model="temp.recipients"/>
+            </el-form-item>
+          </el-col>
+          <el-col class="column-col" :lg="12" :md="12" :sm="12">
+            <el-form-item label="收件人电话" prop="mobile">
+              <el-input v-model="temp.recipients_tel"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col class="column-col" :lg="24" :md="24" :sm="24">
+            <el-form-item label="备注">
+              <el-input v-model="temp.receipt_remark"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <!--end-->
+      </el-form>
+
       <div slot="footer" class="dialog-footer">
-        <el-button @click="outerVisible = false">取 消</el-button>
-        <el-button type="primary" @click="innerVisible = true">添加记录</el-button>
+        <el-button @click="outerVisible = false">返回</el-button>
+        <el-button type="primary" @click="outerVisible = false">保存</el-button>
       </div>
     </el-dialog>
   </div>
@@ -93,6 +113,7 @@ import {
   editFeedbackInfo,
   FeedbackInfo
 } from '../../../../api/business/businessOrder/feedbackOrderInfo'
+import { getOrderInfo } from '../../../../api/baseApi'
 import { searchType } from '../../../../api/baseApi'// 这接口也可以搜索业务小哥
 import comControl from './control.vue'//控制器
 import { parseTime } from '@/utils'
@@ -105,10 +126,12 @@ export default {
       defParams: defParams,
       option: option,
       initThData: initThData,
+      info: [],
       tableData: [],
+      has_receipt: [],
+      attribution: [],
       businessType: [],
       outerVisible: false,
-      innerVisible: false,
       downloadLoading: false,
       area: [],
       columnData: [],
@@ -126,14 +149,22 @@ export default {
         }
       },
       filterParam: {},
+      isClear: 0,
       totalPage: 0,
       radio: 0,
-      ruleForm: {
-        comment: ''
+      temp: {
+        file_id: '',// 文件的id 字符串集合，
+        predict_time: '',//预计到达时间
+        fact_time: '',//实际到达时间
+        courier_number: '',//收件单号
+        send_single_number: '',//寄件单号
+        recipients: '',//收件人
+        recipients_tel: '',//收件人电话
+        receipt_remark: '',//备注
+        send_time: '',//默认时间~!
+        order_id: ''// 订单ID
       },
       row: [],
-      people: mockPeople,
-      userLogs: mockUserLogs,
       rules: {
         comment: [
           { required: true, message: '请输入新记录内容', trigger: 'blur' },
@@ -145,28 +176,30 @@ export default {
   computed: {
     length: {
       get() {
-        if (this.defParams.length) return this.defParams.length + '条/页'
+        if (this.defParams.pagesize) return this.defParams.pagesize + '条/页'
       },
       set(val) {
-        this.defParams.length = val
+        this.defParams.pagesize = val
       }
     },
     pageData() {
       return {
         totalPageNum: this.totalPage,
-        curPage: this.defParams.start
+        curPage: this.defParams.currpage
       }
     }
   },
   watch: {},
-  created() {
-    this.getData()
+  async created() {
+    await this.getTableList()
+    this.mapTableTh()
   },
-  mounted() {},
+  mounted() {
+  },
   methods: {
     mapTableTh() {
-      console.log(this.initThData.length, '订单总表表格列数')
-      this.initThData.forEach((item, index) => {
+      console.log(initThData.length, '订单总表表格列数')
+      initThData.forEach((item, index) => {
         let config = { ...tableConfig }
         let comConfig = { ...tableConfig.filterConfig }
         config.prop = item.key // 数据字段
@@ -177,72 +210,29 @@ export default {
         config.width = item.width ? item.width : '140'
         comConfig.filterKey = item.key
         comConfig.paramKey = item.paramKey ? item.paramKey : item.key
-        if (item.name === '业务类型') {
-          comConfig.comData = this.businessType
+        if (item.name === '回单状态') {
+          comConfig.comData = this.has_receipt
         }
-        if (item.name === '省份') {
-          comConfig.comData = this.area
-        }
-        if (item.name === '性别') {
-          let sex = [
-            { name: '男', key: 1 },
-            { name: '女', key: 0 }
-          ]
-          comConfig.comData = sex
-        }
-        if (item.name === '客户类型') {
-          let clientType = [
-            { name: '潜在客户', key: 1 },
-            { name: '正常客户', key: 2 }
-          ]
-          comConfig.comData = clientType
-        }
-        if (item.name === '是否审核') {
-          let auditStatus = [
-            { name: '已审核', key: 1 },
-            { name: '未审核', key: 0 }
-          ]
-          comConfig.comData = auditStatus
+        if (item.name === '发站归属地' || item.name === '到站归属地') {
+          comConfig.comData = this.attribution
         }
         config.filterConfig = comConfig
         this.columnData.push(config)
       })
     },
-    getTableList(params) {
+    async getTableList(params) {
       let param
       params ? param = params : param = { ...defParams }
-      clientSearch(param).then((res) => {
+      await getFeedbackList(param).then((res) => {
         if (res.code == 200) {
-          this.totalPage = res.data.total
-          this.tableData = res.data.info
+          let { attribution, has_receipt, info, total_count, pagesize } = res.data
+          this.info = res.data
+          this.totalPage = total_count
+          this.tableData = info
+          this.has_receipt = has_receipt
+          this.attribution = attribution
         }
       })
-    },
-    async getData() {
-      await this.getTableList()
-      await searchType({ type: 'customer_business' }).then((res) => {
-        if (res.code === 200) {
-          Object.keys(res.data).forEach((item) => {
-            this.businessType.push({
-              key: item,
-              name: res.data[item]
-            })
-          })
-        }
-      })
-      await searchType({ type: 'area' }).then((res) => {
-        if (res.code === 200) {
-          this.area = res.data
-        }
-      })
-      searchType({ type: 'saleman' }).then((res) => {
-        if (res.code === 200) {
-          if (res.data.length !== 0) {
-            this.people = res.data
-          }
-        }
-      })
-      this.mapTableTh()
     },
     //去添加客户
     addClient() {
@@ -253,75 +243,36 @@ export default {
       this.getTableList()
     },
     //* 单选事件
-    getSelect(val) {
-      this.selectRow = val
-      console.log(val, '单选广播事件')
-    },
+    getSelect(val) {this.selectRow = val},
     //设置表格样式
-    headerCss() {
-      return 'font-size:16px; font-weight: 800;'
-    },
-    //表行点击
-    clickRow(row) {
-      console.log(row, '点击了')
-    },
+    headerCss() {return 'font-size:16px; font-weight: 800;'},
     // 筛选事件
     getFilter(val) {
-      let param = Object.assign(this.defParams, val, { start: 1 })
+      let param = Object.assign(this.defParams, val, { currpage: 1 })
       this.filterParam = { ...val }
       this.getTableList(param)
     },
     // 分页事件
     pageChange(num) {
-      this.defParams.start = num
+      this.defParams.currpage = num
       this.getTableList(this.defParams)
     },
     // 重置
     handleReset() {
-      console.log(this.filterParam, '重置参数对象')
-      let param = Object.assign(this.defParams, this.filterParam, { start: 1 })
+      let i = Math.floor(Math.random() * 10 + 1)
+      this.isClear = i
+      for (let key in this.filterParam) {
+        this.filterParam[key] = ''
+      }
+      console.log('重置', this.filterParam)
+      let param = Object.assign(this.defParams, this.filterParam, { currpage: 1 })
       this.getTableList(param)
-      this.isReaetParam = true//  直接重置需求.没开发
     },
     // 查询
     handleSearch() {
       this.getTableList()
     },
-    // 添加记录
-    addLogs(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          let id = this.userLogs[0].customer_id
-          let param = { comment: this.ruleForm.comment, customer_id: id }
-          logsAdd(param).then((res) => {
-            if (res.code == 200) {
-              this.getLogList()
-              this.$message({
-                message: '添加成功!',
-                type: 'success'
-              })
-              this.ruleForm.comment = null
-              this.innerVisible = false
-            }
-          })
-        } else {
-          console.log('表单错误!!')
-          return false
-        }
-      })
-    },
-    getLogList(row) {
-      if (row) this.row = row
-      logsShow({ id: this.row.id }).then((res) => {
-        if (res.code == 200) {
-          if (res.data.length !== 0) {// 没数据,使用mock
-            this.userLogs = res.data
-          }
-          console.log('记录列表!', res.data)
-          this.outerVisible = true
-        }
-      })
-    },
+
     exportList() {
       // let param = this.defParams
       // if (this.selectRow.length > 0) {
@@ -376,15 +327,6 @@ export default {
         })
         this.downloadLoading = false
       })
-    },
-    formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
     }
   },
   directives: {}
@@ -433,7 +375,7 @@ var initThData = [
   {
     name: '操作人',
     key: 'opera_user',
-    type: 'editFilter'
+    isNeed: false
   },
   {
     name: '订单号',
@@ -443,7 +385,7 @@ var initThData = [
   {
     name: '运输批次',
     key: 'depart_batch',
-    type: 'selectFilter'
+    type: 'editFilter'
   },
   {
     name: '发站',
@@ -474,7 +416,7 @@ var initThData = [
   {
     name: '托运人电话',
     key: 'consignee_mobile',
-    type: 'selectFilter'
+    type: 'editFilter'
   },
   {
     name: '收车人',
@@ -485,7 +427,7 @@ var initThData = [
   {
     name: '收车人电话',
     key: 'consignor_mobile',
-    type: 'selectFilter'
+    type: 'editFilter'
   },
   {
     name: '货物名称',
@@ -501,12 +443,12 @@ var initThData = [
   {
     name: '运输司机',
     key: 'convey_driver',
-    type: 'selectFilter'
+    type: 'editFilter'
   },
   {
     name: '司机所属公司',
     key: 'convey_company',
-    type: 'selectFilter'
+    type: 'editFilter'
   },
   {
     name: '车牌号',
@@ -572,7 +514,7 @@ var initThData = [
   {
     name: '备注',
     key: 'receipt_remark',
-    type: 'editFilter'
+    isNeed: false
   }
 ]
 var defParams = {
@@ -600,14 +542,14 @@ var defParams = {
   predict_time_end: '',//预期到达时间结束值
   fact_time_start: '',//实际到达时间开始
   fact_time_end: '',//实际到达时间结束
-  receive_time_start:'',//我方收件时间开始
-  receive_time_end:'',//我方收件时间结束
-  courier_number:'',//收件单号
-  recipients:'',//收件人
-  recipients_tel:"",//收件人电话
-  send_time_start:'',//寄件时间开始
-  send_time_end:'',//寄件时间结束
-  send_single_number:"",//寄件单号
+  receive_time_start: '',//我方收件时间开始
+  receive_time_end: '',//我方收件时间结束
+  courier_number: '',//收件单号
+  recipients: '',//收件人
+  recipients_tel: '',//收件人电话
+  send_time_start: '',//寄件时间开始
+  send_time_end: '',//寄件时间结束
+  send_single_number: ''//寄件单号
 }
 var option = [
   {
@@ -622,38 +564,6 @@ var option = [
   }, {
     value: '100',
     label: '100条/页'
-  }
-]
-var mockPeople = [
-  {
-    'id': 1,  //业务员id
-    'name': '李磊'  //业务员姓名
-  },
-  {
-    'id': 2,  //业务员id
-    'name': '韩梅梅'  //业务员姓名
-  },
-  {
-    'id': 3,  //业务员id
-    'name': '韩梅'  //业务员姓名
-  }
-]
-var mockUserLogs = [
-  {
-    'id': 1,
-    'customer_id': 17, //客户id
-    'name': '隔壁老王',  //客户姓名
-    'username': 'Sandy',  //维护人
-    'comment': '吃饭睡觉打豆豆',  //维护内容
-    'created_at': '2019-06-12 19:22:32'  //记录添加时间
-  },
-  {
-    'id': 1,
-    'customer_id': 17, //客户id
-    'name': '隔壁老李',  //客户姓名
-    'username': 'Mosen',  //维护人
-    'comment': '吃饭睡觉打飞机',  //维护内容
-    'created_at': '2019-06-15 10:22:32'  //记录添加时间
   }
 ]
 </script>
