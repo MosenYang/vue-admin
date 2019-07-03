@@ -955,7 +955,7 @@ export default {
       this.$refs[el].validate((valid) => {
         if (valid) {
           alert('提交')
-          createOrder().then((res) => {
+          createOrder(params).then((res) => {
             console.log('提交', res)
           })
         } else {

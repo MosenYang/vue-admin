@@ -12,7 +12,7 @@ export function getOrderMsg(data) {
     baseURL: '',
     url: '/api/orders/create',
     method: 'GET',
-    params:data
+    params: data
   })
 }
 
@@ -104,9 +104,20 @@ export function moreLoading(data) {
 export function importExcel(data) {
   return request({
     baseURL: '',
+    responseType:'blob',
     url: '/api/download/import',
     method: 'post',
     data
   })
 }
 
+// 订单总表-导出模板
+export function importExcelTemplate(data) {
+  return request({
+    baseURL: '',
+    responseType:'blob',
+    url: '/api/order/download/import',
+    method: 'post',
+    data
+  })
+}

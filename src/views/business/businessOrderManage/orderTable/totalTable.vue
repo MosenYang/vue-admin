@@ -16,7 +16,7 @@
                    class="filter-item"
                    type="primary"
                    icon="el-icon-download"
-                   @click="handleDownload">
+                   @click="downloadTemplate">
           导出模板
         </el-button>
         <el-button v-waves
@@ -24,7 +24,7 @@
                    class="filter-item"
                    type="primary"
                    icon="el-icon-download"
-                   @click="handleDownloadExcel">
+                   @click="requireExcel">
           导入订单
         </el-button>
       </div>
@@ -61,7 +61,7 @@
             重置
           </el-button>
           <el-button v-waves class="filter-item" type="primary" icon="el-icon-search"
-                     @click="handleDownload">
+                     @click="DownloadFile">
             导出
           </el-button>
           <el-button v-waves class="filter-item" type="primary" icon="el-icon-search"
@@ -87,13 +87,6 @@
                         @page-change="getpage"/>
       <!--图片上传-->
       <el-dialog title="上传凭证图片" :visible.sync="dialogVisible" width="40%">
-        <!--        <form id="" enctype="multipart/form-data" method="post">-->
-        <!--          <input id="text" name="file" type="text"></input><br/>-->
-        <!--          <input id="file" name="file"-->
-        <!--                 type="file" @change="changeFile($event)"-->
-        <!--                 ref="avatarInput"></input>-->
-        <!--          <input type="button" value="提交" @click="uploadPic"/>-->
-        <!--        </form>-->
         <load-pic></load-pic>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
@@ -111,17 +104,21 @@
   </div>
 </template>
 <script>
-
-import { checkOrder, destroyOrder, orderIndex, getOrderInfo } from '../../../../api/business/businessOrder/order'
-import { uploadPic } from '../../../../api/baseApi'
+import {
+  checkOrder,
+  destroyOrder,
+  orderIndex,
+  getOrderInfo,
+  importExcel,
+  importExcelTemplate
+} from '../../../../api/business/businessOrder/order'
 import TableComponents from '../../components/Tables/dg-table2'//动态表格
 import selectFilter from '../../components/Tables/defFilter/selectFilter.vue'//搜索
 import comControl from './component/control.vue'//控制器
 import waves from '@/directive/waves' // 指令
-import { parseTime } from '@/utils'
+import { parseTime, requestJS } from '@/utils'
 // import unLoadExcel from '@/components/uploadExcel/Excel'// 文件上传(并没有写)
 import loadPic from '@/components/Upload/upLoadFile'// 图片上传
-
 export default {
   name: 'totalTable',
   data() {
@@ -174,43 +171,6 @@ export default {
     this.getTableList()
   },
   methods: {
-    // 提交方法
-    uploadPic() {
-      let files = this.$refs.avatarInput.files
-      let fileData = {}
-      if (files instanceof Array) {
-        fileData = files[0]
-      } else {
-        fileData = this.file
-      }
-      console.log('fileData', typeof fileData, fileData)
-      let data = new FormData()
-      data.append('file', fileData)
-      data.append('type', 1)
-      uploadPic(data).then((res) => {
-        if (res.code == 200) {
-          alert('提交')
-        }
-      })
-    },
-    changeFile(ev) {
-      let file = ev.target.files[0]
-      console.log('ev', ev.target.files[0])
-      if (file) {
-        this.file = file
-        let reader = new FileReader()
-        let that = this
-        reader.readAsDataURL(file)
-        reader.onload = function(e) {
-          // 这里的this 指向reader
-          that.avatar = this.result
-        }
-      }
-    },
-    upLoadPic() {
-
-      this.dialogVisible = true
-    },
     /**
      * 多装车
      * */
@@ -218,7 +178,6 @@ export default {
       if (this.selectRow.length >= 1) {
         this.selectRow.forEach((item, index) => {
           if (item) {
-
           }
         })
       } else {
@@ -229,9 +188,9 @@ export default {
       }
     },
     /**
-     * 上传下载文件
+     * 前端下载文件
      **/
-    handleDownload() {
+    handleDownload0() {
       this.downloadLoading = true
       import('@/vendor/Export2Excel').then(excel => {
         const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
@@ -245,9 +204,28 @@ export default {
         this.downloadLoading = false
       })
     },
-    handleDownloadExcel() {
+    // 导出模板
+    downloadTemplate() {
+      importExcelTemplate().then((res) => {
+        let blob = res
+        // blob.type = 'application/octet-stream'
+        var filename = '模板.xlsx'
+        var a = document.createElement('a')
+        var url = URL.createObjectURL(blob)//创键临时url对象
+        a.href = url
+        a.download = filename
+        a.click()
+        window.URL.revokeObjectURL(url)
+      })
+    },
+    DownloadFile() {
+      this.downloadLoading = true
+      importExcel().then().catch()
+    },
+    requireExcel() {
       this.dialogExcelVisible = true
     },
+    upLoadPic() {},
     /**
      * 审核
      * */
@@ -310,9 +288,6 @@ export default {
         page: 1
       }
       this.filters = val
-      // const res = dofilter(allfilter)
-      // this.data = res.data
-      // this.pagenum = res.pagenum
     },
     // 分页事件
     getpage(page) {
@@ -321,8 +296,6 @@ export default {
         filters: this.filters,
         page
       }
-      // const res = dofilter(allfilter)
-      // this.data = res.data
     },
     // 重置
     handleReset() {

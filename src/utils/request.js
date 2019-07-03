@@ -4,14 +4,15 @@ import store from '@/store'
 import { getToken } from '@/utils/auth'
 
 /**
- *请求线上地址 还需要两步骤
- * 1.去掉baseUrl, 2.去掉mock文件夹的相关路由
+ *请求线上地址,两步
+ * 1.去掉baseUrl,
+ * 2.去掉mock文件夹的相关路由
  **/
 const service = axios.create({
   // 为什么没有.因为我需要切换mock和线上地址, 把地址分成两段了,完整url在代理里面拼接了,中间这段就省去
   baseURL: process.env.VUE_APP_BASE_API,
-  withCredentials: true, // 跨域发送请求
-  timeout: 18000,
+  withCredentials: true, // 跨域
+  timeout: 8000,
   headers: {
     Accept: 'application/json',
     Authorization: localStorage.getItem('suoBang-token') ? 'Bearer ' + localStorage.getItem('suoBang-token') : ''// 记得要拼接空格
@@ -26,15 +27,16 @@ service.interceptors.request.use(config => {
     return config
   },
   error => {
-    console.log(error) // for debug
+    console.log(error)
     return Promise.reject(error)
   }
 )
 
-// 响应拦截器
-// 兼容mock 和线上接口200/400状态 (Mosen 添加)
+// 响应拦截器 兼容mock和线上接口200/400状态 (Mosen)
 service.interceptors.response.use(response => {
+    // console.log(response, 'response对象')
     const res = response.data
+    if (!res.code) return res //导出表格情况
     if (res.code !== 20000 && res.code !== 200) {
       Message({
         message: res.message || '错误',
@@ -61,25 +63,25 @@ service.interceptors.response.use(response => {
           confirmButtonText: '重新登录',
           cancelButtonText: '取消',
           type: 'warning'
-        }).then(() => {
-          // 重新登录
+        }).then(() => {// 重新登录
           store.dispatch('user/resetToken').then(() => {
             location.reload()
           })
         })
       }
-      return Promise.reject(res.message || 'error')
-    } else {
-      Message({
-        message: '接口成功',
-        type: 'success',
-        duration: 1000
-      })
-      return res
+      //抛异常处理
+      return Promise.reject(res)
     }
+    // 正常
+    Message({
+      message: '接口成功',
+      type: 'success',
+      duration: 1000
+    })
+    return res
   },
   error => {
-    console.log('错误信息:' + error) // for debug
+    console.log('错误信息:' + error)
     Message({
       message: error.message,
       type: 'error',

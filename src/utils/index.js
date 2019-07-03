@@ -362,3 +362,69 @@ export function fit(valObj, array) {
   let newData = array.filter(item => _key.every(k => valObj[k] === item[k]))
   return newData
 }
+
+/***
+ * 原生ajax 下载excel专用,目前只封装post方法
+ * @param {Object} 参数对象
+ * url 请求地址
+ * token 令牌
+ * fileName 文件名
+ * callback 回调
+ * error 接口错误
+ */
+export function requestJS(param) {
+  let xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('microsoft.XMLHttp')
+  //请求方式,请求路径url,async(是否异步)
+  xhr.open('POST', param.url, true)
+  //设置请求头参数的方式,如果没有可忽略此行代码
+  xhr.setRequestHeader('Authorization', param.token)
+  //设置响应类型为 blob
+  xhr.responseType = 'blob'
+  xhr.onreadystatechange = function(res) {
+    if (xhr.status === 200 && xhr.readyState === 4) {
+      //response返回响应的正文,取决于responseType 属性
+      var blob = this.response
+      blob.type = 'application/octet-stream'
+      var filename = param.fileName //导出名字
+      var a = document.createElement('a')
+      //创键临时url对象
+      var url = URL.createObjectURL(blob)
+      a.href = url
+      a.download = filename
+      a.click()
+      //释放之前创建的URL对象
+      window.URL.revokeObjectURL(url)
+      param.callback(xhr)
+    } else {
+      param.error()
+    }
+  }
+  //发送请求
+  xhr.send()
+}
+
+/**
+ * test Browser
+ * @returns {string}
+ */
+export function testBrowser() {
+  var userAgent = navigator.userAgent
+  var isOpera = userAgent.indexOf('Opera') > -1
+  if (isOpera) {
+    return 'Opera'
+  }
+  //判断是否Opera浏览器
+  if (userAgent.indexOf('Firefox') > -1) {
+    return 'FF'
+  } //判断是否Firefox浏览器
+  if (userAgent.indexOf('Chrome') > -1) {
+    return 'Chrome'
+  }
+  if (userAgent.indexOf('Safari') > -1) {
+    return 'Safari'
+  } //判断是否Safari浏览器
+  if (userAgent.indexOf('compatible') > -1 && userAgent.indexOf('MSIE') > -1 && !isOpera) {
+    return 'IE'
+  }
+
+}
