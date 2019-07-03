@@ -228,8 +228,8 @@ export default {
     },
     // 父组件清空所有筛选项
     isClear: {
-      type: Boolean,
-      default: false
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -241,11 +241,11 @@ export default {
       curId: -1
     }
   },
+  computed: {},
   watch: {
-    isClear(newValue) {
-      if (newValue) {
+    isClear(newValue, oldValue) {
+      if (newValue !== 0) {
         this.barData = []
-        //清掉数据
         for (let i in this.emitParams) {
           this.emitParams[i] = ''
         }
@@ -267,6 +267,7 @@ export default {
         this.doRegFilters(item.filterConfig.type, item)
       }
     })
+
     window.onresize = () => {
       setTimeout(() => {
         if (_filterbar) this.filterPosition(_filterbar, _curFilter)
@@ -281,6 +282,7 @@ export default {
     clickPage(val) {
       this.$emit('page-change', val)
     },
+    resetFilter() {},
     //关闭搜索项
     handleClose(tag, item) {
       this.barData.splice(this.barData.indexOf(tag), 1)
