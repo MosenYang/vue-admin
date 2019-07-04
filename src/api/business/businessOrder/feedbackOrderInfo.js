@@ -32,7 +32,7 @@ export function FeedbackInfo(data) {
 }
 
 // 提交新的编辑
-export function editFeedbackInfo(data) {
+export function commitFeedback(data) {
   return request({
     baseURL: '',
     url: '/api/order/receipt/edit',

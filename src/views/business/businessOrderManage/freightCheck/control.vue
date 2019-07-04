@@ -1,7 +1,7 @@
 <template>
   <div class="control-wrap">
-    <el-button class="send" @click.stop="click2" size="mini" :disabled="row.has_receipt=='未回单'">查看</el-button>
-    <el-button class="edit" @click.stop="click1" size="mini" >编辑</el-button>
+    <el-button class="edit" @click.stop="click1" size="mini">编辑</el-button>
+<!--    <el-button class="edit" @click.stop="click2" size="mini">合理亏损</el-button>-->
   </div>
 </template>
 <script>
@@ -12,7 +12,7 @@ export default {
       this.handlers.editOrder(this.row)
     },
     click2() {
-      this.handlers.showPic(this.row)
+      this.handlers.checkOrder(this.row)
     }
   }
 }
@@ -26,9 +26,11 @@ export default {
     .el-button {
       @extend %blue-btn
     }
-    .has_receipt{
+
+    .has_receipt {
       background: #f1f1f1;
     }
+
     .delete-btn {
       background: #ff0000;
       color: #ffffff;

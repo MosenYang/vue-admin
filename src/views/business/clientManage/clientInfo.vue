@@ -48,6 +48,7 @@
     <div class="table-wrap">
       <table-components :table-data="tableData" :selection="true" :pagination="true" :row-click="clickRow"
                         :action-config="actionConfig"
+                        :isClear="isClear"
                         :page-config="pageData"
                         :column-config="columnData"
                         @filter-change="getFilter"
@@ -142,6 +143,7 @@ export default {
       dialogVisible: false,
       downloadLoading: false,
       area: [],
+      isClear: 0,
       columnData: [],
       selectRow: [],
       actionConfig: {
@@ -309,10 +311,14 @@ export default {
     },
     // 重置
     handleReset() {
-      console.log(this.filterParam, '重置参数对象')
+      let i = Math.floor(Math.random() * 10 + 1)
+      this.isClear = i
+      for (let key in this.filterParam) {
+        this.filterParam[key] = ''
+      }
+      console.log('重置', this.filterParam)
       let param = Object.assign(this.defParams, this.filterParam, { start: 1 })
       this.getTableList(param)
-      this.isReaetParam = true//  直接重置需求.没开发
     },
     // 查询
     handleSearch() {

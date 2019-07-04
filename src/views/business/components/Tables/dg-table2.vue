@@ -36,7 +36,7 @@
                            :show-overflow-tooltip="item.showOverflowTooltip">
             <!-- 自定义头部 新写法-->
             <template slot="header" slot-scope="scope">
-              <el-popover placement="bottom" width="100"
+              <el-popover placement="bottom"
                           @show="curId=idx"
                           @hide="curId=-1"
                           trigger="hover"
@@ -77,7 +77,7 @@
                            :show-overflow-tooltip="item.showOverflowTooltip">
             <!-- 自定义头部 新写法-->
             <template slot="header" slot-scope="scope">
-              <el-popover placement="bottom" width="100"
+              <el-popover placement="bottom"
                           @show="curId=idx"
                           @hide="curId=-1"
                           trigger="hover"
@@ -135,11 +135,14 @@
 import editFilter from './defFilter/edit.vue'
 import searchSelectFilter from './defFilter/searchSelect.vue'
 import selectFilter from './defFilter/selectFilter.vue'
+import dateFilter from './defFilter/dateFilter.vue'
+
 // 默认筛选器组件
 var defComponents = {
   editFilter, // 输入框选择器
   searchSelectFilter,// 自动搜索
-  selectFilter//纯下拉
+  selectFilter,//纯下拉
+  dateFilter,//日期
 }
 // 默认筛选器字段
 const ComFilterDefConfig = {
@@ -235,7 +238,7 @@ export default {
   data() {
     return {
       barData: [],
-      regFilters: {}, // 所有的组件对象 非常的重要
+      regFilters: {}, // 所有的组件对象
       filterAction: {},// 动态显示  radio_gender: true
       emitParams: {},// 过滤参数
       curId: -1
@@ -291,9 +294,8 @@ export default {
     },
     // 广播事件(复用)
     getFilterBridge(valObj) {// valObj.value 可能是对象 || 字符
-      console.log(valObj, '筛选数据~!!!!')
+      console.log(valObj, '传上来的筛选数据~!')
       let isObj = Object.prototype.toString.call(valObj.value) === '[object Object]'
-      //用于显示
       let option = {
         label: valObj.label,
         value: valObj.value.name ? valObj.value.name : valObj.value,
@@ -306,7 +308,7 @@ export default {
         }
         return array
       })
-      // 给参数赋值: 这里很坑.关键是接口需要的值 或者文字,或者数字
+      // 给参数赋值: 接口需要的值 或者文字,或者数字
       this.emitParams[option.paramKey] = valObj.value.id || valObj.value
       this.barData.push(option)
       this.$emit('filter-change', this.emitParams)

@@ -2,7 +2,7 @@
   <div class="page">
     <div class="page-title flex-between">
       <span>回单信息</span>
-      <el-button type="primary" icon="el-icon-plus" @click="outerVisible = true">
+      <el-button type="primary" icon="el-icon-plus" @click="addOrderShow">
         添加回单信息
       </el-button>
     </div>
@@ -48,42 +48,49 @@
                         :headerCellStyle="headerCss"
                         @page-change="pageChange"/>
     </div>
-
     <!--添加新回单-->
-    <el-dialog title="添加新回单" :visible.sync="outerVisible">
-      <el-form :model="temp" label-position="top" ref="ruleForm" label-width="100px" :rules="rules">
+    <el-dialog :title="actionType+'新回单'" :visible.sync="outerVisible" center>
+      <el-form :model="temp" label-position="right" ref="ruleForm" label-width="130px" :rules="rules">
         <el-row>
           <el-col class="column-col" :lg="12" :md="12" :sm="12">
-            <el-form-item label="预计到达时间" prop="username">
-              <el-input v-model="temp.predict_time"/>
+            <el-form-item label="预计到达时间" prop="predict_time">
+              <el-date-picker style="width: 100%"
+                              v-model="temp.predict_time"
+                              type="date"
+                              placeholder="选择预计到达时间">
+              </el-date-picker>
             </el-form-item>
           </el-col>
           <el-col class="column-col" :lg="12" :md="12" :sm="12">
-            <el-form-item label="实际到达时间" prop="mobile">
-              <el-input v-model="temp.fact_time"/>
+            <el-form-item label="实际到达时间" prop="fact_time">
+              <el-date-picker style="width: 100%"
+                              v-model="temp.fact_time"
+                              type="date"
+                              placeholder="选择实际到达时间">
+              </el-date-picker>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col class="column-col" :lg="12" :md="12" :sm="12">
-            <el-form-item label="收件单号/来源" prop="username">
+            <el-form-item label="收件单号/来源" prop="courier_number">
               <el-input v-model="temp.courier_number"/>
             </el-form-item>
           </el-col>
           <el-col class="column-col" :lg="12" :md="12" :sm="12">
-            <el-form-item label="寄件单号" prop="mobile">
-              <el-input v-model="temp.mobile"/>
+            <el-form-item label="寄件单号">
+              <el-input v-model="temp.send_single_number"/>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col class="column-col" :lg="12" :md="12" :sm="12">
-            <el-form-item label="收件人" prop="username">
+            <el-form-item label="收件人">
               <el-input v-model="temp.recipients"/>
             </el-form-item>
           </el-col>
           <el-col class="column-col" :lg="12" :md="12" :sm="12">
-            <el-form-item label="收件人电话" prop="mobile">
+            <el-form-item label="收件人电话">
               <el-input v-model="temp.recipients_tel"/>
             </el-form-item>
           </el-col>
@@ -95,13 +102,36 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row>
+          <el-col>
+            <el-form-item label="回单上传">
+              <div class="up-load-file">
+                <!-- 多选上传//multiple="multiple"-->
+                <input type="file" class="input-file" style="width: 100%;height: 100%"
+                       ref="avatar" name="unLoad" @change="changeFileIpt($event)"
+                       accept="image/gif,image/jpeg,image/jpg,image/png">
+                <div class="list-wrap flex" v-if="imgList.length>=1" v-for="(item,index) in imgList" :key="index">
+                  <img :src="item" style="width: 100px;height: 100px">
+                </div>
+              </div>
+            </el-form-item>
+          </el-col>
+        </el-row>
         <!--end-->
       </el-form>
-
       <div slot="footer" class="dialog-footer">
         <el-button @click="outerVisible = false">返回</el-button>
-        <el-button type="primary" @click="outerVisible = false">保存</el-button>
+        <el-button type="primary" @click="addOrder('ruleForm')">{{actionType}}</el-button>
       </div>
+    </el-dialog>
+    <!--查看凭证-->
+    <el-dialog title="查看凭证" :visible.sync="showPicDialog">
+      <el-carousel :interval="5000" arrow="always">
+        <el-carousel-item v-for="(item,index) in feedbackDetailList" :key="index">
+          <div>{{item.path}}</div>
+          <img :src="item.path"/>
+        </el-carousel-item>
+      </el-carousel>
     </el-dialog>
   </div>
 </template>
@@ -110,13 +140,16 @@ import TableComponents from '../../components/Tables/dg-table2'
 import {
   addFeedback,
   getFeedbackList,
-  editFeedbackInfo,
-  FeedbackInfo
+  FeedbackInfo,
+  commitFeedback,
+  feedbackDetail
 } from '../../../../api/business/businessOrder/feedbackOrderInfo'
 import { getOrderInfo } from '../../../../api/baseApi'
 import { searchType } from '../../../../api/baseApi'// 这接口也可以搜索业务小哥
 import comControl from './control.vue'//控制器
 import { parseTime } from '@/utils'
+// import uploadPic from '../../../../components/Upload/upLoadImg'
+import { uploadPic } from '../../../../api/baseApi'
 
 export default {
   components: { TableComponents },
@@ -130,22 +163,19 @@ export default {
       tableData: [],
       has_receipt: [],
       attribution: [],
-      businessType: [],
       outerVisible: false,
       downloadLoading: false,
-      area: [],
       columnData: [],
       selectRow: [],
       actionConfig: {
         type: 'customize',
         label: '操作区',
-        width: 200,
+        width: 140,
         fixed: true,
         component: comControl,
         handlers: {
-          editOrder: (row) => {console.log('编辑', row)},
-          deleteOrder: this.deleteOrder,
-          upLoadOrder: this.getLogList
+          editOrder: this.editOrder,
+          showPic: this.showPic
         }
       },
       filterParam: {},
@@ -166,11 +196,22 @@ export default {
       },
       row: [],
       rules: {
-        comment: [
-          { required: true, message: '请输入新记录内容', trigger: 'blur' },
+        courier_number: [
+          { required: true, message: '请输入收件单号', trigger: 'blur' },
           { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+        ],
+        predict_time: [
+          { required: true, message: '预计到达时间不能为空', trigger: 'blur' }
+        ],
+        fact_time: [
+          { required: true, message: '实际到达时间不能为空', trigger: 'blur' }
         ]
-      }
+      },
+      file: '',
+      imgList: [],
+      actionType: '新增',
+      showPicDialog: false,
+      feedbackDetailList: []
     }
   },
   computed: {
@@ -194,9 +235,64 @@ export default {
     await this.getTableList()
     this.mapTableTh()
   },
-  mounted() {
-  },
+  mounted() {},
   methods: {
+    changeFileIpt(ev) {
+      console.log(ev.target.files, 'filesList')
+      let file = ev.target.files[0]
+      if (file) {
+        this.file = file
+        let reader = new FileReader()
+        let that = this
+        reader.readAsDataURL(file)
+        reader.onload = function(e) {
+          that.imgList.push(this.result)
+          let data = new FormData()
+          data.append('file', file)
+          data.append('type', 1)
+          uploadPic(data).then((res) => {
+            if (res.code == 200) {
+              that.$message({
+                message: '上传成功!',
+                type: 'success'
+              })
+              that.temp.file_id = '' + res.data.file_id// 必须转成字符串
+            }
+          })
+        }
+      }
+    },
+    editOrder(row) {
+      this.actionType = '编辑'
+      FeedbackInfo({ id: row.id }).then((res) => {
+        this.temp = Object.assign(this.temp, res.data.info)
+        this.temp.id = row.id
+        delete this.temp.images
+        delete this.temp.order_id
+        delete this.temp.file_id
+        delete this.temp.send_time
+        console.log('temp', this.temp)
+        this.imgList = res.data.info.images
+      })
+      this.outerVisible = true
+    },
+    addOrderShow() {
+      if (this.selectRow.length === 0) {
+        return this.$message({
+          type: 'warning',
+          message: '请选择单'
+        })
+      }
+      if (this.selectRow.length > 1) {
+        return this.$message({
+          type: 'warning',
+          message: '请选择一个单'
+        })
+      }
+      this.actionType = '新增'
+      this.temp.order_id = this.selectRow[0].id
+      this.outerVisible = true
+    },
     mapTableTh() {
       console.log(initThData.length, '订单总表表格列数')
       initThData.forEach((item, index) => {
@@ -234,30 +330,63 @@ export default {
         }
       })
     },
-    //去添加客户
-    addClient() {
-      this.$router.push({ path: 'createClientInfo' })
+    //去添加回单
+    addOrder(formName) {
+      let curDate = new Date().getTime()
+      this.temp.predict_time = parseTime(this.temp.predict_time)
+      this.temp.fact_time = parseTime(this.temp.fact_time)
+      if (this.actionType == '新增') this.send_time = parseTime(curDate)
+      console.log('参数', this.temp)
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          if (this.actionType == '新增') {
+            addFeedback(this.temp).then((res) => {
+              if (res.code === 200) {
+                this.$message({
+                  type: 'success',
+                  message: '创建回单成功!'
+                })
+              }
+              console.log('res', res)
+            })
+          }
+
+          if (this.actionType == '编辑') {
+            commitFeedback(this.temp).then((res) => {
+              console.log('res', res)
+              this.$message({
+                type: 'success',
+                message: '编辑回单成功!'
+              })
+            })
+          }
+          this.outerVisible = false
+        } else {
+          console.log('错误的提交!!')
+          return false
+        }
+      })
     },
     //改变显示数
     changePageLimit() {
       this.getTableList()
     },
-    //* 单选事件
+    //单选事件
     getSelect(val) {this.selectRow = val},
     //设置表格样式
     headerCss() {return 'font-size:16px; font-weight: 800;'},
-    // 筛选事件
+    //筛选事件
     getFilter(val) {
       let param = Object.assign(this.defParams, val, { currpage: 1 })
       this.filterParam = { ...val }
       this.getTableList(param)
     },
-    // 分页事件
+    //分页事件
     pageChange(num) {
       this.defParams.currpage = num
       this.getTableList(this.defParams)
     },
-    // 重置
+    //重置
     handleReset() {
       let i = Math.floor(Math.random() * 10 + 1)
       this.isClear = i
@@ -268,18 +397,22 @@ export default {
       let param = Object.assign(this.defParams, this.filterParam, { currpage: 1 })
       this.getTableList(param)
     },
-    // 查询
+    //查询
     handleSearch() {
       this.getTableList()
     },
+    showPic(row) {
+      feedbackDetail({ id: row.id }).then((res) => {
+        this.showPicDialog = true
+        res.data.info.map((item) => {
+          item.path = 'https://api.thisyang.online' + item.path
+        })
+        // https://api.thisyang.online/uploads/2019_07_01/image/2019_07_01_17_54_42_5d19d8623ab75.jpg
+        this.feedbackDetailList = res.data.info
 
+      })
+    },
     exportList() {
-      // let param = this.defParams
-      // if (this.selectRow.length > 0) {
-      //   param = this.selectRow
-      // } else {
-      //   param = this.tableData
-      // }
       exportCustomer().then(() => {})
       return
       this.downloadLoading = true
@@ -299,18 +432,6 @@ export default {
           filename: '客户信息'
         })
         this.downloadLoading = false
-      })
-    },
-    // 删除订单
-    deleteOrder(row) {
-      deleteList({ id: row.id }).then((res) => {
-        if (res.code === 200) {
-          this.tableData.splice(this.tableData.indexOf(row), 1)
-          this.$message({
-            message: '删除成功',
-            type: 'success'
-          })
-        }
       })
     },
     // 前端调导出

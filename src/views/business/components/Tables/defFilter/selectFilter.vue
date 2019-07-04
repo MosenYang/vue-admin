@@ -53,6 +53,7 @@ export default {
   watch: {},
   created() {},
   mounted() {
+
     this.comData.forEach((item) => {
       let obj = {
         id: item.value || item.id || item.key,
@@ -63,7 +64,6 @@ export default {
   },
   methods: {
     handleCallback() {
-      console.log('', this.label, this.inputValue)
       if (!this.inputValue) return console.log('没选中值')
       this.$emit('getFilterBridge', {
         label: this.label,// 列名字
