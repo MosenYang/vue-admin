@@ -62,7 +62,11 @@
             </template>
             <!--td内容 在使用v-if控制自定义组件失效,所以使用本办法-->
             <template slot-scope="scope" v-if='item.tdComponent'>
-              <component :is="item.tdComponent" :row="scope.row" :tdConfig="item.tdConfig"></component>
+              <component :is="item.tdComponent"
+                         :row="scope.row"
+                         :tdParam="item.paramKey ? item.paramKey : item.prop"
+                         :tdValue="scope.row[item.prop]"
+                         :tdConfig="item.tdConfig"></component>
             </template>
           </el-table-column>
 
@@ -142,7 +146,7 @@ var defComponents = {
   editFilter, // 输入框选择器
   searchSelectFilter,// 自动搜索
   selectFilter,//纯下拉
-  dateFilter,//日期
+  dateFilter//日期
 }
 // 默认筛选器字段
 const ComFilterDefConfig = {
@@ -409,11 +413,12 @@ var tableConfig = {
   prop: '', // 参数字段
   label: '', // 名字
   type: '', // 类型当前表头交互类型
+  paramKey: '',// 对应列的接口参数,(有相同也有不同)
   hidden: false,//当前数据多.是否需要渲染
   isNeed: true,// 是否需要搜索项
   thIndex: null,// 下标
   tdComponent: null,// 表格Td 内部组件可以传
-  tdConfig: {},// 表格Td 配置项 // comData:表格组件的数据
+  tdConfig: {},// 表格Td 配置项
   fixed: null, // 是否固定
   width: null, // 宽度
   minWidth: '80', // 最小宽度
@@ -442,6 +447,7 @@ var tableConfig = {
     }
   }
 }
+
 </script>
 <style scoped>
   .filterbox {

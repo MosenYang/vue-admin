@@ -4,9 +4,9 @@
     <div class="page-title flex-between">
       <mallki class-name="mallki-text" text="运费校验"/>
       <div class="">
-<!--        <el-button class="filter-item" type="primary">-->
-<!--          <i class="el-icon-edit-outline" ></i>-->
-<!--        </el-button>-->
+        <!--        <el-button class="filter-item" type="primary">-->
+        <!--          <i class="el-icon-edit-outline" ></i>-->
+        <!--        </el-button>-->
       </div>
     </div>
     <div class="totalTable-container">
@@ -55,9 +55,10 @@
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
-import { lossOrderList, checkLossOrder } from '../../../../api/business/businessOrder/lossOrder'
+import { checkOrder} from '../../../../api/business/businessOrder/freightCheck'
 import waves from '@/directive/waves/index.js' // 水波纹指令
 import comControl from './control.vue'//控制器
+import tdComonent from './tdComonent.vue'//控制器
 
 export default {
   components: { tableComponents },
@@ -93,6 +94,8 @@ export default {
       type_of_business: [],//下拉
       order_type: [],//下拉
       payment_method: [],//下拉
+      attribution: [],
+      freight_settlement_method: [],
       isClear: 0,//重置
       downloadLoading: false
     }
@@ -122,18 +125,32 @@ export default {
   methods: {
     async getTableList(params) {
       let data = params ? params : this.defParams
-      await lossOrderList(data).then((res) => {
+      await checkOrder(data).then((res) => {
         this.info = res.data
-        // console.log('res.data', res)
-        let { orders_data, payment_method, type_of_business, order_status, order_type, total_count, pagesize } = res.data
-        this.tableData = orders_data
+        console.log('res.data', res)
+        let {
+          info,
+          attribution,
+          freight_settlement_method,
+          order_status,
+          order_type,
+          payment_method,
+          type_of_business,
+          total_count, pagesize
+        } = res.data
+        this.tableData = info
         this.totalPage = total_count
         this.defParams.pagesize = pagesize
         this.order_status = order_status
         this.type_of_business = type_of_business
         this.order_type = order_type
         this.payment_method = payment_method
+        this.attribution = attribution
+        this.freight_settlement_method = freight_settlement_method
       })
+    },
+    callBack(data) {
+      console.log('回调', data)
     },
     mapTableTh() {
       console.log(initThData.length, '订单总表表格列数')
@@ -147,27 +164,41 @@ export default {
         config.type = comConfig.type = item.type
         config.width = item.width ? item.width : '150'
         comConfig.filterKey = item.key
-        comConfig.paramKey = item.paramKey ? item.paramKey : item.key
+        config.paramKey = comConfig.paramKey = item.paramKey ? item.paramKey : item.key
         if (item.name === '订单状态') {
           comConfig.comData = this.order_status
         }
-        if (item.name === '亏损审核状态') {
-          comConfig.comData = [{ name: '已审核', value: 1 }, { name: '未审核', value: 0 }]
+        if (item.name === '发展归属地' || '到站归属地') {
+          comConfig.comData = this.attribution
         }
-        if (item.name === '审核状态') {
-          comConfig.comData = [{ name: '已审核', value: 1 }, { name: '未审核', value: 0 }]
-        }
+
         if (item.name === '订单分类') {
           comConfig.comData = this.order_type
         }
-        if (item.name === '付款方式') {
+        //0
+        if (item.name === '付款方式' && item.key !== 'payment_method') {
+          config.width = 180
+          config.tdComponent = tdComonent
+          config.tdConfig = {
+            callback(data) {console.log('', data)},
+            comData: this.freight_settlement_method,
+            comType: 'select'// 'select','edit'
+          }
+        } else {
           comConfig.comData = this.payment_method
         }
+        1
+        if (item.name === '调度填写运费' || item.name === '财务填写运费' || item.name === '车队填写运费') {
+          config.width = 180
+          config.tdComponent = tdComonent
+          config.tdConfig = {
+            comData: null,
+            comType: 'edit'// 'select','edit'
+          }
+        }
+
         if (item.name === '业务类型') {
           comConfig.comData = this.type_of_business
-        }
-        if (item.name === '回单') {
-          comConfig.comData = [{ name: '有回单', value: 1 }, { name: '无回单', value: 0 }, { name: '已回单', value: 2 }]
         }
         config.filterConfig = comConfig
         this.columnData.push(config)
@@ -231,7 +262,7 @@ export default {
     changePageLimit(val) {
       this.defParams.pagesize = val
       this.getTableList(this.defParams)
-    },
+    }
   },
   directives: { waves }
 }
@@ -244,7 +275,7 @@ var initThData = [
   },
   {
     name: '运输批次号',
-    key: 'depart_batch',
+    key: 'waybill_number',
     type: 'editFilter'
   },
   {
@@ -254,145 +285,148 @@ var initThData = [
   },
   {
     name: '订单分类',
-    key: 'amount_of_loss',
-    type: 'editFilter'
-  },
-  {
-    name: '发站',
-    key: 'loss_audit',
-    type: 'selectFilter'
-  },
-  {
-    name: '发展归属地',
-    key: 'dispose_user',
-    type: 'editFilter'
-  },
-  {
-    name: '到站',
-    key: 'dispose_time',
-    type: 'dateFilter'
-  },
-  {
-    name: '到站归属地',
-    key: 'is_audit',
-    type: 'selectFilter'
-  },
-  {
-    name: '托运人',
     key: 'order_type',
     type: 'selectFilter'
   },
   {
-    name: '托运人电话',
+    name: '发站',
     key: 'start_city_string',
     type: 'editFilter'
   },
   {
-    name: '货物名称',
+    name: '发展归属地',
     key: 'start_attribution',
+    type: 'selectFilter'
+  },
+  {
+    name: '到站',
+    key: 'end_city_string',
     type: 'editFilter'
   },
   {
-    name: '识别码',
+    name: '到站归属地',
+    key: 'end_attribution',
+    type: 'selectFilter'
+  },
+  {
+    name: '托运人',
     key: 'consignor',
     type: 'editFilter'
   },
   {
-    name: '发货方回扣',
+    name: '托运人电话',
     key: 'consignor_mobile',
-    isNeed:false
+    type: 'editFilter'
   },
   {
-    name: '付款方式',
-    key: 'consignee',
-    type: 'selectFilter'
-  },
-  {
-    name: '总运费',
-    key: 'consignee_mobile',
-    type: 'editFilter',
-    isNeed:false
-  },
-  {
-    name: '调度填写运费',
+    name: '货物名称',
     key: 'car_brand_name',
-    type: 'selectFilter',
-    component:'',
-    isNeed:false
+    type: 'editFilter'
   },
   {
-    name: '付款方式',
+    name: '识别码',
     key: 'heading_code',
-    type: 'dateFilter',
-    isNeed:false
+    type: 'editFilter'
   },
   {
-    name: '财务填写运费',
-    key: 'pay_cash',
-    type: 'dateFilter',
+    name: '发货方回扣',
+    key: 'discount',
     isNeed: false
   },
   {
     name: '付款方式',
-    key: 'freight_collect',
-    isNeed: false
-  },
-  {
-    name: '车队填写运费',
-    key: 'monthly_statement',
-    isNeed: false
-  },
-  {
-    name: '业务类型',
-    key: 'discount',
-  },
-  {
-    name: '运输司机',
     key: 'payment_method',
     type: 'selectFilter'
   },
   {
-    name: '司机所属公司',
+    name: '总运费',
     key: 'total_cost',
-    type: 'editFilter'
+    isNeed: false
   },
   {
-    name: '司机电话',
-    key: 'operator',
-    type: 'editFilter'
+    name: '付款方式',
+    key: 'freight_settlement_method',
+    isNeed: false
+
   },
   {
-    name: '提车司机',
+    name: '调度填写运费',
+    key: 'freight',
+    component: '',
+    isNeed: false
+  },
+  {
+    name: '付款方式',
+    key: 'finance_freight_method',
+    isNeed: false
+  },
+  {
+    name: '财务填写运费',
+    key: 'finance_freight',
+    type: 'dateFilter',
+    isNeed: false
+  },
+  {
+    name: '付款方式',
+    key: 'cart_freight_method',
+    isNeed: false
+  },
+  {
+    name: '车队填写运费',
+    key: 'cart_freight',
+    isNeed: false
+  },
+  {
+    name: '业务类型',
     key: 'type_of_business',
     type: 'selectFilter'
   },
   {
+    name: '运输司机',
+    key: 'driver_name',
+    type: 'editFilter'
+  },
+  {
+    name: '司机所属公司',
+    key: 'company',
+    type: 'editFilter'
+  },
+  {
+    name: '司机电话',
+    key: 'mobile',
+    type: 'editFilter'
+  },
+  {
+    name: '提车司机',
+    key: 'carry_car_name',
+    type: 'editFilter'
+  },
+  {
     name: '送车司机',
-    key: 'convey_driver',
+    key: 'send_car_name',
     type: 'editFilter'
   },
   {
     name: '中转状态',
-    key: 'convey_company',
-    type: 'editFilter',
-    isNeed:false
+    key: 'is_transfer',
+    isNeed: false
   },
   {
     name: '开单日期',
-    key: 'convey_driver_tel',
-    type: 'editFilter'
+    key: 'create_order_time',
+    type: 'dateFilter'
   },
   {
     name: '备注',
-    key: 'carry_car_name',
-    type: 'editFilter',
-    isNeed:false
-  },
+    key: 'remark',
+    isNeed: false
+  }
 ]
 var tableConfig = {
   prop: '', // 参数字段
   label: '', // 名字
   type: '', // 类型当前表头交互类型
+  paramKey: '',// 对应列的接口参数,(有相同也有不同)
   hidden: false,//当前数据多.是否需要渲染
   isNeed: true,// 是否需要搜索项
   thIndex: null,// 下标
@@ -446,41 +480,26 @@ var defParams = {
   pagesize: 10,
   currpage: 1,
   order_num: '',// 订单号
-  depart_batch: '',//多个发车批次号的集合
+  waybill_number: '',//多个发车批次号的集合
   order_status: '',//订单状态
-  amount_of_loss: '',//亏损金额
-  loss_audit: '',//	亏损审核状态 0.未审核 1.已审核
-  dispose_user: '',//操作人
-  dispose_time_start: '',//操作时间开始
-  dispose_time_end: '',//	操作时间结束
-  is_audit: '',//审核状态 0.未审核 1.已审核
-  order_type: '',//订单类型
+  order_type: '',
   start_city_string: '',// 发站
   start_attribution: '',// 发站归属地
   end_city_string: '',// 到站
   end_attribution: '',// 到站归属地
   consignor: '',//托运人
   consignor_mobile: '',//托运人电话
-  consignee: '',//收货人
-  consignee_mobile: '',//收货人电话
   car_brand_name: '',// 货物信息
   heading_code: '',//车架号
   payment_method: '',//付款方式
-  operator: '',//经办人
   type_of_business: '',//业务类型
-  convey_driver: '',//运车司机
-  convey_company: '',//司机所属公司
-  convey_driver_tel: '',//司机电话
-  carry_car_name: '',//提车司机
-  send_car_name: '',//送车司机
-  is_transfer: '',// 中转状态
-  create_order_time_start: '',// 开单日期开始
-  create_order_time_end: '',// 开单日期结束
-  who_handle_name: '',// 状态修改人 // 废弃
-  audit_people: '',// 审核人
-  audit_time_start: '',// 审核时间开始值
-  audit_time_end: '',//审核时间结束值
-  has_receipt: ''//回单 0’无回单’,1’有回单’, 2’已回单’
+  driver_name: '',//运输司机
+  company: '',//运输司机公司
+  mobile: '',//司机电话
+  carry_car_name: '',//提车司机姓名
+  send_car_name: '',//送车司机姓名
+  create_order_time_start: '',
+  create_order_time_end: ''//开单日期结束值
 }
 </script>
 <style lang="scss" scoped>

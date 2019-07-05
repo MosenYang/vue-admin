@@ -7,6 +7,7 @@
               @keyup.enter.native="todoSearch"
               size="small"
               class="input-with-select">
+      <i slot="prefix" class="el-input__icon el-icon-search"></i>
       <!--<el-button slot="append" icon="el-icon-search" @click="todoSearch" />-->
     </el-input>
   </div>

@@ -1,4 +1,4 @@
-<!--提送信息-->
+<!--回扣信息-->
 <template>
   <div class="page">
     <div class="page-title flex-between">

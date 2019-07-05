@@ -1,17 +1,19 @@
-<!--提送信息-->
+<!--业务提成-->
 <template>
   <div class="page">
     <div class="page-title flex-between">
       <mallki class-name="mallki-text" text="业务提成"/>
-      <div class=""></div>
+      <div class="">
+        <!--        <el-button class="filter-item" type="primary">-->
+        <!--          <i class="el-icon-edit-outline" ></i>-->
+        <!--        </el-button>-->
+      </div>
     </div>
     <div class="totalTable-container">
       <div class="flex-between control">
         <div class="limit">
           当前显示:
-          <el-select v-model="length"
-                     @change="changePageLimit"
-                     placeholder="请选择">
+          <el-select v-model="length" @change="changePageLimit" placeholder="请选择">
             <el-option v-for="item in option"
                        :key="item.value"
                        :label="item.label"
@@ -21,7 +23,7 @@
         <div class="filters-btns">
           <div class="inquire-wrap">
             <span>查询:</span>
-            <el-input v-model="defParams.query"
+            <el-input v-model="defParams.global_query"
                       placeholder="请写查询内容"
                       style="width: 200px;"
                       class="filter-item"
@@ -31,83 +33,285 @@
               查询
             </el-button>
           </div>
-          <el-button class="filter-item"
-                     type="primary">
+          <el-button class="filter-item" type="primary" @click="handleReset">
             <i class="el-icon-refresh"></i>
             重置
           </el-button>
-          <el-button class="filter-item"
+          <el-button class="filter-item" @click="exportHandle"
                      type="primary">
-            <i class="el-icon-upload" style=""></i>
+            <i class="el-icon-upload"></i>
             导出
           </el-button>
-          <el-button class="filter-item"
+          <el-button class="filter-item" @click="checkHandle"
                      type="primary">
-            <i class="el-icon-edit-outline" style=""></i>
+            <i class="el-icon-edit-outline"></i>
             批量审核
           </el-button>
         </div>
       </div>
     </div>
+    <div>
+      <table-components :table-data="tableData" :selection="true" :pagination="true"
+                        :action-config="actionConfig"
+                        :isClear="isClear"
+                        :page-config="pageData"
+                        :column-config="columnData"
+                        @filter-change="getFilter"
+                        @select-change="getSelect"
+                        :headerCellStyle="headerCss"
+                        @page-change="pageChange"/>
+    </div>
   </div>
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
+import {
+  pushMoneyList,
+  checkPushMoney,
+  exportPushMoney,
+  alterPushMoney
+} from '../../../../api/business/businessOrder/pushMoney'
 import waves from '@/directive/waves/index.js' // 水波纹指令
+import comControl from './control.vue'//控制器
+import tdComonent from './tdComonent.vue'//表格
+
 export default {
   components: { tableComponents },
   props: {},
   data() {
     return {
-      query: '',
+      global_query: '',
       defParams: defParams,
       option: option,
       tableData: [],
       columnData: [],
+      info: '',// 总数据
+      selectRow: [],
       actionConfig: {
         type: 'customize',
         label: '操作区',
-        width: 140,
+        width: 80,
         fixed: true,
-        // component: comControl,
+        component: comControl,
         handlers: {
           editOrder: (row) => {
-            this.$router.push({ path: '/addContractor', query: row })
-          },
-          deleteOrder: this.deleteOrder
+            console.log('row', row.id)
+            this.$router.push(
+              {
+                name: 'businessAlterOrder',
+                query: row.id
+              }) // 有Bug
+          }
         }
       },
       filterParam: {},
-      total: 0
+      totalPage: 0,
+      order_status: [],//下拉
+      type_of_business: [],//下拉
+      order_type: [],//下拉
+      payment_method: [],//下拉
+      attribution: [],
+      freight_settlement_method: [],
+      isClear: 0,//重置
+      downloadLoading: false
     }
   },
   computed: {
+    pageData() {
+      return {
+        totalPageNum: this.totalPage,
+        curPage: this.defParams.start
+      }
+    },
     length: {
       get() {
-        if (this.defParams.length) return this.defParams.length + '条/页'
+        if (this.defParams.pagesize) return this.defParams.pagesize + '条/页'
       },
       set(val) {
-        this.defParams.length = val
+        this.defParams.pagesize = val
       }
     }
   },
   watch: {},
-  created() {
-    this.getTableList()
+  async created() {
+    await this.getTableList()
+    this.mapTableTh()
   },
   mounted() {},
   methods: {
-    getTableList() {
-      let a  = initThData
-      console.log('000', a)
+    async getTableList(params) {
+      let data = params ? params : this.defParams
+      await pushMoneyList(data).then((res) => {
+        this.info = res.data
+        console.log('页面.data', res)
+        let {
+          info,
+          attribution,
+          order_status,
+          order_type,
+          payment_method,
+          type_of_business,
+          total_count, pagesize
+        } = res.data
+        this.tableData = info
+        this.totalPage = total_count
+        this.defParams.pagesize = pagesize
+        this.order_status = order_status
+        this.type_of_business = type_of_business
+        this.order_type = order_type
+        this.payment_method = payment_method
+        this.attribution = attribution
+      })
     },
-    handleSearch() {},
+    callBack(data) {
+      console.log('回调', data)
+    },
+    mapTableTh() {
+      console.log(initThData.length, '订单总表表格列数')
+      initThData.forEach((item, index) => {
+        let config = { ...tableConfig }
+        let comConfig = { ...tableConfig.filterConfig }
+        config.prop = item.key // 数据字段
+        config.thIndex = index
+        config.isNeed = item.isNeed === false ? false : true
+        config.label = comConfig.label = item.name
+        config.type = comConfig.type = item.type
+        config.width = item.width ? item.width : '150'
+        comConfig.filterKey = item.key
+        config.paramKey = comConfig.paramKey = item.paramKey ? item.paramKey : item.key
+        if (item.name === '订单状态') {
+          comConfig.comData = this.order_status
+        }
+        if (item.name === '发展归属地' || item.name === '到站归属地') {
+          comConfig.comData = this.attribution
+        }
+        if (item.name === '审核状态') {
+          comConfig.comData = [
+            { name: '已审核', value: 1 },
+            { name: '未审核', value: 0 }]
+        }
+        if (item.name === '业务类型') {
+          comConfig.comData = this.type_of_business
+        }
+        //1
+        if (item.name === '系统单价') {
+          config.width = 180
+          config.tdComponent = tdComonent
+          config.tdConfig = {
+            comData: null,
+            comType: 'edit'// 'select','edit'
+          }
+        }
+        config.filterConfig = comConfig
+        this.columnData.push(config)
+      })
+    },
+    // 重置
+    handleReset() {
+      let i = Math.floor(Math.random() * 10 + 1)
+      this.isClear = i
+      for (let key in this.filterParam) {
+        this.filterParam[key] = ''
+      }
+      console.log('重置', this.filterParam)
+      let param = Object.assign(this.defParams, this.filterParam, { currpage: 1 })
+      this.getTableList(param)
+    },
+    //* 搜索
+    handleSearch() {
+      if (this.defParams.global_query) {
+        this.defParams.currpage = 1
+        this.getTableList(this.defParams)
+      } else {
+        this.$message({
+          showClose: true,
+          message: '请输入查询内容',
+          type: 'warning'
+        })
+      }
+    },
+    //导出
+    exportHandle() {
+      let data=[]
+      if (this.selectRow.length === 0) {
+        return this.$message({
+          type: 'error',
+          message: '请先选择表!'
+        })
+      }
+      else{
+        this.selectRow.forEach((item)=>{
+          data.push(item.id)
+        })
+        exportPushMoney({ order_id:data.join()}).then((res) => {
+          let blob = res
+          // blob.type = 'application/octet-stream'
+          var filename = '模板.xlsx'
+          var a = document.createElement('a')
+          var url = URL.createObjectURL(blob)//创键临时url对象
+          a.href = url
+          a.download = filename
+          a.click()
+          window.URL.revokeObjectURL(url)
+        })
+      }
+    },
+    //审核
+    checkHandle() {
+      let data=[]
+      if (this.selectRow.length === 0) {
+        return this.$message({
+          type: 'error',
+          message: '请先选择表!'
+        })
+      }
+      else{
+        this.selectRow.forEach((item)=>{
+          data.push(item.id)
+        })
+        checkPushMoney({ order_id:data.join(),module_id:3}).then((res)=>{
+          if(res.code==200){
+            return this.$message({
+              type: 'success',
+              message: '审核成功!'
+            })
+          }
+        })
+      }
+    },
+    getFilter(val) {
+      if (val.create_order_time && val.create_order_time !== '') {//开单日期
+        this.defParams.create_order_time_start = val.create_order_time[0]
+        this.defParams.create_order_time_end = val.create_order_time[1]
+      } else {
+        this.defParams.audit_time_start = this.defParams.audit_time_end = ''
+      }
+      if (val.audit_time && val.audit_time !== '') {// 审核时间
+        this.defParams.audit_time_start = val.audit_time[0]
+        this.defParams.create_order_time_end = val.audit_time[1]
+      } else {
+        this.defParams.audit_time_start = this.defParams.audit_time_end = ''
+      }
+      let param = Object.assign(this.defParams, val, { currpage: 1 })
+      this.filterParam = { ...val }
+      this.getTableList(param)
+      console.log(val, '当前参数')
+      console.log(param, '请求参数')
+    },
+    headerCss() {return 'font-size:16px; font-weight: 800;'},
+    getSelect(row) {
+      this.selectRow = row
+      console.log('this.selectRow', this.selectRow)
+    },
+    pageChange(val) {
+      // this.selectRow = []
+      this.defParams.currpage = val
+      this.getTableList(this.defParams)
+    },
     //改变显示数
     changePageLimit(val) {
-      this.getTableList()
-    },
-    getCurrentDate() {
-      return new Date().toLocaleDateString()
+      this.defParams.pagesize = val
+      this.getTableList(this.defParams)
     }
   },
   directives: { waves }
@@ -116,141 +320,95 @@ export default {
 var initThData = [
   {
     name: '订单号',
-    key: '',
+    key: 'order_num',
     type: 'editFilter'
-
-  },
-  {
-    name: '开单日期',
-    key: '',
-    type: 'editFilter'
-
   },
   {
     name: '订单状态',
-    key: '',
+    key: 'order_status',
     type: 'selectFilter'
-  },
-  {
-    name: '提送类型',
-    key: '',
-    type: 'selectFilter'
-
   },
   {
     name: '审核状态',
-    key: '',
+    key: 'is_audit',
     type: 'selectFilter'
   },
   {
-    name: '审核人',
-    key: '',
+    name: '发站',
+    key: 'start_city_string',
     type: 'editFilter'
   },
   {
-    name: '审核时间',
-    key: ''
+    name: '发展归属地',
+    key: 'start_attribution',
+    type: 'selectFilter'
   },
   {
-    name: '公司名称',
-    key: '',
-    type: 'editFilter'
-
-  },
-  {
-    name: '司机姓名',
-    key: '',
+    name: '到站',
+    key: 'end_city_string',
     type: 'editFilter'
   },
   {
-    name: '司机电话',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '车牌号',
-    key: '',
-    type: 'editFilter'
-
-  },
-  {
-    name: '提车地址',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '到达地址',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '托运人',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '托运人电话',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '收货人',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '收货人电话',
-    key: '',
-    type: 'editFilter'
+    name: '到站归属地',
+    key: 'end_attribution',
+    type: 'selectFilter'
   },
   {
     name: '货物名称',
-    key: '',
+    key: 'car_brand_name',
     type: 'editFilter'
   },
   {
     name: '识别码',
-    key: '',
+    key: 'heading_code',
     type: 'editFilter'
   },
   {
-    name: '付款方式',
-    key: '',
-    type: 'selectFilter'
+    name: '系统单价',
+    key: 'system_price',
+    isNeed: false
   },
   {
-    name: '金额',
-    key: '',
-    type: 'editFilter'
+    name: '接车单价',
+    key: 'price',
+    isNeed: false
   },
   {
-    name: '代收款',
-    key: ''
-  },
-  {
-    name: '提送时间',
-    key: '',
-    type: 'editFilter'
+    name: '多出提成',
+    key: 'commission',
+    isNeed: false
   },
   {
     name: '经办人',
-    key: '',
+    key: 'operator',
     type: 'editFilter'
   },
   {
-    name: '回单',
-    key: '',
+    name: '业务类型',
+    key: 'type_of_business',
     type: 'selectFilter'
   },
   {
-    name: '提车备注',
-    key: ''
+    name: '开单日期',
+    key: 'create_order_time',
+    type: 'dateFilter'
+  },
+  {
+    name: '审核人',
+    key: 'audit_people',
+    type: 'editFilter'
+  },
+  {
+    name: '审核时间',
+    key: 'audit_time',
+    type: 'dateFilter'
   }
 ]
 var tableConfig = {
   prop: '', // 参数字段
   label: '', // 名字
   type: '', // 类型当前表头交互类型
+  paramKey: '',// 对应列的接口参数,(有相同也有不同)
   hidden: false,//当前数据多.是否需要渲染
   isNeed: true,// 是否需要搜索项
   thIndex: null,// 下标
@@ -297,33 +455,36 @@ var option = [
   }, {
     value: '100',
     label: '100条/页'
+  },
+  {
+    value: '300',
+    label: '300条/页'
+  },
+  {
+    value: '500',
+    label: '500条/页'
   }
 ]
 var defParams = {
-  query: '',// 搜索字段
-  start: 1,
-  length: 10,// 条数
-  company: '',//公司
-  type: '',//公司类别 transport:运输商；tisong:提送
-  name: '',// 姓名
-  position: '',//职位
-  sex: '',//性别
-  mobile: '',//客户手机
-  telephone: '',//电话
-  company_address: '',
-  business_scope: '',// 经营范围
-  start_address: '',
-  end_address: '',
-  wechat: '',//微信
-  qq: '',// qq
-  fax: '',//传真号
-  create_user_name: '',//创建人
-  created_at_from: '',// 创建时间
-  created_at_to: '',//创建时间截止
-  updated_at_from: '',//更新时间起
-  updated_at_to: ''//更新时间截止
+  global_query: '',
+  pagesize: 10,
+  currpage: 1,
+  order_num: '',// 订单号
+  order_status: '',//订单状态
+  is_audit: '',// 审核状态
+  start_city_string: '',// 发站
+  start_attribution: '',// 发站归属地
+  end_city_string: '',// 到站
+  end_attribution: '',// 到站归属地
+  car_brand_name: '',//货物信息
+  heading_code: '',//识别码
+  operator: '',//经办人
+  create_order_time_start: '',// 开始开单日期
+  create_order_time_end: '',//结束开单日期
+  audit_people: '',//审核人
+  audit_time_start: '',//审核时间开始值
+  audit_time_end: ''//审核时间结束
 }
-
 </script>
 <style lang="scss" scoped>
   @import "src/styles/mixin.scss";
@@ -370,3 +531,4 @@ var defParams = {
   }
 
 </style>
+

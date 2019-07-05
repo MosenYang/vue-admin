@@ -53,7 +53,6 @@ export default {
   watch: {},
   created() {},
   mounted() {
-
     this.comData.forEach((item) => {
       let obj = {
         id: item.value || item.id || item.key,
