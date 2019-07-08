@@ -1,7 +1,7 @@
 import Layout from '@/layout'
 
 const businessRouter = {
-  path: '/',
+  path: '/business',
   component: Layout,
   name: 'business',
   alwaysShow: false,

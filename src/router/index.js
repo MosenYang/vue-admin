@@ -10,6 +10,7 @@ import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
 import nestedRouter from './modules/nested'
 import businessRouter from './modules/myBusinessRoute'
+import motorcade from './modules/motorcade'
 
 /**
  * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -38,6 +39,7 @@ export const constantRoutes = [
     hidden: true
   },
   businessRouter,
+  motorcade,
   {
     path: '/home',
     component: Layout,
