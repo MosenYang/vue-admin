@@ -1,4 +1,4 @@
-<!--提送信息-->
+<!--运输明细表-->
 <template>
   <div class="page">
     <div class="page-title flex-between">
@@ -26,13 +26,11 @@
                       style="width: 200px;"
                       class="filter-item"
                       @keyup.enter.native="handleSearch"/>
-            <el-button @click="handleSearch"
-                       class="filter-item" type="primary" icon="el-icon-search">
+            <el-button @click="handleSearch" class="filter-item" type="primary" icon="el-icon-search">
               查询
             </el-button>
           </div>
-          <el-button class="filter-item"
-                     type="primary">
+          <el-button class="filter-item" type="primary">
             <i class="el-icon-refresh"></i>
             重置
           </el-button>
@@ -54,11 +52,31 @@
         </div>
       </div>
     </div>
+    <div>
+      <table-components :table-data="tableData" :selection="true" :pagination="true"
+                        :action-config="actionConfig"
+                        :isClear="isClear"
+                        :page-config="pageData"
+                        :column-config="columnData"
+                        @filter-change="getFilter"
+                        @select-change="getSelect"
+                        :headerCellStyle="headerCss"
+                        @page-change="pageChange"/>
+    </div>
   </div>
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
 import waves from '@/directive/waves/index.js' // 水波纹指令
+import {
+  transInfoList,
+  addTransportPrice,
+  unload,
+  againCheck,
+  transferType,
+  transferStatus
+} from '../../../../api/business/transportMangage/transportInfo'
+
 export default {
   components: { tableComponents },
   props: {},
@@ -69,6 +87,7 @@ export default {
       option: option,
       tableData: [],
       columnData: [],
+      isClear: 0,
       actionConfig: {
         type: 'customize',
         label: '操作区',
@@ -87,27 +106,166 @@ export default {
     }
   },
   computed: {
+    pageData() {
+      return {
+        totalPageNum: this.totalPage,
+        curPage: this.defParams.start
+      }
+    },
     length: {
       get() {
-        if (this.defParams.length) return this.defParams.length + '条/页'
+        if (this.defParams.pagesize) return this.defParams.pagesize + '条/页'
       },
       set(val) {
-        this.defParams.length = val
+        this.defParams.pagesize = val
       }
     }
   },
   watch: {},
-  created() {},
+  created() {
+    this.getTableList()
+  },
   mounted() {},
   methods: {
-    getTableList() {},
-    handleSearch() {},
+    async getTableList(params) {
+      let data = params ? params : this.defParams
+      await transInfoList(data).then((res) => {
+        this.info = res.data
+        console.log('res.data', res)
+        let {
+          info,
+          attribution,
+          freight_settlement_method,
+          order_status,
+          order_type,
+          payment_method,
+          type_of_business,
+          total_count, pagesize
+        } = res.data
+        this.tableData = info
+        this.totalPage = total_count
+        this.defParams.pagesize = pagesize
+        this.order_status = order_status
+        this.type_of_business = type_of_business
+        this.order_type = order_type
+        this.payment_method = payment_method
+        this.attribution = attribution
+        this.freight_settlement_method = freight_settlement_method
+      })
+    },
+    callBack(data) {
+      console.log('回调', data)
+    },
+    mapTableTh() {
+      console.log(initThData.length, '订单总表表格列数')
+      initThData.forEach((item, index) => {
+        let config = { ...tableConfig }
+        let comConfig = { ...tableConfig.filterConfig }
+        config.prop = item.key // 数据字段
+        config.thIndex = index
+        config.isNeed = item.isNeed === false ? false : true
+        config.label = comConfig.label = item.name
+        config.type = comConfig.type = item.type
+        config.width = item.width ? item.width : '150'
+        comConfig.filterKey = item.key
+        config.paramKey = comConfig.paramKey = item.paramKey ? item.paramKey : item.key
+        if (item.name === '订单状态') {
+          comConfig.comData = this.order_status
+        }
+        if (item.name === '发展归属地' || '到站归属地') {
+          comConfig.comData = this.attribution
+        }
+
+        if (item.name === '订单分类') {
+          comConfig.comData = this.order_type
+        }
+        //0
+        if (item.name === '付款方式' && item.key !== 'payment_method') {
+          config.width = 180
+          config.tdComponent = tdComonent
+          config.tdConfig = {
+            callback(data) {console.log('', data)},
+            comData: this.freight_settlement_method,
+            comType: 'select'// 'select','edit'
+          }
+        } else {
+          comConfig.comData = this.payment_method
+        }
+        1
+        if (item.name === '调度填写运费' || item.name === '财务填写运费' || item.name === '车队填写运费') {
+          config.width = 180
+          config.tdComponent = tdComonent
+          config.tdConfig = {
+            comData: null,
+            comType: 'edit'// 'select','edit'
+          }
+        }
+
+        if (item.name === '业务类型') {
+          comConfig.comData = this.type_of_business
+        }
+        config.filterConfig = comConfig
+        this.columnData.push(config)
+      })
+    },
+    // 重置
+    handleReset() {
+      let i = Math.floor(Math.random() * 10 + 1)
+      this.isClear = i
+      for (let key in this.filterParam) {
+        this.filterParam[key] = ''
+      }
+      console.log('重置', this.filterParam)
+      let param = Object.assign(this.defParams, this.filterParam, { currpage: 1 })
+      this.getTableList(param)
+    },
+    //* 搜索
+    handleSearch() {
+      if (this.defParams.global_query) {
+        this.defParams.currpage = 1
+        this.getTableList(this.defParams)
+      } else {
+        this.$message({
+          showClose: true,
+          message: '请输入查询内容',
+          type: 'warning'
+        })
+      }
+    },
+    getFilter(val) {
+      if (val.dispose_time && val.dispose_time !== '') {//操作时间
+        this.defParams.dispose_time_start = val.dispose_time[0]
+        this.defParams.dispose_time_end = val.dispose_time[1]
+      } else {
+        this.defParams.audit_time_start = ''
+        this.defParams.audit_time_end = ''
+      }
+      if (val.create_order_time && val.create_order_time !== '') {// 开单日期
+        this.defParams.create_order_time_start = val.create_order_time[0]
+        this.defParams.create_order_time_end = val.create_order_time[1]
+      } else {
+        this.defParams.create_order_time_start = ''
+        this.defParams.create_order_time_end = ''
+      }
+      let param = Object.assign(this.defParams, val, { currpage: 1 })
+      this.filterParam = { ...val }
+      this.getTableList(param)
+      console.log(val, '当前参数')
+      console.log(param, '请求参数')
+    },
+    headerCss() {return 'font-size:16px; font-weight: 800;'},
+    getSelect(row) {
+      this.selectRow = row
+      console.log('this.selectRow', this.selectRow)
+    },
+    pageChange(val) {
+      this.defParams.currpage = val
+      this.getTableList(this.defParams)
+    },
     //改变显示数
     changePageLimit(val) {
-      this.getTableList()
-    },
-    getCurrentDate() {
-      return new Date().toLocaleDateString()
+      this.defParams.pagesize = val
+      this.getTableList(this.defParams)
     }
   },
   directives: { waves }
@@ -116,96 +274,44 @@ export default {
 var initThData = [
   {
     name: '订单号',
-    key: '',
+    key: 'order_num',
     type: 'editFilter'
-
-  },
-  {
-    name: '开单日期',
-    key: '',
-    type: 'editFilter'
-
   },
   {
     name: '订单状态',
-    key: '',
-    type: 'selectFilter'
-  },
-  {
-    name: '提送类型',
-    key: '',
+    key: 'order_status',
     type: 'selectFilter'
 
   },
   {
-    name: '审核状态',
-    key: '',
+    name: '发站',
+    key: 'start_city_string',
+    type: 'editFilter'
+  },
+  {
+    name: '发展归属地',
+    key: 'start_attribution',
     type: 'selectFilter'
-  },
-  {
-    name: '审核人',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '审核时间',
-    key: ''
-  },
-  {
-    name: '公司名称',
-    key: '',
-    type: 'editFilter'
 
   },
   {
-    name: '司机姓名',
-    key: '',
+    name: '到站',
+    key: 'end_city_string',
     type: 'editFilter'
   },
   {
-    name: '司机电话',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '车牌号',
-    key: '',
-    type: 'editFilter'
-
-  },
-  {
-    name: '提车地址',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '到达地址',
-    key: '',
-    type: 'editFilter'
+    name: '到站归属地',
+    key: 'end_attribution',
+    type: 'selectFilter'
   },
   {
     name: '托运人',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '托运人电话',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '收货人',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '收货人电话',
-    key: '',
+    key: 'consignor',
     type: 'editFilter'
   },
   {
     name: '货物名称',
-    key: '',
+    key: 'car_brand_name',
     type: 'editFilter'
   },
   {
@@ -214,37 +320,54 @@ var initThData = [
     type: 'editFilter'
   },
   {
-    name: '付款方式',
-    key: '',
-    type: 'selectFilter'
-  },
-  {
-    name: '金额',
-    key: '',
-    type: 'editFilter'
-  },
-  {
-    name: '代收款',
-    key: ''
-  },
-  {
-    name: '提送时间',
-    key: '',
+    name: '单价',
+    key: 'price',
     type: 'editFilter'
   },
   {
     name: '经办人',
-    key: '',
+    key: 'operator',
     type: 'editFilter'
   },
   {
-    name: '回单',
-    key: '',
+    name: '业务类别',
+    key: 'type_of_business',
     type: 'selectFilter'
   },
   {
-    name: '提车备注',
-    key: ''
+    name: '回单',
+    key: 'has_receipt',
+    type: 'selectFilter'
+  },
+  {
+    name: '中转状态',
+    key: 'is_transfer',
+    type: 'selectFilter'
+  },
+  {
+    name: '中转归属地',
+    key: 'transfer_place',
+    isNeed: false
+  },
+  {
+    name: '结算方式',
+    key: 'freight_settlement_method',
+    isNeed: false
+  },
+  {
+    name: '运费',
+    key: 'freight',
+    isNeed: false
+  },
+  {
+    name: '运费修改人',
+    key: 'change_freight_username',
+    type: 'editFilter'
+  },
+  {
+    name: '备注',
+    key: 'remark',
+    isNeed: false
   }
 ]
 var tableConfig = {
@@ -300,28 +423,23 @@ var option = [
   }
 ]
 var defParams = {
-  query: '',// 搜索字段
-  start: 1,
-  length: 10,// 条数
-  company: '',//公司
-  type: '',//公司类别 transport:运输商；tisong:提送
-  name: '',// 姓名
-  position: '',//职位
-  sex: '',//性别
-  mobile: '',//客户手机
-  telephone: '',//电话
-  company_address: '',
-  business_scope: '',// 经营范围
-  start_address: '',
-  end_address: '',
-  wechat: '',//微信
-  qq: '',// qq
-  fax: '',//传真号
-  create_user_name: '',//创建人
-  created_at_from: '',// 创建时间
-  created_at_to: '',//创建时间截止
-  updated_at_from: '',//更新时间起
-  updated_at_to: ''//更新时间截止
+  query: '',
+  currpage: 1,
+  pagesize: 10,
+  waybill_id: '',
+  order_num: '',
+  order_status: '',
+  start_city_string: '',
+  start_attribution: '',
+  end_city_string: '',
+  end_attribution: '',
+  consignor: '',
+  car_brand_name: '',
+  heading_code: '',
+  operator: '',
+  type_of_business: '',
+  has_receipt: '',
+  is_transfer: ''
 }
 
 </script>

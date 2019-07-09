@@ -69,7 +69,7 @@ export function transportLoading(data) {
 
 //**********************************
 //运输明细
-export function transInfo(data) {
+export function transInfoList(data) {
   return request({
     baseURL: '',
     url: '/api/waybill/info',

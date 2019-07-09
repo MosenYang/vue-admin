@@ -1,4 +1,3 @@
-// 默认项目配置
 module.exports = {
   title: '索邦软件',
 

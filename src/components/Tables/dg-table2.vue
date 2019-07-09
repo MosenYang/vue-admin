@@ -211,14 +211,12 @@ export default {
       type: Boolean,
       default: false
     },
-    // 操作栏对象
     actionConfig: {
       type: Object,
       default: function() {
         return {}
       }
     },
-    // element自带显示加载
     isLoading: {
       type: Boolean,
       default: false

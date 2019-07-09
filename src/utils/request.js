@@ -3,13 +3,7 @@ import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
 
-/**
- *请求线上地址,两步
- * 1.去掉baseUrl,
- * 2.去掉mock文件夹的相关路由
- **/
 const service = axios.create({
-  // 为什么没有.因为我需要切换mock和线上地址, 把地址分成两段了,完整url在代理里面拼接了,中间这段就省去
   baseURL: process.env.VUE_APP_BASE_API,
   withCredentials: true, // 跨域
   timeout: 8000,
@@ -31,12 +25,10 @@ service.interceptors.request.use(config => {
     return Promise.reject(error)
   }
 )
-
-// 响应拦截器 兼容mock和线上接口200/400状态 (Mosen)
+// 响应拦截器
 service.interceptors.response.use(response => {
-    // console.log(response, 'response对象')
     const res = response.data
-    if (!res.code) return res //导出表格情况
+    if (!res.code) return res //导出表格
     if (res.code !== 20000 && res.code !== 200) {
       Message({
         message: res.message || '错误',

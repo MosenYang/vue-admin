@@ -74,12 +74,19 @@
         </div>
       </div>
     </div>
+    <div>
 
+    </div>
   </div>
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
 import waves from '@/directive/waves/index.js' // 水波纹指令
+import {
+  truck, add, transportLineList,
+  changeMiddle, changePayMethod, alterFreight, deleteLine, editLine
+} from '../../../../api/business/transportMangage/loadingArrange'
+
 export default {
   components: { tableComponents },
   props: {},
@@ -118,9 +125,6 @@ export default {
     //改变显示数
     changePageLimit(val) {
       this.getTableList()
-    },
-    getCurrentDate() {
-      return new Date().toLocaleDateString()
     }
   },
   directives: { waves }
