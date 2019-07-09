@@ -4,7 +4,7 @@ import request from '../../../utils/request'
 export function carInfoList(data) {
   return request({
     baseURL: '',
-    url: 'api/hxd/vehicle/info',
+    url: '/api/hxd/vehicle/info',
     method: 'get',
     params: data
   })
