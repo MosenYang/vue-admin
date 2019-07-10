@@ -97,12 +97,15 @@
                         :headerCellStyle="headerCss"
                         @page-change="pageChange"/>
     </div>
+    <dialog>
+
+    </dialog>
   </div>
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
 import waves from '@/directive/waves/index.js' // 水波纹指令
-import tdComponent from './tdComonent'
+import tdComponent from '../../../../components/Tables/tdComonent'
 import comControl from './control'
 import {
   truck, add, transportLineList,
@@ -208,7 +211,8 @@ export default {
           if (item.name === '运费结算方式') data = this.freight_settlement_method
           config.tdConfig = {
             comData: data,
-            comType: 'select'
+            comType: 'select',
+            callback: this.callback
           }
         }
         //edit
@@ -217,12 +221,16 @@ export default {
           config.tdComponent = tdComponent
           config.tdConfig = {
             comData: null,
-            comType: 'edit'
+            comType: 'edit',
+            callback: this.callback
           }
         }
         config.filterConfig = comConfig
         this.columnData.push(config)
       })
+    },
+    callback(params) {
+      console.log('', params)
     },
     handleReset() {
       let i = Math.floor(Math.random() * 10 + 1)
@@ -279,8 +287,8 @@ export default {
     changePageLimit(val) {
       this.defParams.pagesize = val
       this.getTableList(this.defParams)
-    },
-  // 合同
+    }
+    // 合同
   },
   directives: { waves }
 }
