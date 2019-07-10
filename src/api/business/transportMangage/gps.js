@@ -61,7 +61,7 @@ export function gpsAdd(data) {
   })
 }
 
-// 通过车牌获取批次
+// 通过车牌获取车辆信息
 export function gpsStatus(data) {
   return request({
     baseURL: '',

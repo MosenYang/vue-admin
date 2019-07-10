@@ -26,7 +26,10 @@
                       style="width: 200px;"
                       class="filter-item"
                       @keyup.enter.native="handleSearch"/>
-            <el-button @click="handleSearch" class="filter-item" type="primary" icon="el-icon-search">
+            <el-button @click="handleSearch"
+                       class="filter-item"
+                       type="primary"
+                       icon="el-icon-search">
               查询
             </el-button>
           </div>
@@ -68,6 +71,7 @@
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
 import waves from '@/directive/waves/index.js' // 水波纹指令
+import tdComponent from '../../../../components/Tables/tdComonent'
 import {
   transInfoList,
   addTransportPrice,
@@ -102,7 +106,13 @@ export default {
         }
       },
       filterParam: {},
-      total: 0
+      totalPage: 0,
+      attribution: [],
+      freight_settlement_method: [],
+      has_receipt: [],
+      is_transfer: [],
+      order_status: [],
+      type_of_business: []
     }
   },
   computed: {
@@ -122,8 +132,9 @@ export default {
     }
   },
   watch: {},
-  created() {
-    this.getTableList()
+  async created() {
+    await this.getTableList()
+    this.mapTableTh()
   },
   mounted() {},
   methods: {
@@ -131,14 +142,13 @@ export default {
       let data = params ? params : this.defParams
       await transInfoList(data).then((res) => {
         this.info = res.data
-        console.log('res.data', res)
+        console.log('表的总数.data', res.data)
         let {
-          info,
-          attribution,
+          info, attribution,
           freight_settlement_method,
+          has_receipt,
+          is_transfer,
           order_status,
-          order_type,
-          payment_method,
           type_of_business,
           total_count, pagesize
         } = res.data
@@ -147,17 +157,18 @@ export default {
         this.defParams.pagesize = pagesize
         this.order_status = order_status
         this.type_of_business = type_of_business
-        this.order_type = order_type
-        this.payment_method = payment_method
+        this.is_transfer = is_transfer
+        this.has_receipt = has_receipt
         this.attribution = attribution
         this.freight_settlement_method = freight_settlement_method
       })
     },
-    callBack(data) {
-      console.log('回调', data)
+    callBack(val) {
+      console.log('val', val)
     },
     mapTableTh() {
       console.log(initThData.length, '订单总表表格列数')
+      let that = this
       initThData.forEach((item, index) => {
         let config = { ...tableConfig }
         let comConfig = { ...tableConfig.filterConfig }
@@ -172,37 +183,43 @@ export default {
         if (item.name === '订单状态') {
           comConfig.comData = this.order_status
         }
-        if (item.name === '发展归属地' || '到站归属地') {
+        if (item.name === '发展归属地' || item.name === '到站归属地') {
           comConfig.comData = this.attribution
         }
-
-        if (item.name === '订单分类') {
-          comConfig.comData = this.order_type
+        if (item.name === '业务类别') {
+          comConfig.comData = this.type_of_business
         }
-        //0
-        if (item.name === '付款方式' && item.key !== 'payment_method') {
+        if (item.name === '回单') {
+          comConfig.comData = this.has_receipt
+        }
+        if (item.name === '中转状态') {
+          comConfig.comData = this.is_transfer
+        }
+        // select
+        if (item.name === '中转归属地' || item.name === '结算方式') {
           config.width = 180
-          config.tdComponent = tdComonent
-          config.tdConfig = {
-            callback(data) {console.log('', data)},
-            comData: this.freight_settlement_method,
-            comType: 'select'// 'select','edit'
+          config.tdComponent = tdComponent
+          let data
+          if (item.name === '结算方式') {
+            // 没有返回.或者没有调公共接口
           }
-        } else {
-          comConfig.comData = this.payment_method
+          if (item.name === '中转归属地') {
+            data = this.attribution
+          }
+          config.tdConfig = {
+            comData: data,
+            comType: 'select',//'edit'
+            callback: this.callBack
+          }
         }
-        1
-        if (item.name === '调度填写运费' || item.name === '财务填写运费' || item.name === '车队填写运费') {
+        if (item.name === '运费') {
           config.width = 180
-          config.tdComponent = tdComonent
+          config.tdComponent = tdComponent
           config.tdConfig = {
             comData: null,
-            comType: 'edit'// 'select','edit'
+            comType: 'edit',
+            callback: this.callBack
           }
-        }
-
-        if (item.name === '业务类型') {
-          comConfig.comData = this.type_of_business
         }
         config.filterConfig = comConfig
         this.columnData.push(config)
@@ -426,7 +443,7 @@ var defParams = {
   query: '',
   currpage: 1,
   pagesize: 10,
-  waybill_id: '',
+  waybill_id: 5,
   order_num: '',
   order_status: '',
   start_city_string: '',

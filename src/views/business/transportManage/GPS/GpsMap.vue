@@ -1,12 +1,16 @@
 <template>
   <div class="page">
-    <baidu-map class="bm-view" ak="Um8BbQX25uFFn8kqYukNmUP5a0y9jU0y" :zoom="zoom" @ready="handler"
+    <baidu-map class="bm-view" ak="Um8BbQX25uFFn8kqYukNmUP5a0y9jU0y" @click="getPoint" :zoom="zoom" @ready="handler"
                :scroll-wheel-zoom="true" :center="center">
-      <bm-marker :position="markerPoint" :dragging="true"
-                 :icon="{url: 'http://developer.baidu.com/map/jsdemo/img/fox.gif', size: {width: 300, height: 157}}">
+      <bm-marker :position="center" :dragging="false"
+                 :icon="{url: 'http://developer.baidu.com/map/jsdemo/img/fox.gif',size: {width: 100, height: 57}}">
+        <div class="list-wrap">
+          <bm-label content="车辆"
+                    :labelStyle="{color: 'red', fontSize : '14px'}"
+                    :offset="{width: -35, height: 30}"/>
+        </div>
       </bm-marker>
       <bm-navigation anchor="BMAP_ANCHOR_TOP_LEFT"></bm-navigation>
-
     </baidu-map>
     <div class="control-tab">
       <div>我的设备</div>
@@ -47,9 +51,8 @@
   </div>
 </template>
 <script>
-import BaiduMap from 'vue-baidu-map/components/map/Map.vue'
-import { BmNavigation, BmMarker } from 'vue-baidu-map'
-import axios from 'axios'
+// import BaiduMap from 'vue-baidu-map/components/map/Map.vue'
+import { BmNavigation, BmMarker, BmLabel,BaiduMap, BmScale, BmGeolocation } from 'vue-baidu-map'
 import {
   plateNumber,
   gpsStatus,
@@ -62,15 +65,13 @@ import tableComponents from '../../../../components/Tables/dg-table2'
 //
 export default {
   components: {
-    BaiduMap, BmNavigation, BmMarker, tableComponents
+    BaiduMap, BmNavigation, BmMarker, tableComponents, BmLabel
   },
   props: {},
   data() {
     return {
       defParams: defParams,
-      center: { lng: 116.404, lat: 39.915 },
       carList: [],
-      zoom: 0,
       groups: [],
       markerPoint: [],
       option: option,
@@ -80,7 +81,14 @@ export default {
       total_count: '',
       freight_settlement_method: [],
       payment_method: [],
-      type_of_business: []
+      type_of_business: [],
+      jgNameDialog: false,
+      locs: [],//当前车辆的坐标信息
+      center: {},
+      zoom: 12.8,
+      location: "北京市",
+      keyword: '',  //搜索框关键词
+      address: ''   //位置详细信息
     }
   },
   computed: {},
@@ -115,6 +123,9 @@ export default {
       plateNumber().then((res) => {
         console.log('获取车牌', res)
       })
+      gpsStatus().then((res) => {
+
+      })
     },
     truckCar(val) {
       console.log('装车', val)
@@ -125,8 +136,11 @@ export default {
       xhr.onreadystatechange = function() {
         if (xhr.status === 200 && xhr.readyState === 4) {
           let groups = JSON.parse(this.response)
-          console.log('groups', groups)
-          console.log('groups.locs', groups.locs)
+          console.log('groups.locs', groups.locs[0])
+          that.center.lat = Number(groups.locs[0].lat)
+          that.center.lng = Number(groups.locs[0].lng)
+          console.log('Number(groups.locs[0].lat)', Number(groups.locs[0].lat))
+          this.center = groups.locs[0].info
         }
       }
       xhr.send('version=1&method=loadLocation&vid=13245324&vKey=' + val.vKey)
@@ -171,10 +185,16 @@ export default {
       xhr.send('version=1&method=loadVehicles&uid=2330786&uKey=6d9a7509fd48f7d58bf15a5de26bd9e3')
     },
     handler({ BMap, map }) {
-      // console.log(BMap, map)
+      console.log(BMap, map)
       this.center.lng = 116.404
       this.center.lat = 39.915
-      this.zoom = 10
+      this.zoom = 12.8
+    },
+    getPoint(e) {
+      this.center.lng = e.point.lng
+      this.center.lat = e.point.lat
+      this.zoom = e.target.getZoom()
+      console.log('点击原始', e)
     }
   }
 }

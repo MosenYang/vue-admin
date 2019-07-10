@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="filterbox">
+    <div class="filterbox" v-if="barShow">
       <!--筛选项内容区-->
       <div v-if="barData" class="filter-with-count">
         <el-tag v-for="(item, i) in barData" :key="i"
@@ -118,7 +118,7 @@
                            align="center">
             <template slot-scope="scope">
               <component :is="actionConfig.component" :row="scope.row" :handlers="actionConfig.handlers"/>
-              <!--  row 是当前行, handlers 是初始配置的方法传的 -->
+              <!-- row 是当前行, handlers 是初始配置的方法传的 -->
             </template>
           </el-table-column>
         </template>
@@ -168,6 +168,10 @@ var _filterbar = null // 点击元素的父元素
 export default {
   name: 'DgTable',
   props: {
+    barShow: {
+      type: Boolean,
+      default: true
+    },
     names: {
       type: String,
       default: ''

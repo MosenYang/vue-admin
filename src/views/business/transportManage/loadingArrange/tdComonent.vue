@@ -26,7 +26,7 @@
   </div>
 </template>
 <script>
-import { checkAction } from '../../../../api/business/businessOrder/freightCheck'
+import { alterPushMoney } from '../../../../api/business/businessOrder/pushMoney'
 
 export default {
   data() {
@@ -63,13 +63,13 @@ export default {
     },
     setData(data) {
       console.log('修改参数', data)
-      if (data.value == '') {
+      if (data.system_price === '') {
         return this.$message({
           type: 'warning',
           message: '值不能为空'
         })
       }
-      checkAction(data).then((res) => {
+      alterPushMoney(data).then((res) => {
         if (res.code == 200) {
           this.$message({
             type: 'success',
@@ -80,19 +80,16 @@ export default {
     },
     handleCallback() {
       let param = {
-        id: this.row.id,
-        type: this.tdParam,
-        value: this.inputValue.id
+        order_id: this.row.id,
+        system_price: this.inputValue.id
       }
       this.setData(param)
     },
     todoSearch() {
       let param = {
-        id: this.row.id,
-        type: this.tdParam,
-        value: this.editData
+        order_id: this.row.id,
+        system_price: this.editData
       }
-
       this.setData(param)
     }
   }

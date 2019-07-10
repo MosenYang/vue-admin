@@ -1,9 +1,6 @@
 <template>
   <div class="control-wrap">
-    <el-button class="edit" @click.stop="click1" size="mini">{{status}}</el-button>
-    <el-button class="edit" @click.stop="click2" size="mini">补装车</el-button>
-    <el-button class="edit" @click.stop="click3" size="mini">合同生成</el-button>
-    <el-button class="edit" @click.stop="click4" size="mini">合同上传</el-button>
+    <el-button class="edit" @click.stop="click1" size="mini">合同上传</el-button>
   </div>
 </template>
 <script>
@@ -16,16 +13,7 @@ export default {
   props: ['row', 'handlers'],
   methods: {
     click1() {
-      this.handlers.changeTransport(this.row,this.status)
-    },
-    click2() {
-      this.handlers.addTransportAar(this.row)
-    },
-    click3() {
-      this.handlers.createFile(this.row)
-    },
-    click4() {
-      this.handlers.uploadFile(this.row)
+      this.handlers.changeTransport(this.row, this.status)
     }
   },
   mounted() {

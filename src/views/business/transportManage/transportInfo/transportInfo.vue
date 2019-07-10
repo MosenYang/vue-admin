@@ -48,14 +48,99 @@
                         :headerCellStyle="headerCss"
                         @page-change="pageChange"/>
     </div>
+    <!--补装车-->
+    <el-dialog title="补装车" :visible.sync="trucking" width="70%" center>
+      <div class="totalTable-container">
+        <div class="flex-between control">
+          <div class="limit">
+            当前显示:
+            <el-select v-model="truckLength"
+                       @change="changeTruckPageLimit"
+                       placeholder="请选择">
+              <el-option v-for="item in option"
+                         :key="item.value"
+                         :label="item.label"
+                         :value="item.value"/>
+            </el-select>
+          </div>
+          <div class="filters-btns">
+            <!--            <div class="inquire-wrap">-->
+            <!--              <span>查询:</span>-->
+            <!--              <el-input v-model="defParams.query"-->
+            <!--                        placeholder="请写查询内容"-->
+            <!--                        style="width: 200px;"-->
+            <!--                        class="filter-item"-->
+            <!--                        @keyup.enter.native="handleSearch"/>-->
+            <!--              <el-button v-waves @click="handleSearch" class="filter-item" type="primary" icon="el-icon-search">-->
+            <!--                查询-->
+            <!--              </el-button>-->
+            <!--            </div>-->
+            <el-button v-waves class="filter-item" type="primary" @click="resetTruck">
+              <i class="el-icon-refresh"></i>
+              重置
+            </el-button>
+            <el-button v-waves class="filter-item" type="primary" @click="truckCar">
+              <i class="el-icon-refresh"></i>
+              补装车
+            </el-button>
+          </div>
+        </div>
+      </div>
+      <!--表格-->
+      <table-components :table-data="truckDataList" :selection="true" :pagination="true"
+                        :isClear="isClear"
+                        :column-config="truckColumnData"
+                        :page-config="truckPage"
+                        @filter-change="filterTruck"
+                        @select-change="selectTruck"
+                        :headerCellStyle="headerCss"
+                        @page-change="TruckPageChange"/>
+    </el-dialog>
+    <!-- 添加在途信息 -->
+    <el-dialog title="添加在途信息" :visible.sync="addLoading" width="30%" center>
+      <el-form label-position="left">
+        <el-form-item>
+          <el-input v-model="addRoadInfo"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addLoading = false">取消</el-button>
+        <el-button type="primary" @click="addRoadHandle">确定</el-button>
+      </div>
+    </el-dialog>
+    <!-- 添加发车信息 -->
+    <el-dialog title="添加发车信息" :visible.sync="carStart" width="30%" center>
+      <el-form label-position="left" label-width="70px" ref="form" :model="temp">
+        <el-form-item label="发车日期">
+          <el-date-picker v-model="temp.date" type="date" placeholder="选择日期" style="width: 100%">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="发车站">
+          <el-input v-model="temp.start_address"></el-input>
+        </el-form-item>
+        <el-form-item label="到达地">
+          <el-input v-model="temp.end_address"></el-input>
+        </el-form-item>
+        <el-form-item label="途径地">
+          <el-input v-model="temp.pathway"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="carStart = false">取消</el-button>
+        <el-button type="primary" @click="addCarStartHandle">确定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
 import tableComponents from '../../components/Tables/dg-table2'
 import control from './control'
 import waves from '@/directive/waves/index.js' // 水波纹指令
+import tdComponent from '../../../../components/Tables/tdComonent'
+import { parseTime } from '@/utils'
 import {
   transportInfoList,
+  transportOnway,
   transportAdd,
   transportLoading,
   transfer,
@@ -79,30 +164,61 @@ export default {
         fixed: true,
         component: control,
         handlers: {
-          changeTransport(row) {
-          },
-          addTransportAar(row) {
-            transportAdd().then()
-          },
+          changeTransport: this.changeTransport,
+          addTransportAar: this.addTransportAar,
           createFile(row) {},
-          uploadFile(row) {
-          }
+          uploadFile: this.uploadFile
         }
       },
-      filterParam: {},
+      filterParam: {},//删选条件
       totalPage: 0,
       isClear: 0,
-      car_status: []
+      car_status: [],
+      trucking: false,
+      truckData: [],
+      truckDataList: [],
+      truckColumnData: [],
+      defTruckParams: defTruckParams,
+      filterTruckParam: {},
+      payment_method: [],
+      freight_settlement_method: [],
+      type_of_business: [],
+      addLoading: false,
+      addRoadInfo: '',
+      rowId: '',
+      temp: {
+        pc_id: '',
+        date: '',
+        start_address: '',
+        end_address: '',
+        pathway: ''
+      },
+      carStart: false
     }
-  },
+  }
+  ,
   computed: {
-
+    truckPage() {
+      return {
+        totalPageNum: this.truckData.total_count,
+        curPage: this.defTruckParams.currpage
+      }
+    },
+    truckLength: {
+      get() {
+        if (this.defTruckParams.pagesize) return this.defTruckParams.pagesize + '条/页'
+      },
+      set(val) {
+        this.defTruckParams.pagesize = val
+      }
+    },
     pageData() {
       return {
         totalPageNum: this.totalPage,
         curPage: this.defParams.currpage
       }
-    },
+    }
+    ,
     length: {
       get() {
         if (this.defParams.pagesize) return this.defParams.pagesize + '条/页'
@@ -116,8 +232,10 @@ export default {
   async created() {
     await this.getTableList()
     this.mapTableTh()
+  }
+  ,
+  mounted() {
   },
-  mounted() {},
   methods: {
     async getTableList(params) {
       let data = params ? params : this.defParams
@@ -170,7 +288,6 @@ export default {
       let param = Object.assign(this.defParams, this.filterParam, { currpage: 1 })
       this.getTableList(param)
     },
-    //* 搜索
     handleSearch() {
       if (this.defParams.global_query) {
         this.defParams.currpage = 1
@@ -204,7 +321,9 @@ export default {
       console.log(val, '当前参数')
       console.log(param, '请求参数')
     },
-    headerCss() {return 'font-size:16px; font-weight: 800;'},
+    headerCss() {
+      return 'font-size:16px; font-weight: 800;'
+    },
     getSelect(row) {
       this.selectRow = row
       console.log('this.selectRow', this.selectRow)
@@ -213,11 +332,187 @@ export default {
       this.defParams.currpage = val
       this.getTableList(this.defParams)
     },
-    upload() {
+    uploadFile() {},
+    changeTransport(row, status) {
+      console.log(row, status, '9090')
+      this.rowId = row.waybill_id
+      if (status === '添加在途') {
+        this.addLoading = true
+      } else {
+        this.carStart = true
+      }
+    },
+    addCarStartHandle() {
+      // 文档有一个参数没写,改一下就好
+      this.temp.pc_id = this.rowId
+      this.temp.date = parseTime(this.temp.date)
+      console.log(this.temp, '参数')
+      transportAdd(this.temp).then((res) => {
+        if (res.code === 200) {
+          this.carStart = false
+        }
+      })
+    },
+    addTransportAar(row) {// 补装车
+      transportLoading().then((res) => {
+        console.log('补装车.data', res.data)
+        this.truckData = res.data
+        let { freight_settlement_method, orders_data, pagesize, payment_method, total_count, type_of_business }
+          = res.data
+        this.trucking = true
+        this.truckDataList = orders_data
+        this.defTruckParams.pagesize = pagesize
+        this.payment_method = payment_method
+        this.type_of_business = type_of_business
+        this.freight_settlement_method = freight_settlement_method
 
+        this.mapTuckTh()
+      })
+    },
+    mapTuckTh() {
+      truckThData.forEach((item, index) => {
+        let config = { ...tableConfig }
+        let comConfig = { ...tableConfig.filterConfig }
+        config.prop = item.key // 数据字段
+        config.thIndex = index
+        config.isNeed = item.isNeed ? config.isNeed : false
+        config.label = comConfig.label = item.name
+        config.type = comConfig.type = item.type
+        config.width = item.width ? item.width : '140'
+        comConfig.filterKey = item.key
+        comConfig.paramKey = item.paramKey ? item.paramKey : item.key
+        if (item.name === '付款方式') {
+          comConfig.comData = this.payment_method
+        }
+        if (item.name === '业务类别') {
+          comConfig.comData = this.type_of_business
+        }
+        if (item.name === '中转归属地') {// 组件的下拉数据暂时没
+          config.width = 180
+          config.tdComponent = tdComponent
+          config.tdConfig = {
+            comData: this.freight_settlement_method,
+            comType: 'select',
+            callback: this.callback
+          }
+        }
+        if (item.name === '运费付款方式') {
+          config.width = 180
+          config.tdComponent = tdComponent
+          config.tdConfig = {
+            comData: this.freight_settlement_method,
+            comType: 'select',
+            callback: this.callback
+          }
+        }
+        if (item.name === '备注') {
+          config.width = 180
+          config.tdComponent = tdComponent
+          config.tdConfig = {
+            comData: null,
+            comType: 'edit'// 'select','edit'
+          }
+        }
+        config.filterConfig = comConfig
+        this.truckColumnData.push(config)
+      })
+    },
+    callback(val) {
+      console.log(val, '详情00000')
+    },
+    onTruckHandle() {
+      if (this.selectRow.length >= 1) {
+        let out = this.selectRow.every((val, i, a) => {
+          return val.order_status === '已入库'
+        })
+        if (out) {
+          this.trucking = true
+          let params = { ...this.defTruckParams }
+          moreLoading(params).then((res) => {
+            if (res.code === 200) {
+              this.truckData = res.data
+              console.log('res.data', res.data.data)
+            }
+            this.mapTuckTh()
+          })
+        } else {
+          this.$message({
+            showClose: true,
+            message: '订单车辆必须是已入库状态!!'
+          })
+        }
+      } else {
+        this.$message({
+          showClose: true,
+          message: '请选择订单'
+        })
+      }
+    },
+    TruckTableList(params) {
+      let data = params ? params : { ...this.defTruckParams }
+      moreLoading(data).then((res) => {
+        if (res.code === 200) {
+          this.truckData = res.data
+          console.log('res.data', res.data.data)
+        }
+      })
+    },
+    TruckPageChange(val) {
+      let param = Object.assign(this.defTruckParams, { currpage: val })
+      this.TruckTableList(param)
+    },
+    selectTruck(val) {
+      this.selectTruckRow = val
+    },
+    filterTruck(val) {
+      this.filterTruckParam = { ...val }
+      let param = Object.assign(this.defTruckParams, val, { currpage: 1 })
+      this.TruckTableList(param)
+      console.log(val, '筛选')
+    },
+    resetTruck() {
+      let i = Math.floor(Math.random() * 10 + 1)
+      this.isClear = i
+      for (let key in this.filterTruckParam) {
+        this.filterTruckParam[key] = ''
+      }
+      let param = Object.assign(this.defTruckParams, this.filterTruckParam, { currpage: 1 })
+      this.TruckTableList(param)
+    },
+    changeTruckPageLimit() {},
+    addRoadHandle() {
+      let params = {
+        waybill_id: this.rowId,
+        content: this.addRoadInfo
+      }
+      if (!this.addRoadInfo) {
+        return this.$message({
+          type: 'error',
+          message: '请输入内容!'
+        })
+      }
+      transportOnway(params).then((res) => {
+        this.$message({
+          type: 'success',
+          message: '添加成功!'
+        })
+        this.addLoading = false
+      })
+    },
+    truckCar() {
+      if (this.selectTruckRow.length >= 1) {
+        //没有接口
+        return
+      }
+      return this.$message({
+        type: 'warning',
+        message: '请选择车辆!'
+      })
     }
   },
-  directives: { waves }
+  directives: {
+    waves
+  }
 }
 
 var initThData = [
@@ -379,7 +674,162 @@ var defParams = {
   pathway: '',//途径
   end_address: ''//途径
 }
+var truckThData = [
+  {
+    name: '订单号',
+    key: 'order_num',
+    type: 'editFilter',
+    paramKey: null,
+    isNeed: true
+  },
+  {
+    name: '开单日期',
+    key: 'create_order_time',
+    type: 'dateFilter',
+    paramKey: null,
+    isNeed: true
+  },
+  {
+    name: '状态修改人',
+    key: 'who_handle_name',
+    type: 'editFilter',
+    paramKey: null,
+    isNeed: true
+  },
+  {
+    name: '发站',
+    key: 'start_city_string',
+    type: 'editFilter',
+    paramKey: null,
+    isNeed: true
+  },
+  {
+    name: '到站',
+    key: 'end_city_string',
+    paramKey: null,
+    isNeed: true
+  },
+  {
+    name: '托运人',
+    key: 'consignor',
+    paramKey: null,
+    isNeed: true
+  },
+  {
+    name: '托运人电话',
+    key: 'consignor_mobile',
+    paramKey: null,
+    type: 'editFilter',
+    isNeed: true
+  },
+  {
+    name: '收车人',
+    key: 'consignee',
+    paramKey: null,
+    type: 'editFilter'
 
+  },
+  {
+    name: '收车人电话',
+    key: 'consignee_mobile',
+    paramKey: null,
+    type: 'editFilter',
+    isNeed: true
+  },
+  {
+    name: '货物名称',
+    key: 'car_brand_name',
+    paramKey: null,
+    type: 'editFilter',
+    isNeed: true
+  },
+  {
+    name: '识别码',
+    key: 'heading_code',
+    paramKey: null,
+    type: 'editFilter',
+    isNeed: true
+  },
+  {
+    name: '现付',
+    key: 'pay_cash',
+    paramKey: null,
+    isNeed: false
+  },
+  {
+    name: '到付',
+    key: 'freight_collect',
+    paramKey: null,
+    type: 'editFilter',
+    isNeed: false
+  },
+  {
+    name: '月结',
+    key: 'monthly_statement',
+    paramKey: null
+  },
+  {
+    name: '付款方式',
+    key: 'payment_method',
+    paramKey: null,
+    type: 'selectFilter',
+    isNeed: true
+  },
+  {
+    name: '合计运费',
+    key: 'total_cost',
+    paramKey: null,
+    isNeed: false
+  },
+  {
+    name: '经办人',
+    key: 'operator',
+    paramKey: null,
+    type: 'editFilter',
+    isNeed: true
+  },
+  {
+    name: '业务类别',
+    key: 'type_of_business',
+    paramKey: null,
+    type: 'selectFilter',
+    isNeed: true
+  },
+  {
+    name: '中转归属地',
+    key: 'transfer_place',
+    paramKey: null
+  },
+  {
+    name: '运费付款方式',
+    key: 'freight_settlement_method',
+    paramKey: null
+  },
+  {
+    name: '备注',
+    key: 'remark',
+    paramKey: null,
+    isNeed: false
+  }
+]
+var defTruckParams = {
+  pagesize: 10,
+  currpage: 1,
+  create_order_time_end: '',
+  create_order_time_start: '',
+  who_handle_name: '',
+  start_city_string: '',
+  end_city_string: '',
+  consignor: '',
+  consignor_mobile: '',
+  consignee: '',
+  consignee_mobile: '',
+  car_brand_name: '',
+  heading_code: '',
+  payment_method: '',
+  operator: '',
+  type_of_business: ''
+}
 </script>
 <style lang="scss" scoped>
   @import "src/styles/mixin.scss";

@@ -1,8 +1,8 @@
 <template>
   <div>
-    <!--详情  https://blog.csdn.net/xr510002594/article/details/84108882-->
+    <!--详情 https://blog.csdn.net/xr510002594/article/details/84108882-->
     <baidu-map class="bm-view" ak="Um8BbQX25uFFn8kqYukNmUP5a0y9jU0y"
-               :zoom="zoom" @ready="handler" :scroll-wheel-zoom="true"
+               zoom="12.8" @ready="handler" :scroll-wheel-zoom="true"
                center="上海">
       <bm-navigation anchor="BMAP_ANCHOR_TOP_LEFT"></bm-navigation>
     </baidu-map>
