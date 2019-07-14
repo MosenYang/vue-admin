@@ -9,8 +9,8 @@ import componentsRouter from './modules/components'
 import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
 import nestedRouter from './modules/nested'
-import businessRouter from './modules/myBusinessRoute'
-import motorcade from './modules/motorcade'
+import businessRouter from './modules/myBusinessRoute'// 业务
+import motorcade from './modules/motorcade'// 车队
 
 /**
  * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -54,19 +54,6 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/system',
-    component: Layout,
-    redirect: '/system',
-    children: [
-      {
-        path: 'system',
-        component: () => import('@/views/system/system'),
-        name: 'system',
-        meta: { title: '系统管理', icon: 'component', affix: true }
-      }
-    ]
-  },
-  {
     path: '/dashboard',
     component: Layout,
     redirect: '/dashboard',
@@ -76,18 +63,6 @@ export const constantRoutes = [
         component: () => import('@/views/dashboard/index'),
         name: 'dashboard',
         meta: { title: '控制面板', icon: 'dashboard', affix: true }
-      }
-    ]
-  },
-  {
-    path: '/documentation',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/documentation/index'),
-        name: 'Documentation',
-        meta: { title: '文档', icon: 'documentation', affix: true }
       }
     ]
   },

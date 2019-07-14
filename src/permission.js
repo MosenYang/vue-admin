@@ -11,7 +11,6 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
 const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
 
-
 router.beforeEach(async(to, from, next) => {
   // 开始进度条
   NProgress.start()
@@ -22,8 +21,7 @@ router.beforeEach(async(to, from, next) => {
   // 确定用户是否已登录
   const hasToken = getToken()
   if (hasToken) {
-    if (to.path === '/login') {
-      // 如果已登录，则重定向到主页
+    if (to.path === '/login') {// 如果已登录，则重定向到主页
       next({ path: '/' })
       NProgress.done()
     } else {
