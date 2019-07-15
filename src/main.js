@@ -24,7 +24,7 @@ import MdInput from '@/components/MDinput'
 Vue.component('Mallki', Mallki)
 Vue.component('MdInput', MdInput)
 
-
+console.log('vue是什么', Vue)
 import { mockXHR } from '../mock'
 
 if (process.env.NODE_ENV === 'production') {
