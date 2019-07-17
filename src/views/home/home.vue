@@ -1,7 +1,8 @@
 <template>
   <div class="page">
-    <div class="title">百度版</div>
+    <!--    <div class="title">百度版</div>-->
     <!--    <BaiDuMap></BaiDuMap>-->
+    <div class="title">高德版地图</div>
     <a-map></a-map>
   </div>
 </template>

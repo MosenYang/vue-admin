@@ -1,43 +1,104 @@
 <template>
   <div class="page">
-    <div id="container" class="container"></div>
+    <div class="map-container">
+      <div id="container" class="container"></div>
+      <div class="control"></div>
+    </div>
   </div>
 </template>
-<script>
+<script type="text/javascript">
+  import {
+    plateNumber,
+    gpsStatus,
+    gpsAdd,
+    loadingList2,
+    loadingList,
+    getCar
+  } from '../../api/business/transportMangage/gps'
+
   export default {
-    components: {  },
+    components: {},
     data() {
       return {
-        map: null,
+        mapData: [],
+        defParams: defParams,
+        map: null
       }
     },
     props: {},
     computed: {},
     watch: {},
     created() {
-      this.mapInit()
-      //MosenKey	224c2c3197dfe223efbc17e15b32c92f
+      this.getCarList()
     },
-    mounted() {},
+    mounted() {
+      this.mapInit()
+
+    },
     methods: {
       mapInit() {
-        this.map = new window.AMap.Map('container', {
+        let map
+        this.map = map = new AMap.Map('container', {
           zoom: 11,//级别
+          resizeEnable: true, // 是否监控地图容器尺寸变化
           center: [116.397428, 39.90923],//中心点坐标
           viewMode: '3D'//使用3D视图
         })
-        console.log('map', this.map)
+        AMap.plugin(['AMap.ToolBar', 'AMap.Driving', 'AMap.PlaceSearch', 'AMap.Transfer'], function () {//异步加载插件
+          var toolbar = new AMap.ToolBar()
+          map.addControl(toolbar)
+          var driving = new AMap.Driving()//驾车路线规划
+          driving.search(/*参数*/)
+        })
       },
-      getMap() {
-      }
+      getCarList() {
+        loadingList(this.defParams).then((res) => {
+          if (res.code == 200) {
+            let {
+              orders_data,
+              payment_method,
+              type_of_business,
+              freight_settlement_method,
+              pagesize, total_count
+            } = res.data
+            console.log('地图', res.data)
+          }
+        })
+        // plateNumber().then((res) => {
+        //   console.log('获取车牌', res)
+        // })
+        // gpsStatus().then((res) => {
+        // })
+      },
+      getMap() {}
     }
   }
-</script>
-<style scoped>
-  /*@import "../base/reset.css";*/
-.container{
-  width: 100%;
-  height: 600px;
-}
+  var defParams = {
+    query: '',// 搜索字段
+    start: 1,
+    length: 10,// 条数
+    order_num: '',
+    create_order_time_start: '',
+    create_order_time_end: '',
+    who_handle_name: '',
+    start_city_string: '',
+    end_city_string: '',
+    consignor: '',
+    consignor_mobile: '',
+    consignee: '',
+    consignee_mobile: '',
+    car_brand_name: '',
+    heading_code: '',
+    payment_method: '',
+    operator: '',
+    type_of_business: ''
+  }
 
+</script>
+<style lang="scss" scoped>
+  .container {
+    width: 100%;
+    height: 600px;
+    border: 1px solid red;
+  }
 </style>

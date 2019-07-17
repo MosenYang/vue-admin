@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>地图</title>
+  <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=224c2c3197dfe223efbc17e15b32c92f"></script>
+  <script src="https://webapi.amap.com/ui/1.0/main.js"></script>
+  <style>
+    .container {
+      width: 1000px;
+      height: 1000px;
+    }
+  </style>
+</head>
+<body>
+<div id="container" class="container"></div>
+
+<script type="text/javascript">
+  var map = new AMap.Map('container', {
+    zoom: 11,//级别
+    center: [116.397428, 39.90923],//中心点坐标
+    viewMode: '3D'//使用3D视图
+  })
+  AMap.plugin(['AMap.ToolBar','AMap.Driving'],function(){//异步同时加载多个插件
+    var toolbar = new AMap.ToolBar();
+    map.addControl(toolbar);
+    var driving = new AMap.Driving();//驾车路线规划
+    driving.search(/*参数*/)
+  });
+
+</script>
+</body>
+</html>
