@@ -11,7 +11,7 @@ import { getToken } from '@/utils/auth'
 const service = axios.create({
   // 为什么没有.因为我需要切换mock和线上地址, 把地址分成两段了,完整url在代理里面拼接了,中间这段就省去
   baseURL: process.env.VUE_APP_BASE_API,
-  withCredentials: true, // 跨域
+  withCredentials: true, // 表示跨域请求时是否需要使用凭证
   timeout: 8000,
   headers: {
     Accept: 'application/json',
